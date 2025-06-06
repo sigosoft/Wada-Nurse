@@ -8,6 +8,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String label;
   final bool showCloseIcon;
   final bool showBellIcon;
+
   final bool showBackButton;
   final dynamic elevation;
 

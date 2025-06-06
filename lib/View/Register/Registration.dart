@@ -178,6 +178,7 @@ class _RegisterState extends State<Register> {
                           Get.off(DocumentationUploadScreen());
                         }, text: Strings.next),
                       ),
+
                       SizedBox(height: 15),
                     ],
                   ),
