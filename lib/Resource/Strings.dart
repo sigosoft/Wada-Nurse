@@ -1,0 +1,60 @@
+class Strings {
+
+  static const String logInWithPhoneNumber = "Login with phone number";
+  static const String enterYourPhoneNumber = "Enter your phone number";
+  static const String dontHaveAnAccount = "Don’t have an account?  ";
+  static const String signUp = "Sign Up";
+  static const String phoneNumber = "Phone Number";
+  static const String countryCode = "Country Code";
+  static const String next = "Next";
+  static const String password = "Password";
+  static const String forgotPassword = "Forgot Password?";
+  static const String forgotPasswordHeading = "Forgot Password";
+  static const String enterPhoneNumberLinkedWithYourNumber = "Enter the phone number linked with your account.";
+  static const String submit = "Submit";
+  static const String otpVerification = "OTP verification";
+  static const String enterVerificationCodeSendToYourNumber = "Enter the verification code we just sent to your Phone Number";
+  static const String verify = "Verify";
+  static const String didNotReceiveCode = "Didn’t received code? ";
+  static const String resend = "Resend";
+  static const String createNewPassword = "Create New Password";
+  static const String yourPasswordMustUnique = "Your new password must be unique from those previously used.";
+  static const String newPassword = "New Password";
+  static const String register = "Register";
+  static const String createAccount = "Create an account to continue!  ";
+  static const String fullName = "Full Name*";
+  static const String email = "Email*";
+  static const String dob = "Date of Birth";
+  static const String gender = "Gender";
+  static const String referralCode = "Referral Code";
+  static const String agreeWith = "I agree with ";
+  static const String termsAndConditions = "Terms & Conditions";
+  static const String and = " And ";
+  static const String privacyPolicy = "Privacy Policy";
+  static const String qualification = "Qualification*";
+  static const String language = "Language";
+  static const String confirmNewPassword = "Confirm New Password";
+  static const String uploadMedicalRecords = "Upload Medical Records";
+  static const String idProof = "ID Proof";
+  static const String recordName = "Record Name";
+  static const String uploadRecord = "Upload Record";
+  static const String documentFormat = "Document Format";
+  static const String or = "Or";
+  static const String openCamera = "Open Camera";
+  static const String uploaded = "Uploaded";
+  static const String save = "Save";
+  static const String notes = "Notes";
+  static const String documentFormats= "Document formats: PDF, PNG, and JPEG.";
+  static const String selectFile = "Select File";
+  static const String certificates = "Certificates";
+  static const String employeeType= "Employee Type";
+  static const String salariedEmployee = "Salaried Employee";
+  static const String perDayCharge = "Per Day Charge";
+  static const String registrationFeeForFirstTimeUsers = "Registration fee for first-time users";
+  static const String w = "";
+  static const String x = "";
+  static const String y = "";
+  static const String z = "";
+
+
+}
