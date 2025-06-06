@@ -26,7 +26,7 @@ class NurseShiftItem extends StatelessWidget {
        Get.to(ShiftDetails(bookingType: bookingType));
       },
       child: Container(
-        height: showLocationText?240:bookingType=="upcoming"?270:220,
+        height: showLocationText?240:bookingType=="upcoming"||bookingType=="ongoing"?270:220,
         margin: const EdgeInsets.only(bottom: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -120,7 +120,7 @@ class NurseShiftItem extends StatelessWidget {
                   ),
                 ],
               ),
-              showLocationText||bookingType=="upcoming"?
+              showLocationText||bookingType=="upcoming"||bookingType=="ongoing"?
               SizedBox(height: 8):SizedBox(),
               showLocationText?
               Text(
@@ -131,8 +131,8 @@ class NurseShiftItem extends StatelessWidget {
                   color: Colors.grey,
                 ),
               ):SizedBox(),
-              bookingType=="upcoming"?
-                  SubmitButtonWidget(text: Strings.checkin,):Container()
+              bookingType=="upcoming"||bookingType=="ongoing"?
+                  SubmitButtonWidget(text: bookingType=="upcoming"?Strings.checkin:Strings.checkout,):Container()
             ],
           ),
         ),

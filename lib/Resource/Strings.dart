@@ -85,4 +85,37 @@ class Strings {
   static const String acceptedmsg = "You've successfully accepted.";
   static const String checkin = "Check-in";
   static const String checkout = "Check-out";
+  static const String cant_checkin = "  Can't Check-in";
+  static const String verifylocation = "Verify Location";
+  static const String searchplace = "Search Place";
+  static const String checkinmsg = "Are you sure you want to check-in?";
+  static const String cant_checkin_msg = "You can check in only 15 minutes prior to the shift start time";
+  static const String openCamera_msg = "Take a selfie to verify your identity and ensure accurate check-in tracking.";
+  static const String checkoutmsg2 = "You have successfully checked-out.";
+  static const String successfullyCheckedin = "Successful Checked-in!";
+  static const String successfullyCheckedinmsg = "You've Successfully Checked-in.";
+  static const String takeLeave = "Take Leave";
+  static const String in_value = "in ";
+  static const String out_value = " out ";
+  static const String downloadSalarySlip = "Download Salary Slip";
+  static const String callUs= "Call us at";
+  static const String emailUs= "Email us at";
+  static const String companyOffice= "Company Office";
+  static const String faqs= "FAQs";
+  static const String needsAnUpdate= "Needs An Update";
+  static const String aNewUpdateIsAvailableForThisAppPleaseDownload= "A new update is available for this app. Please download the latest version to continue using the app.";
+  static const String update= "Update";
+  static const String feedback = "For feedback or suggestions";
+  static const String wellBeBackSoon = "We'll Be Back Soon";
+  static const String sorryWereDownForMaintenanceWellBeBackUpShortly = "Sorry, we're down for maintenance  We'll be back up shortly.";
+  static const String serverDown = "Server Down";
+  static const String gotIt = "Got It";
+  static const String noInternetConnection = "No Internet Connection";
+  static const String pleaseCheckYourInternetConnectionAndTryAgain = "Please check your internet connection and try again.";
+  static const String tryAgain = "Try Again";
+  static const String supportHelp = "Support & Help";
+  static const String aboutUs = "About Us";
+  static const String helpCentre = "Help Centre";
+
+
 }

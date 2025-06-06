@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../../Resource/Colors.dart';
 import '../../Resource/Strings.dart';
 import '../../Widget/CustomAppBar.dart';
+import '../Home/Home.dart';
 import 'TabBarItem.dart';
 
 class Bookings extends StatefulWidget {
@@ -18,7 +21,7 @@ class _BookingsState extends State<Bookings>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       setState(() {}); // Rebuild UI when tab changes
     });
@@ -39,6 +42,9 @@ class _BookingsState extends State<Bookings>
         showCloseIcon: false,
         showBellIcon: true,
         elevation: 0.0,
+        onTap: () {
+          Get.offAll(Home());
+        },
       ),
       body: SafeArea(
         child: SizedBox(
@@ -49,48 +55,48 @@ class _BookingsState extends State<Bookings>
               SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(3, (index) {
-                    return Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                _tabController.animateTo(index);
-                              },
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: _tabController.index == index
-                                      ? colorPrimary
-                                      : inactiveTab,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  index == 0
-                                      ? Strings.requests
-                                      : index == 1
-                                          ? Strings.upcoming
-                                          : Strings.completed,
-                                  style: TextStyle(
-                                    color: _tabController.index == index
-                                        ? Colors.white
-                                        : colorPrimaryDark,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(5, (index) {
+                      return Container(
+                        margin: EdgeInsets.only(right: index < 4 ? 10 : 0), // Add space between buttons
+                        child: InkWell(
+                          onTap: () {
+                            _tabController.animateTo(index);
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 100, // Adjust width as needed
+                            decoration: BoxDecoration(
+                              color: _tabController.index == index
+                                  ? colorPrimary
+                                  : inactiveTab,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              index == 0
+                                  ? Strings.requests
+                                  : index == 1
+                                  ? Strings.ongoing
+                                  : index == 2
+                                  ? Strings.upcoming
+                                  : index == 3? Strings.completed:Strings.cancelled,
+                              style: TextStyle(
+                                color: _tabController.index == index
+                                    ? Colors.white
+                                    : colorPrimaryDark,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
                               ),
                             ),
                           ),
-                          if (index < 2) SizedBox(width: 10), // Add space between buttons
-                        ],
-                      ),
-                    );
-                  }),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
               Expanded(
@@ -104,8 +110,10 @@ class _BookingsState extends State<Bookings>
                     physics: NeverScrollableScrollPhysics(), // Disable swipe scrolling
                     children: [
                       TabBarItem(index:0,bookingType: "requests",),
+                      TabBarItem(index:1,bookingType: "ongoing",),
                       TabBarItem(index:1,bookingType: "upcoming",),
                       TabBarItem(index:2,bookingType: "completed",),
+                      TabBarItem(index:3,bookingType: "cancelled",),
                     ],
                   ),
                 ),

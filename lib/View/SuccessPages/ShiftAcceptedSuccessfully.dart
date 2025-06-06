@@ -10,7 +10,16 @@ import '../../Widget/SubmitButtonWidget.dart';
 import '../Home/Home.dart';
 
 
-class ShiftAcceptedSuccessfully extends StatelessWidget {
+class ShiftAcceptedSuccessfully extends StatefulWidget {
+  const ShiftAcceptedSuccessfully({super.key,required this.title, required this.message});
+  final String title;
+  final String message;
+
+  @override
+  State<ShiftAcceptedSuccessfully> createState() => _ShiftAcceptedSuccessfullyState();
+}
+
+class _ShiftAcceptedSuccessfullyState extends State<ShiftAcceptedSuccessfully> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +41,7 @@ class ShiftAcceptedSuccessfully extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      Strings.accepted,
+                      widget.title,
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -41,7 +50,7 @@ class ShiftAcceptedSuccessfully extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      Strings.acceptedmsg,
+                      widget.message,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,

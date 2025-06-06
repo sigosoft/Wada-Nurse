@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +13,8 @@ import '../../Resource/Strings.dart';
 import '../../Widget/CheckboxWdget.dart';
 import '../../Widget/ShiftDetailsWidget.dart';
 import '../SuccessPages/ShiftAcceptedSuccessfully.dart';
+import 'CameraScreen.dart';
+import 'ShiftDetailsListing.dart';
 
 class ShiftDetails extends StatefulWidget {
   const ShiftDetails({super.key, this.bookingType = ""});
@@ -164,7 +167,7 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                       height: 45,
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.to(ShiftAcceptedSuccessfully());
+                          Get.to(ShiftAcceptedSuccessfully(title: Strings.accepted,message: Strings.acceptedmsg,));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorPrimary,
@@ -193,11 +196,224 @@ class _ShiftDetailsState extends State<ShiftDetails> {
     );
   }
 
+  void _showCantCheckinBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 5),
+              SvgPicture.asset(
+                "lib/Assets/Images/checkin_info.svg",
+                // Replace with your SVG path
+                width: 40,
+                height: 40,
+              ),
+              SizedBox(height: 5),
+              Text(
+                Strings.cant_checkin,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                Strings.cant_checkin_msg,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 30),
+              SizedBox(
+                height: 45,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    openCameraBottomSheet(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    Strings.ok,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void openCameraBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 5),
+              SvgPicture.asset(
+                "lib/Assets/Images/camera.svg",
+                width: 40,
+                height: 40,
+              ),
+              SizedBox(height: 5),
+              Text(
+                Strings.openCamera,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                Strings.openCamera_msg,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 30),
+              SizedBox(
+                height: 45,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Fetch available cameras
+                    final cameras = await availableCameras();
+                    final frontCamera = cameras.firstWhere(
+                          (camera) => camera.lensDirection == CameraLensDirection.front,
+                    );
+
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => CameraScreen(),
+                    //   ),
+                    // );
+                   Get.to(CameraScreen());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    Strings.ok,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(label: Strings.shiftdetails, showCloseIcon: false),
+      appBar: widget.bookingType=="ongoing"?AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.black.withOpacity(0.3),
+        leading: InkWell(
+          onTap: () {
+            Get.back();
+          },
+          child: SvgPicture.asset(
+            "lib/Assets/Images/BackButton.svg",
+            fit: BoxFit.scaleDown,
+            color: Colors.black,
+          ),
+        ),
+        title: TextStyleInterWithoutPadding(
+          text: Strings.ongoing,
+          color: Colors.black,
+          fontWeight: FontWeight.w700,
+          size: 20.00,
+        ),
+        titleSpacing: -10.0, // Adjust this value to reduce the gap
+        toolbarHeight: 50,
+        centerTitle: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 0),
+            child: PopupMenuButton<int>(
+              color: Colors.white,
+              icon: Container(
+                width: 20,
+                height: 20,
+                child: SvgPicture.asset(
+                  "lib/Assets/Images/settings.svg",
+                  fit: BoxFit.scaleDown,
+                ),
+              ),
+              onSelected: (value) {
+                if (value == 1) {
+
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 1,
+                  height: 30,
+                  child: Text(
+                    Strings.takeLeave,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        elevation: 3,
+        scrolledUnderElevation: 3.0,
+      ):
+      CustomAppBar(label: widget.bookingType=="completed"?Strings.completed:widget.bookingType=="cancelled"?Strings.cancelled:Strings.shiftdetails, showCloseIcon: false),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -245,6 +461,13 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                               : Container(),
                         ],
                       ),
+                      SizedBox(height: widget.bookingType=="ongoing"||widget.bookingType=="completed"?15:0),
+                      widget.bookingType=="ongoing"||widget.bookingType=="completed"?
+                      InkWell(
+                          onTap: (){
+                            Get.to(ShiftDetailsListing());
+                          },
+                          child: SubmitButtonWidget(text: Strings.shiftdetails,)):Container(),
                       SizedBox(height: 15),
                       Text(
                         Strings.requestdetails,
@@ -365,20 +588,33 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 10),
+                      widget.bookingType=="completed"?
+                      Text(Strings.downloadSalarySlip,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ):Container(),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-          widget.bookingType == "requests"
-              ? Container()
-              : widget.bookingType == "upcoming"
+           widget.bookingType == "upcoming"||widget.bookingType=="ongoing"
               ? Container(
                 padding: EdgeInsets.only(left: 15, right: 15, bottom: 20),
-                child: SubmitButtonWidget(text: Strings.checkin),
-              )
-              : Container(
+                child: InkWell(
+                  onTap: () {
+                    _showCantCheckinBottomSheet(context);
+
+                  },
+                    child: SubmitButtonWidget(text: widget.bookingType=="ongoing"?Strings.checkout:Strings.checkin)),
+              ):widget.bookingType == "requests"?
+          Container(
                 padding: EdgeInsets.only(left: 15, right: 15, bottom: 20),
                 child: Row(
                   children: [
@@ -433,7 +669,7 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                     ),
                   ],
                 ),
-              ),
+              ):Container(),
         ],
       ),
     );

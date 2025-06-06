@@ -8,8 +8,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String label;
   final bool showCloseIcon;
   final bool showBellIcon;
+
   final bool showBackButton;
   final dynamic elevation;
+  final VoidCallback? onTap;
 
   const CustomAppBar({
     super.key,
@@ -18,6 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton= true,
     this.showBellIcon = false,
     this.elevation,
+    this.onTap,
   });
 
   @override
@@ -32,9 +35,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       shadowColor: Colors.black.withOpacity(0.3),
       leading:  showBackButton
           ? InkWell(
-        onTap: () {
-          Get.back();
-        },
+        onTap: onTap,
         child: SvgPicture.asset(
           "lib/Assets/Images/BackButton.svg",
           fit: BoxFit.scaleDown,

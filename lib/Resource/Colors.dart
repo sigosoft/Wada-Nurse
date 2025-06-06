@@ -13,3 +13,4 @@ const greyishBlack= Color(0xff333333);
 const boxBg = Color(0xFFEAF3FA);
 var colorPrimaryWith25Opacity = Color(0xff318AD1).withOpacity(0.25);
 const inactiveTab = Color(0xFFE7F4FD);
+const white =  Color(0xCCFFFFFF);
