@@ -93,7 +93,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    SubmitButtonWidget(onTap: () {}, text: Strings.submit),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: SubmitButtonWidget(onTap: () {}, text: Strings.submit)),
                   ],
                 ),
               ),

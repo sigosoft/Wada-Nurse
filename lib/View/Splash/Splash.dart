@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: 30),
               SvgPicture.asset(
-                "lib/Assets/Images/Nursing home-rafiki 1.svg",
+                "lib/Assets/Images/nursing_home.svg",
                 fit: BoxFit.scaleDown,
               ),
               SizedBox(height: 50),

@@ -52,9 +52,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 SizedBox(height: 20),
                 CountryCodeAndPhoneNUmber(name: Strings.phoneNumber),
                 SizedBox(height: 20),
-                SubmitButtonWidget(onTap: () {
-                  Get.off(OtpVerification());
-                }, text: Strings.submit),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: SubmitButtonWidget(onTap: () {
+                    Get.off(OtpVerification());
+                  }, text: Strings.submit),
+                ),
               ],
             ),
           ),
