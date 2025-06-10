@@ -88,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     SizedBox(height: 10),
-
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
                         child: SubmitButtonWidget(onTap: () {Get.to(Home());}, text: Strings.next)),

@@ -128,4 +128,33 @@ class Strings {
   static const String successfullyCheckedout = "Successful Checked-out!";
   static const String successfullyCheckedoutmsg = "You've successfully checked-out.";
   static const String notifications = "Notifications";
+  static const String declined = "Declined";
+  static const String documents = "Documents";
+  static const String bankAccounts = "Bank Accounts";
+  static const String balance = "Balance";
+  static const String youCanWithdrawOncePerMonth = "• You can withdraw only once per month.";
+  static const String nextWithdrawalOn = "• Next withdrawal on";
+  static const String minimumWithdrawalAmount = "• Minimum withdrawal amount is ";
+  static const String withDraw = "Withdraw";
+  static const String transactions = "Transactions";
+  static const String addBankAccount = "Add Bank Account";
+  static const String accountHolderName = "Account Holder Name (As per bank records)";
+  static const String bankName = "Bank Name";
+  static const String accountNumber = "Account Number";
+  static const String confirmAccountNumber = "Confirm Account Number";
+  static const String ifscCode = "IFSC Code";
+  static const String branchName = "Branch Name";
+  static const String bankAccount = "Bank Account";
+  static const String p = "";
+  static const String q = "";
+  static const String r = "";
+  static const String s = "";
+  static const String t = "";
+  static const String u = "";
+  static const String v = "";
+  static const String w = "";
+  static const String x = "";
+  static const String y = "";
+  static const String z = "";
+
 }

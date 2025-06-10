@@ -15,3 +15,9 @@ const boxBg = Color(0xFFEAF3FA);
 var colorPrimaryWith25Opacity = Color(0xff318AD1).withOpacity(0.25);
 const inactiveTab = Color(0xFFE7F4FD);
 const white =  Color(0xCCFFFFFF);
+const redColorText= Color(0xffDC0004);
+const greyBorder= Color(0xffE6E6E6);
+const boxGradient= Color(0xffEAF3FA);
+const darkBlueGradient1 = Color(0xff19476B);
+const grayText = Color(0xff636363);
+
