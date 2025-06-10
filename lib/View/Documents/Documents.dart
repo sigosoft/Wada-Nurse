@@ -8,6 +8,8 @@ import 'package:waaada_nurseapp/Widget/AgreeWithTermsWidget.dart';
 import 'package:waaada_nurseapp/Widget/AppbarWithoutElevation.dart';
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 import 'package:waaada_nurseapp/Widget/CustomRadioTile.dart';
+import 'package:waaada_nurseapp/Widget/DeclinedDocumetWidget.dart';
+import 'package:waaada_nurseapp/Widget/DocumentWidget.dart';
 import 'package:waaada_nurseapp/Widget/MemberDropDownField.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWithBorderColor.dart';
@@ -28,7 +30,9 @@ class _DocumentsState extends State<Documents> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(label: Strings.documents,showBackButton: true),
+      appBar: CustomAppBar(label: Strings.documents, showBackButton: true,onTap: () {
+        Get.back();
+      },),
       body: SingleChildScrollView(
         child: GetBuilder(
           init: RegistrationController(),
@@ -38,40 +42,12 @@ class _DocumentsState extends State<Documents> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 20),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color:greyBorder,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextStyleInterWithPadding(
-                                text: Strings.idProof,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w700,
-                                size: 16.0,
-                              ),
-                              TextStyleInterWithPadding(
-                                text: Strings.pending,
-                                color: redColorText,
-                                fontWeight: FontWeight.w700,
-                                size: 16.0,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 30),
-                          UploadedFilesListView(),
-                        ],
-                      ),
-                    ),
-
+                    DocumentWidget(status: "Pending"),
+                    SizedBox(height: 20),
+                    DocumentWidget(status: "Verified"),
+                    SizedBox(height: 20),
+                    DeclinedDocumentWidget(),
+                    SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -80,3 +56,5 @@ class _DocumentsState extends State<Documents> {
     );
   }
 }
+
+

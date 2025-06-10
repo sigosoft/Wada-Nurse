@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/SuccessScreens/WithdrawalSuccessScreen.dart';
+import 'package:waaada_nurseapp/Widget/NurseShiftItem.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 
 import '../Resource/Colors.dart';
@@ -434,6 +435,8 @@ class WalletController extends GetxController {
                   ),
                 ),
                 SizedBox(height: 10),
+                NurseShiftItem(showLocationText: false,bookingType: "",),
+
               ],
             ),
           ),

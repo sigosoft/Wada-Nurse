@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
 const colorPrimary = Color(0xff318AD1);
+const colorPrimary1 = Color(0xff417CCA);
+const colorPrimaryDark = Color(0xff0059A0);
 const blueGradient1 = Color(0xffE4F3FF);
 const blueGradient2 = Color(0xff1D77BF);
 const blackTextColor = Color(0xff6C7278);
@@ -16,4 +18,16 @@ const grayText = Color(0xff636363);
 const redColorText2 = Color(0xffB14949);
 const grayText2 = Color(0xff606060);
 const borderColor = Color(0xffCCCCCC);
+const logoutTextColor = Color(0xffB14949);
+const greyishBlack= Color(0xff333333);
+const boxBg = Color(0xFFEAF3FA);
+var colorPrimaryWith25Opacity = Color(0xff318AD1).withOpacity(0.25);
+const inactiveTab = Color(0xFFE7F4FD);
+const white =  Color(0xCCFFFFFF);
+const circleAvatarFillColor = Color(0xFFF3F4F6);
+const borderLine = Color(0xffE5E5E5);
+const versionCodeGray = Color(0xFFAAAAAA);
+const greenText = Color(0xFF039300);
+const redBox = Color(0xFFFFB5B5);
+
 

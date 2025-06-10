@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -93,7 +94,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    SubmitButtonWidget(onTap: () {}, text: Strings.submit),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: SubmitButtonWidget(onTap: () {}, text: Strings.submit)),
                   ],
                 ),
               ),

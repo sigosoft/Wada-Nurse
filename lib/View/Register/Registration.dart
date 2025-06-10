@@ -172,9 +172,13 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       SizedBox(height: 50),
-                      SubmitButtonWidget(onTap: () {
-                        Get.off(DocumentationUploadScreen());
-                      }, text: Strings.next),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: SubmitButtonWidget(onTap: () {
+                          Get.off(DocumentationUploadScreen());
+                        }, text: Strings.next),
+                      ),
+
                       SizedBox(height: 15),
                     ],
                   ),

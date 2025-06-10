@@ -12,6 +12,7 @@ import 'package:waaada_nurseapp/Widget/PasswordTextField.dart';
 import 'package:waaada_nurseapp/Widget/RichTextWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
+import '../Home/Home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,7 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     SizedBox(height: 10),
-                    SubmitButtonWidget(onTap: () {}, text: Strings.next),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: SubmitButtonWidget(onTap: () {Get.to(Home());}, text: Strings.next)),
                     SizedBox(height: 15),
                     RichTextWidget(
                       text1: Strings.dontHaveAnAccount,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import '../../../Resource/Strings.dart';
 
@@ -21,12 +22,14 @@ class WithdrawalSuccess extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(height: 100),
-                    SvgPicture.asset(
-                      "lib/Assets/Images/successIcon.svg",
-                      width: 140,
-                      height: 140,
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundColor: circleAvatarFillColor,
+                      child: SvgPicture.asset(
+                        "lib/Assets/Images/successIcon.svg",
+                      ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 30),
                     Text(
                      Strings.withdrawalRequestSend,
                       style: GoogleFonts.inter(
@@ -35,7 +38,7 @@ class WithdrawalSuccess extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Text(

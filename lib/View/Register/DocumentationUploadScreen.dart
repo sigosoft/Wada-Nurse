@@ -122,7 +122,10 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                     SizedBox(height: 10),
                     AgreeWithTermsWidget(),
                     SizedBox(height: 20),
-                    SubmitButtonWidget(onTap: () {}, text: "₹999"),
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: SubmitButtonWidget(onTap: () {}, text: "₹999")),
+                    SizedBox(height: 15),
                   ],
                 ),
               ),
