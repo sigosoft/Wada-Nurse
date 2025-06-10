@@ -70,17 +70,17 @@ class Strings {
   static const String ifscCode = "IFSC Code";
   static const String branchName = "Branch Name";
   static const String bankAccount = "Bank Account";
-  static const String p = "";
-  static const String q = "";
-  static const String r = "";
-  static const String s = "";
-  static const String t = "";
-  static const String u = "";
-  static const String v = "";
-  static const String w = "";
-  static const String x = "";
-  static const String y = "";
-  static const String z = "";
+  static const String deleteBankAccount = "Delete bank Account";
+  static const String areYouSureYouWantToDelete = "Are you sure you want to delete bank account?";
+  static const String thisActionCantBeUndone = "This action cannot be undone.";
+  static const String yes = "Yes";
+  static const String no = "No";
+  static const String withdraw = "Withdraw";
+  static const String withdrawalRequestSend = "Withdrawal Request Sent!";
+  static const String w = "Withdrawal Request Sent!";
+  static const String weHaveReceivedYourRequest= "We have received your withdrawal request. The amount will credited to your bank account within 24 hours..";
+  static const String home = "Home";
+  static const String shiftDetails = "Shift Details";
 
 
 

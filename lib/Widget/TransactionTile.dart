@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:waaada_nurseapp/Controller/WalletController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 
@@ -24,61 +26,69 @@ class TransactionTile extends StatelessWidget {
     final statusColor = isCredited ? Colors.green : Colors.red;
     final statusText = isCredited ? 'Credited' : 'Debited';
 
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: boxGradient,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextStyleInterWithoutPadding(
-                text: date,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-                size: 12.00,
-              ),
-              const SizedBox(height: 8),
-              TextStyleInterWithoutPadding(
-                text: title,
-                color: Colors.black,
-                fontWeight: FontWeight.w700,
-                size: 16.00,
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    isCredited? "lib/Assets/Images/creditIcon.svg":"lib/Assets/Images/debitIcon.svg",
-                  ),
-                  const SizedBox(width: 4),
-                  TextStyleInterWithoutPadding(
-                    text: statusText,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400,
-                    size: 12.00,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextStyleInterWithoutPadding(
-                text:  '₹$amount',
-                color: statusColor,
-                fontWeight: FontWeight.w700,
-                size: 18.00,
-              ),
-            ],
-          ),
-        ],
+    return InkWell(
+      onTap: () {
+        isCredited
+            ? Get.put(WalletController()).showCreditDetailsBottomSheet(context)
+            : Get.put(WalletController()).showDebitDetailsBottomSheet(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: boxGradient,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextStyleInterWithoutPadding(
+                  text: date,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  size: 12.00,
+                ),
+                const SizedBox(height: 8),
+                TextStyleInterWithoutPadding(
+                  text: title,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                  size: 16.00,
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      isCredited
+                          ? "lib/Assets/Images/creditIcon.svg"
+                          : "lib/Assets/Images/debitIcon.svg",
+                    ),
+                    const SizedBox(width: 4),
+                    TextStyleInterWithoutPadding(
+                      text: statusText,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                      size: 12.00,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextStyleInterWithoutPadding(
+                  text: '₹$amount',
+                  color: statusColor,
+                  fontWeight: FontWeight.w700,
+                  size: 18.00,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

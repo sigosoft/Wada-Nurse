@@ -46,7 +46,9 @@ class _WalletState extends State<Wallet> {
                           balance: "1,500",
                           nextWithdrawalDate: "01 May 2025",
                           minWithdrawalAmount: "1,500",
-                          onWithdrawPressed: () {},
+                          onWithdrawPressed: () {
+                            controller.showWithdrawBottomSheet(context);
+                          },
                         ),
                         SizedBox(height: 20),
                         TextStyleInterWithoutPadding(

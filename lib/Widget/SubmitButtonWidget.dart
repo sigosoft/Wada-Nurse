@@ -13,26 +13,23 @@ class SubmitButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: InkWell(
-        onTap:onTap ,
-        child: Container(
-          height: 50,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: colorPrimary,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child:  FittedBox(
-            fit: BoxFit.scaleDown, // Ensures text scales to fit
-            child:   TextStyleInterWithPadding(
-              text: text,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              size: 16.00,
-            ),
+    return InkWell(
+      onTap:onTap ,
+      child: Container(
+        height: 50,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: colorPrimary,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child:  FittedBox(
+          fit: BoxFit.scaleDown, // Ensures text scales to fit
+          child:   TextStyleInterWithPadding(
+            text: text,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            size: 16.00,
           ),
         ),
       ),

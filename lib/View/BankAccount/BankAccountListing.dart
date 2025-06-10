@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:waaada_nurseapp/Controller/WalletController.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Widget/BankAccountListingCard.dart';
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
@@ -20,25 +22,31 @@ class _BankAccountListingState extends State<BankAccountListing> {
       body: SafeArea(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: [
-              SizedBox(height: 15),
-              ListView.separated(
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return BankAccountListingCard(
-                    bankName: "SBI Bank",
-                    accountNumber: "123xxxxxxxx8",
-                    accountHolder: "Joy Thomas",
-                  );
-                },
-                separatorBuilder: (context, index) => SizedBox(height: 20),
-                itemCount: 1,
-              ),
-              Spacer(),
-              SubmitButtonWidget(text:Strings.addBankAccount,),
-              SizedBox(height: 10)
-            ],
+          child: GetBuilder(
+            init: WalletController(),
+            builder:(controller) =>  Column(
+              children: [
+                SizedBox(height: 15),
+                ListView.separated(
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return BankAccountListingCard(
+                      bankName: "SBI Bank",
+                      accountNumber: "123xxxxxxxx8",
+                      accountHolder: "Joy Thomas",
+                      onDelete:() {
+                        controller.deleteBankAccountBottomSheet(context);
+                      } ,
+                    );
+                  },
+                  separatorBuilder: (context, index) => SizedBox(height: 20),
+                  itemCount: 1,
+                ),
+                Spacer(),
+                SubmitButtonWidget(text:Strings.addBankAccount,),
+                SizedBox(height: 10)
+              ],
+            ),
           ),
         ),
       ),

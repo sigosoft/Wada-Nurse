@@ -13,4 +13,7 @@ const greyBorder= Color(0xffE6E6E6);
 const boxGradient= Color(0xffEAF3FA);
 const darkBlueGradient1 = Color(0xff19476B);
 const grayText = Color(0xff636363);
+const redColorText2 = Color(0xffB14949);
+const grayText2 = Color(0xff606060);
+const borderColor = Color(0xffCCCCCC);
 
