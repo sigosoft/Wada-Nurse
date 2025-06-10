@@ -26,7 +26,7 @@ class NurseShiftItem extends StatelessWidget {
         Get.to(ShiftDetails(bookingType: bookingType));
       },
       child: Container(
-        height: showLocationText?240:bookingType=="upcoming"||bookingType=="ongoing"?270:220,
+        height: showLocationText?MediaQuery.of(context).size.height * 0.3:bookingType=="upcoming"||bookingType=="ongoing"?MediaQuery.of(context).size.height * 0.35:MediaQuery.of(context).size.height * 0.28,
         margin: const EdgeInsets.only(bottom: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(

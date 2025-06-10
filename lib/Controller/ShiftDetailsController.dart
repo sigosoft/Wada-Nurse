@@ -1,4 +1,4 @@
-import 'package:camera/camera.dart';
+// import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -6,10 +6,11 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../Resource/Colors.dart';
 import '../Resource/Strings.dart';
-import '../View/Shift/CameraScreen.dart';
+import '../View/Map/ChooseLocation.dart';
 import '../View/SuccessPages/LeaveShiftSuccessfully.dart';
 import '../View/SuccessPages/ShiftAcceptedSuccessfully.dart';
 import '../Widget/ReasonDropDownField.dart';
@@ -17,6 +18,9 @@ import '../Widget/TextInputWidget.dart';
 
 
 class ShiftDetailsController extends GetxController {
+  final ImagePicker _picker = ImagePicker();
+  XFile? _image;
+
   @override
   void onInit() {
     super.onInit();
@@ -29,6 +33,14 @@ class ShiftDetailsController extends GetxController {
     super.onClose();
   }
 
+
+  Future<void> openCamera(String shiftType) async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    if (photo != null) {
+        _image = photo;
+        Get.to(ChooseLocation(shiftType: shiftType));
+    }
+  }
   void showInfoBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -314,19 +326,13 @@ class ShiftDetailsController extends GetxController {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    // Fetch available cameras
-                    final cameras = await availableCameras();
-                    final frontCamera = cameras.firstWhere(
-                          (camera) => camera.lensDirection == CameraLensDirection.front,
-                    );
 
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => CameraScreen(),
-                    //   ),
+                    // final cameras = await availableCameras();
+                    // final frontCamera = cameras.firstWhere(
+                    //       (camera) => camera.lensDirection == CameraLensDirection.front,
                     // );
-                    Get.to(CameraScreen(shiftType: shiftType));
+                    // Get.to(CameraScreen(shiftType: shiftType));
+                    openCamera(shiftType);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorPrimary,
