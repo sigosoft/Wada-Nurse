@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:waaada_nurseapp/View/Notifications/NotificationsListing.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 
 
@@ -78,7 +79,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               padding: const EdgeInsets.only(right: 20),
               child: InkWell(
                 onTap: () {
-                  Get.back();
+                  Get.to(NotificationsListing());
                 },
                 child: SvgPicture.asset(
                   "lib/Assets/Images/bellIcon.svg",

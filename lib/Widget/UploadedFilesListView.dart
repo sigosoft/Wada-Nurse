@@ -4,8 +4,6 @@ import 'package:waaada_nurseapp/Resource/Colors.dart';
 class UploadedFilesListView extends StatelessWidget {
   final List<String> uploadedFiles = [
     'lib/Assets/Images/uploadedImageDummy.png',
-    'lib/Assets/Images/uploadedImageDummy.png',
-    'lib/Assets/Images/uploadedImageDummy.png',
   ];
 
   @override
