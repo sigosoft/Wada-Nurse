@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -32,95 +33,93 @@ class _ChooseLocationState extends State<ChooseLocation> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 5),
-                SvgPicture.asset(
-                  "lib/Assets/Images/question.svg",
-                  // Replace with your SVG path
-                  width: 40,
-                  height: 40,
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 5),
+              SvgPicture.asset(
+                "lib/Assets/Images/question.svg",
+                // Replace with your SVG path
+                width: 40,
+                height: 40,
+              ),
+              SizedBox(height: 5),
+              Text(
+                Strings.confirm,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
                 ),
-                SizedBox(height: 5),
-                Text(
-                  Strings.confirm,
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
+              ),
+              SizedBox(height: 10),
+              Text(
+                widget.shiftType=="checkin"?Strings.checkinmsg:Strings.checkoutMsg,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFE7F4FD),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          Strings.no,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: colorPrimaryDark,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  widget.shiftType=="checkin"?Strings.checkinmsg:Strings.checkoutMsg,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 45,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Get.back();
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                         Get.to(ShiftAcceptedSuccessfully(title:  widget.shiftType=="checkin"?Strings.successfullyCheckedin:Strings.successfullyCheckedout,message:  widget.shiftType=="checkin"?Strings.successfullyCheckedinmsg:Strings.successfullyCheckedoutmsg));
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFE7F4FD),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(
-                            Strings.no,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: colorPrimaryDark,
-                            ),
+                        ),
+                        child: Text(
+                          Strings.yes,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 45,
-                        child: ElevatedButton(
-                          onPressed: () {
-                           Get.to(ShiftAcceptedSuccessfully(title:  widget.shiftType=="checkin"?Strings.successfullyCheckedin:Strings.successfullyCheckedout,message:  widget.shiftType=="checkin"?Strings.successfullyCheckedinmsg:Strings.successfullyCheckedoutmsg));
-                            },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            Strings.yes,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+            ],
           ),
         );
       },
@@ -139,7 +138,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
   @override
   void initState() {
     super.initState();
-    // _setMapStyle();
+
   }
 
   void _setMapStyle() async {

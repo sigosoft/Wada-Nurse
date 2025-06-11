@@ -116,7 +116,7 @@ class _EditProfileState extends State<EditProfile> {
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     child: SubmitButtonWidget(onTap: () {
-                      Get.off(DocumentationUploadScreen());
+
                     }, text: Strings.next),
                   ),
 

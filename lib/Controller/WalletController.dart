@@ -6,6 +6,7 @@ import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/SuccessPages/WithdrawalSuccessScreen.dart';
 import 'package:waaada_nurseapp/Widget/NurseShiftItem.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
+import 'package:waaada_nurseapp/Widget/WalletNurseShiftItem.dart';
 
 import '../Resource/Colors.dart';
 
@@ -78,21 +79,11 @@ class WalletController extends GetxController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 15),
-                ClipRect(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: colorPrimary,
-                    ),
-                    width: 50,
-                    height: 50,
-                    child: SvgPicture.asset(
-                      "lib/Assets/Images/deleteWhiteIcon.svg",
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
+                SvgPicture.asset(
+                  "lib/Assets/Images/delete.svg",
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.scaleDown,
                 ),
                 SizedBox(height: 5),
                 Text(
@@ -103,7 +94,7 @@ class WalletController extends GetxController {
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 5),
                 Text(
                   Strings.areYouSureYouWantToDelete,
                   style: GoogleFonts.inter(
@@ -121,7 +112,7 @@ class WalletController extends GetxController {
                     color: redColorText2,
                   ),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 15),
                 Row(
                   children: [
                     Expanded(
@@ -177,7 +168,7 @@ class WalletController extends GetxController {
 
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
               ],
             ),
           ),
@@ -370,74 +361,75 @@ class WalletController extends GetxController {
       ),
       builder: (context) {
         return SafeArea(
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SvgPicture.asset(
-                      "lib/Assets/Images/creditDetailsBottomSheetIcon.svg",
-                      width: 45,
-                      height: 45,
-                    ),
-                    GestureDetector(
-                      onTap: () => Get.back(),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.black,
+          child: SingleChildScrollView(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SvgPicture.asset(
+                        "lib/Assets/Images/creditDetailsBottomSheetIcon.svg",
+                        width: 45,
+                        height: 45,
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Wada Office",
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: colorPrimary,
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    Text(
-                      "₹37,800",
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "24 Oct 2023",
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    ],
                   ),
-                ),
-                SizedBox(height: 15),
-                Text(
-                  Strings.shiftDetails,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Wada Office",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "₹37,800",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 10),
-                NurseShiftItem(showLocationText: false,bookingType: "",),
-
-              ],
+                  SizedBox(height: 8),
+                  Text(
+                    "24 Oct 2023",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: greyishBlack,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  Text(
+                    Strings.shiftDetails,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  WalletNurseShiftItem(),
+                ],
+              ),
             ),
           ),
         );
@@ -483,7 +475,7 @@ class WalletController extends GetxController {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "David Thomas",
+                      "Withdraw",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -491,31 +483,40 @@ class WalletController extends GetxController {
                       ),
                     ),
                     Text(
-                      "-100",
+                      "₹20,000",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: Colors.red,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "Nurse Booking | 24 Oct 2023",
+                  "24 Oct 2023",
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color:  Colors.black,
+                    color:  greyishBlack,
                   ),
                 ),
                 SizedBox(height: 15),
                 Text(
-                  "Booking Details",
+                  "SBI Bank Account",
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "1234xxxxxx045",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color:  greyishBlack,
                   ),
                 ),
                 SizedBox(height: 10),
