@@ -166,29 +166,6 @@ class Strings {
   static const String logoutmsg = "Are you sure you want to logout?";
   static const String reUpload= "Reupload";
   static const String deleteAccountMessage = "Are you sure you want to delete account?";
-  static const String b = "";
-  static const String d = "";
-  static const String e = "";
-  static const String f = "";
-  static const String g = "";
-  static const String h = "";
-  static const String i = "";
-  static const String j = "";
-  static const String k = "";
-  static const String l = "";
-  static const String m = "";
-  static const String n = "";
-  static const String o = "";
-  static const String p = "";
-  static const String q = "";
-  static const String r = "";
-  static const String s = "";
-  static const String t = "";
-  static const String u = "";
-  static const String v = "";
-  static const String x = "";
-  static const String y = "";
-  static const String z = "";
 
 
 

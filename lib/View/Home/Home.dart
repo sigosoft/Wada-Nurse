@@ -22,6 +22,7 @@ class _HomeState extends State<Home> {
     Bookings(),
     Wallet(),
     Profile(),
+    HomeItem(),
   ];
 
   void _onItemTapped(int index) {

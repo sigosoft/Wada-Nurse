@@ -6,7 +6,12 @@ import 'package:waaada_nurseapp/View/ChangePassword/ChangePassword.dart';
 import 'package:waaada_nurseapp/View/Documents/Documents.dart';
 import 'package:waaada_nurseapp/View/Notifications/NotificationsListing.dart';
 import 'package:waaada_nurseapp/View/Profile/EditProfile.dart';
+import 'package:waaada_nurseapp/View/Settings/AboutUs.dart';
+import 'package:waaada_nurseapp/View/Settings/Faq.dart';
+import 'package:waaada_nurseapp/View/Settings/HelpCenter.dart';
 import 'package:waaada_nurseapp/View/Settings/NeedAnUpdate.dart';
+import 'package:waaada_nurseapp/View/Settings/PrivacyPolicy.dart';
+import 'package:waaada_nurseapp/View/Settings/TermsAndConditions.dart';
 import 'package:waaada_nurseapp/Widget/DoctorDetailsWidget.dart';
 import 'package:waaada_nurseapp/Widget/LogoutWidget.dart';
 import 'package:waaada_nurseapp/Widget/ProfileAppBar.dart';
@@ -93,7 +98,7 @@ class _ProfileState extends State<Profile> {
                           svgIcon: "lib/Assets/Images/helpCentreIcon.svg",
                           text: Strings.helpCentre,
                           onTap: () {
-                           Get.to("");
+                           Get.to(HelpCenter());
                           },
                         ),
                         const Divider(color: borderLine, thickness: 1.0),
@@ -101,7 +106,7 @@ class _ProfileState extends State<Profile> {
                           svgIcon: "lib/Assets/Images/aboutUsIcon.svg",
                           text: Strings.aboutUs,
                           onTap: () {
-                          Get.to("");
+                          Get.to(AboutUs());
                           },
                         ),
                         const Divider(color: borderLine, thickness: 1.0),
@@ -109,7 +114,7 @@ class _ProfileState extends State<Profile> {
                           svgIcon: "lib/Assets/Images/faqIcon.svg",
                           text: Strings.faqs,
                           onTap: () {
-                           Get.to("");
+                           Get.to(Faq());
                           },
                         ),
                         const Divider(color: borderLine, thickness: 1.0),
@@ -117,7 +122,7 @@ class _ProfileState extends State<Profile> {
                           svgIcon: "lib/Assets/Images/termaAndConditionsIcon.svg",
                           text: Strings.termsAndConditions,
                           onTap: () {
-                            Get.to("");
+                            Get.to(TermsAndConditions());
                           },
                         ),
                         const Divider(color: borderLine, thickness: 1.0),
@@ -125,7 +130,7 @@ class _ProfileState extends State<Profile> {
                           svgIcon: "lib/Assets/Images/privacyPolicyIcon.svg",
                           text: Strings.privacyPolicy,
                           onTap: () {
-                            Get.to("");
+                            Get.to(PrivacyPolicy());
                           },
                         ),
                       ],
