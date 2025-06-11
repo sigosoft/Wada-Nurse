@@ -58,12 +58,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       isObscured: controller.isObscured,
                       suffixIcon:  IconButton(
                         icon:
-                        controller.isObscuredForCreateNewPassword2
-                            ? SvgPicture.asset('lib/Assets/Images/eyeOpened.svg')
-                            : SvgPicture.asset(
-                          'lib/Assets/Images/eyeOpened.svg',
-                          fit: BoxFit.scaleDown,
-                        ),
+                        controller.isObscured
+                            ? Icon(Icons.visibility_off_outlined,
+                            size: 18,
+                            color: Colors.grey)
+                            :Icon(Icons.visibility_outlined,
+                            size: 18,
+                            color: Colors.grey),
                         onPressed: () {
                           setState(() {
                            controller.isObscured = !controller.isObscured;
