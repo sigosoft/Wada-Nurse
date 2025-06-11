@@ -51,13 +51,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             suffixIcon: IconButton(
                               icon:
                                   controller.isObscuredCurrentPassword
-                                      ? SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                      )
-                                      : SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                        fit: BoxFit.scaleDown,
-                                      ),
+                                      ? Icon(Icons.visibility_off_outlined,
+                                      size: 18,
+                                      color: Colors.grey)
+                                      :Icon(Icons.visibility_outlined,
+                                      size: 18,
+                                      color: Colors.grey),
                               onPressed: () {
                                 setState(() {
                                   controller.isObscuredCurrentPassword =
@@ -75,13 +74,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             suffixIcon: IconButton(
                               icon:
                                   controller.isObscuredNewPassword
-                                      ? SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                      )
-                                      : SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                        fit: BoxFit.scaleDown,
-                                      ),
+                                      ? Icon(Icons.visibility_off_outlined,
+                                      size: 18,
+                                      color: Colors.grey)
+                                      :Icon(Icons.visibility_outlined,
+                                      size: 18,
+                                      color: Colors.grey),
                               onPressed: () {
                                 setState(() {
                                   controller.isObscuredNewPassword =
@@ -99,13 +97,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                             suffixIcon: IconButton(
                               icon:
                                   controller.isObscuredConfirmNewPassword
-                                      ? SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                      )
-                                      : SvgPicture.asset(
-                                        'lib/Assets/Images/eyeOpened.svg',
-                                        fit: BoxFit.scaleDown,
-                                      ),
+                                      ? Icon(Icons.visibility_off_outlined,
+                                      size: 18,
+                                      color: Colors.grey)
+                                      :Icon(Icons.visibility_outlined,
+                                      size: 18,
+                                      color: Colors.grey),
                               onPressed: () {
                                 setState(() {
                                   controller.isObscuredConfirmNewPassword =

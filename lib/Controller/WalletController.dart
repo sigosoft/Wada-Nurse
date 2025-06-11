@@ -23,7 +23,6 @@ class WalletController extends GetxController {
     super.onClose();
   }
 
-
   final List<Map<String, dynamic>> transactions = [
     {
       "date": "24 Oct 2023",
@@ -61,7 +60,6 @@ class WalletController extends GetxController {
       "isCredited": true,
     },
   ];
-
 
   void deleteBankAccountBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -144,9 +142,7 @@ class WalletController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-
-                          },
+                          onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
                             shape: RoundedRectangleBorder(
@@ -164,8 +160,6 @@ class WalletController extends GetxController {
                         ),
                       ),
                     ),
-
-
                   ],
                 ),
                 SizedBox(height: 10),
@@ -192,15 +186,12 @@ class WalletController extends GetxController {
             left: 16,
             right: 16,
             top: 20,
-            bottom: MediaQuery
-                .of(context)
-                .viewInsets
-                .bottom + 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           child: SafeArea(
             child: StatefulBuilder(
-              builder: (context, setState) =>
-                  Column(
+              builder:
+                  (context, setState) => Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
@@ -239,40 +230,43 @@ class WalletController extends GetxController {
                           fillColor: boxGradient,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                                color: borderColor
-                            ),
+                            borderSide: BorderSide(color: borderColor),
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: [200, 500, 800, 1000].map((amount) {
-                          final isSelected = amountController.text == "$amount";
-                          return GestureDetector(
-                            onTap: () {
-                              amountController.text = "$amount";
-                              setState(() {});
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 10),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? colorPrimary : boxGradient,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child:
-                              TextStyleInterWithoutPadding(
-                                text: "₹$amount",
-                                color: isSelected ? Colors.white : grayText2,
-                                fontWeight: FontWeight.w500,
-                                size: 14.00,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        children:
+                            [200, 500, 800, 1000].map((amount) {
+                              final isSelected =
+                                  amountController.text == "$amount";
+                              return GestureDetector(
+                                onTap: () {
+                                  amountController.text = "$amount";
+                                  setState(() {});
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isSelected ? colorPrimary : boxGradient,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: TextStyleInterWithoutPadding(
+                                    text: "₹$amount",
+                                    color:
+                                        isSelected ? Colors.white : grayText2,
+                                    fontWeight: FontWeight.w500,
+                                    size: 14.00,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                       ),
                       const SizedBox(height: 16),
                       Container(
@@ -313,8 +307,12 @@ class WalletController extends GetxController {
                             ),
                             CircleAvatar(
                               backgroundColor: colorPrimary,
-                                radius: 12,
-                                child: const Icon(Icons.keyboard_arrow_down, color: Colors.white)),
+                              radius: 12,
+                              child: const Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -323,7 +321,7 @@ class WalletController extends GetxController {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                           Get.to(WithdrawalSuccess());
+                            Get.to(WithdrawalSuccess());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
@@ -333,8 +331,9 @@ class WalletController extends GetxController {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            child:  TextStyleInterWithoutPadding(
-                              text: '${Strings.withdraw} ₹${amountController.text}',
+                            child: TextStyleInterWithoutPadding(
+                              text:
+                                  '${Strings.withdraw} ₹${amountController.text}',
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                               size: 18.00,
@@ -350,8 +349,6 @@ class WalletController extends GetxController {
       },
     );
   }
-
-
 
   void showCreditDetailsBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -379,10 +376,7 @@ class WalletController extends GetxController {
                       ),
                       GestureDetector(
                         onTap: () => Get.back(),
-                        child: Icon(
-                          Icons.close,
-                          color: Colors.black,
-                        ),
+                        child: Icon(Icons.close, color: Colors.black),
                       ),
                     ],
                   ),
@@ -437,7 +431,6 @@ class WalletController extends GetxController {
     );
   }
 
-
   void showDebitDetailsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -463,10 +456,7 @@ class WalletController extends GetxController {
                     ),
                     GestureDetector(
                       onTap: () => Get.back(),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.black,
-                      ),
+                      child: Icon(Icons.close, color: Colors.black),
                     ),
                   ],
                 ),
@@ -498,7 +488,7 @@ class WalletController extends GetxController {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color:  greyishBlack,
+                    color: greyishBlack,
                   ),
                 ),
                 SizedBox(height: 15),
@@ -516,11 +506,10 @@ class WalletController extends GetxController {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color:  greyishBlack,
+                    color: greyishBlack,
                   ),
                 ),
                 SizedBox(height: 10),
-          
               ],
             ),
           ),
@@ -529,6 +518,3 @@ class WalletController extends GetxController {
     );
   }
 }
-
-
-
