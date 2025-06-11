@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/WalletController.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/BankAccount/AddBankAccount.dart';
+import 'package:waaada_nurseapp/View/BankAccount/BankAccountListing.dart';
 import 'package:waaada_nurseapp/Widget/BankAccountWidget.dart';
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
@@ -37,7 +38,7 @@ class _WalletState extends State<Wallet> {
                         SizedBox(height: 10),
                         InkWell(
                           onTap: () {
-                            Get.to(AddBankAccount());
+                            Get.to(BankAccountListing());
                           },
                           child: BankAccountsWidget(),
                         ),

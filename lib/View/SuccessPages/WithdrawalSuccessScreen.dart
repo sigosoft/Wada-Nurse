@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import '../../../Resource/Strings.dart';
+import '../Home/Home.dart';
 
 class WithdrawalSuccess extends StatelessWidget {
   const WithdrawalSuccess({super.key});
@@ -58,10 +61,10 @@ class WithdrawalSuccess extends StatelessWidget {
             ),
             SizedBox(height: 5),
             Padding(
-              padding: const EdgeInsets.all(5.0),
+              padding: const EdgeInsets.all(15.0),
               child: SubmitButtonWidget(
                 onTap:(){
-
+                  Get.offAll(Home());
                 },
                 text:Strings.home
               ),

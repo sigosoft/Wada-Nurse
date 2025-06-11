@@ -20,7 +20,7 @@ class _AddBankAccountState extends State<AddBankAccount> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(label: Strings.addBankAccount, showCloseIcon: true),
+      appBar: CustomAppBar(label: Strings.addBankAccount, showCloseIcon: true,onTap: Get.back,),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: SafeArea(
@@ -51,7 +51,7 @@ class _AddBankAccountState extends State<AddBankAccount> {
                   AddBankAccountTextFieldWidget(hintText: Strings.branchName),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.33),
                   SubmitButtonWidget(text: Strings.save, onTap: () {
-                    Get.to(BankAccountListing());
+                    // Get.to(BankAccountListing());
                   }),
                 ],
               ),

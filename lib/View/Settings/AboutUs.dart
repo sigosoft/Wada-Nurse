@@ -23,6 +23,7 @@ class _AboutUsState extends State<AboutUs> {
         appBar: CustomAppBar(
           label: Strings.aboutUs,
           showCloseIcon: false,
+          onTap: Get.back,
         ),
         body: GetBuilder<SettingsController>(
           init: SettingsController(),

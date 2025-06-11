@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/WalletController.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
+import 'package:waaada_nurseapp/View/BankAccount/AddBankAccount.dart';
 import 'package:waaada_nurseapp/Widget/BankAccountListingCard.dart';
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
@@ -18,7 +19,7 @@ class _BankAccountListingState extends State<BankAccountListing> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(label: Strings.bankAccount),
+      appBar: CustomAppBar(label: Strings.bankAccount,onTap: Get.back,),
       body: SafeArea(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -39,11 +40,13 @@ class _BankAccountListingState extends State<BankAccountListing> {
                       } ,
                     );
                   },
-                  separatorBuilder: (context, index) => SizedBox(height: 20),
-                  itemCount: 1,
+                  separatorBuilder: (context, index) => SizedBox(height: 0),
+                  itemCount: 4,
                 ),
                 Spacer(),
-                SubmitButtonWidget(text:Strings.addBankAccount,),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                    child: SubmitButtonWidget(text:Strings.addBankAccount,onTap: (){ Get.to(AddBankAccount());},)),
                 SizedBox(height: 10)
               ],
             ),

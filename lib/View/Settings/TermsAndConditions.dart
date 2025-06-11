@@ -24,6 +24,7 @@ class _TermsAndConditionsState extends State<TermsAndConditions> {
         backgroundColor: Colors.white,
         appBar: CustomAppBar(
           label: Strings.termsAndConditions,
+          onTap: Get.back,
           showCloseIcon: false,
         ),
         body: GetBuilder<SettingsController>(

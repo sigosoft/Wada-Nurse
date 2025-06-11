@@ -24,6 +24,7 @@ class _FaqState extends State<Faq> {
         appBar: CustomAppBar(
           label: Strings.faqs,
           showCloseIcon: false,
+          onTap: Get.back,
         ),
         body: GetBuilder<SettingsController>(
             init: SettingsController(),
@@ -85,7 +86,7 @@ class _FaqState extends State<Faq> {
                                         Container(
                                           // Wrap children to avoid auto-divider
                                           decoration: BoxDecoration(
-                                            color: greyishBlack,
+                                            color: boxBg,
                                             // Ensure no extra background color
                                             borderRadius: BorderRadius.only(
                                               bottomLeft: Radius.circular(15),

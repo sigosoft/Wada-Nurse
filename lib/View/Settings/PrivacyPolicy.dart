@@ -25,6 +25,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         appBar: CustomAppBar(
           label: Strings.privacyPolicy,
           showCloseIcon: false,
+          onTap: Get.back,
         ),
         body: GetBuilder<SettingsController>(
           init: SettingsController(),

@@ -78,21 +78,11 @@ class WalletController extends GetxController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 15),
-                ClipRect(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: colorPrimary,
-                    ),
-                    width: 50,
-                    height: 50,
-                    child: SvgPicture.asset(
-                      "lib/Assets/Images/deleteWhiteIcon.svg",
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
+                SvgPicture.asset(
+                  "lib/Assets/Images/delete.svg",
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.scaleDown,
                 ),
                 SizedBox(height: 5),
                 Text(
@@ -103,7 +93,7 @@ class WalletController extends GetxController {
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 5),
                 Text(
                   Strings.areYouSureYouWantToDelete,
                   style: GoogleFonts.inter(
@@ -121,7 +111,7 @@ class WalletController extends GetxController {
                     color: redColorText2,
                   ),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 15),
                 Row(
                   children: [
                     Expanded(
@@ -177,7 +167,7 @@ class WalletController extends GetxController {
 
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
               ],
             ),
           ),
@@ -403,7 +393,7 @@ class WalletController extends GetxController {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: colorPrimary,
+                        color: Colors.black,
                       ),
                     ),
                     Text(
@@ -422,7 +412,7 @@ class WalletController extends GetxController {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: greyishBlack,
                   ),
                 ),
                 SizedBox(height: 15),
@@ -483,7 +473,7 @@ class WalletController extends GetxController {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "David Thomas",
+                      "Withdraw",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -491,31 +481,40 @@ class WalletController extends GetxController {
                       ),
                     ),
                     Text(
-                      "-100",
+                      "₹20,000",
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: Colors.red,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "Nurse Booking | 24 Oct 2023",
+                  "24 Oct 2023",
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color:  Colors.black,
+                    color:  greyishBlack,
                   ),
                 ),
                 SizedBox(height: 15),
                 Text(
-                  "Booking Details",
+                  "SBI Bank Account",
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "1234xxxxxx045",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color:  greyishBlack,
                   ),
                 ),
                 SizedBox(height: 10),

@@ -24,6 +24,7 @@ class _HelpCenterState extends State<HelpCenter> {
         appBar: CustomAppBar(
           label: Strings.helpCentre,
           showCloseIcon: false,
+          onTap: Get.back,
         ),
         body: GetBuilder<SettingsController>(
           init: SettingsController(),
