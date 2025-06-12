@@ -1,41 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:waaada_nurseapp/Model/LanguageModel.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 
-
 class LanguageDropDownWidget extends StatefulWidget {
-  const LanguageDropDownWidget({super.key, required this.name,required this.onChanged,required this.selectedGender});
+  const LanguageDropDownWidget({
+    super.key,
+    required this.name,
+    required this.onChanged,
+    required this.selectedLanguage,
+    required this.languageList,
+  });
   final String name;
-  final dynamic onChanged;
-  final dynamic selectedGender;
+  final Function(Language?)? onChanged;
+  final Language? selectedLanguage;
+  final List<Language> languageList;
 
   @override
   State<LanguageDropDownWidget> createState() => _LanguageDropDownWidgetState();
 }
 
 class _LanguageDropDownWidgetState extends State<LanguageDropDownWidget> {
-
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 10,right: 10),
-      child: DropdownButtonFormField<String>(
-        value:widget.selectedGender,
-        items: ['English', 'Malayalam', 'Hindi', 'Tamil', 'Telugu']
-            .map((gender) => DropdownMenuItem(
-          value: gender,
-          child: Text(
-            gender,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ))
-            .toList(),
-        onChanged:widget.onChanged,
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: DropdownButtonFormField<Language>(
+        value: widget.selectedLanguage,
+        items:
+            widget.languageList
+                .map(
+                  (language) => DropdownMenuItem<Language>(
+                    value: language,
+                    child: Text(
+                      language.language ?? '',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+        onChanged: widget.onChanged,
         decoration: InputDecoration(
           labelText: widget.name,
           labelStyle: GoogleFonts.inter(
@@ -51,7 +59,10 @@ class _LanguageDropDownWidgetState extends State<LanguageDropDownWidget> {
             borderSide: BorderSide.none,
           ),
 
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 5,
+          ),
           suffixIcon: Container(
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -72,7 +83,7 @@ class _LanguageDropDownWidgetState extends State<LanguageDropDownWidget> {
         ),
         isDense: true,
         icon: null,
-        iconSize: 0,// Hides the default dropdown arrow
+        iconSize: 0, // Hides the default dropdown arrow
       ),
     );
   }

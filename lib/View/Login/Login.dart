@@ -51,23 +51,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       size: 14.00,
                     ),
                     SizedBox(height: 20),
-                    CountryCodeAndPhoneNUmber(name: Strings.phoneNumber),
+                    CountryCodeAndPhoneNUmber(
+                      controller: TextEditingController(),
+                      name: Strings.phoneNumber,
+                      countrycodes: ['+91', '+1', '+44', '+61'],
+                    ),
                     SizedBox(height: 20),
                     PasswordTextField(
                       passwordController: controller.passwordController,
                       isObscured: controller.isObscured,
-                      suffixIcon:  IconButton(
+                      suffixIcon: IconButton(
                         icon:
-                        controller.isObscured
-                            ? Icon(Icons.visibility_off_outlined,
-                            size: 18,
-                            color: Colors.grey)
-                            :Icon(Icons.visibility_outlined,
-                            size: 18,
-                            color: Colors.grey),
+                            controller.isObscured
+                                ? Icon(
+                                  Icons.visibility_off_outlined,
+                                  size: 18,
+                                  color: Colors.grey,
+                                )
+                                : Icon(
+                                  Icons.visibility_outlined,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
                         onPressed: () {
                           setState(() {
-                           controller.isObscured = !controller.isObscured;
+                            controller.isObscured = !controller.isObscured;
                           });
                         },
                       ),
@@ -91,13 +99,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 10),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
-                        child: SubmitButtonWidget(onTap: () {Get.to(Home());}, text: Strings.next)),
+                      child: SubmitButtonWidget(
+                        onTap: () {
+                          Get.to(Home());
+                        },
+                        text: Strings.next,
+                      ),
+                    ),
                     SizedBox(height: 15),
                     RichTextWidget(
                       text1: Strings.dontHaveAnAccount,
                       text2: Strings.signUp,
                       onTap: () {
-                        Get.to(Register());
+                        Get.to(() => Register());
                       },
                     ),
                   ],
@@ -108,4 +122,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

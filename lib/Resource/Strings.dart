@@ -1,5 +1,4 @@
 class Strings {
-
   static const String logInWithPhoneNumber = "Login with phone number";
   static const String enterYourPhoneNumber = "Enter your phone number";
   static const String dontHaveAnAccount = "Don’t have an account?  ";
@@ -10,15 +9,18 @@ class Strings {
   static const String password = "Password";
   static const String forgotPassword = "Forgot Password?";
   static const String forgotPasswordHeading = "Forgot Password";
-  static const String enterPhoneNumberLinkedWithYourNumber = "Enter the phone number linked with your account.";
+  static const String enterPhoneNumberLinkedWithYourNumber =
+      "Enter the phone number linked with your account.";
   static const String submit = "Submit";
   static const String otpVerification = "OTP verification";
-  static const String enterVerificationCodeSendToYourNumber = "Enter the verification code we just sent to your Phone Number";
+  static const String enterVerificationCodeSendToYourNumber =
+      "Enter the verification code we just sent to your Phone Number";
   static const String verify = "Verify";
   static const String didNotReceiveCode = "Didn’t received code? ";
   static const String resend = "Resend";
   static const String createNewPassword = "Create New Password";
-  static const String yourPasswordMustUnique = "Your new password must be unique from those previously used.";
+  static const String yourPasswordMustUnique =
+      "Your new password must be unique from those previously used.";
   static const String newPassword = "New Password";
   static const String register = "Register";
   static const String createAccount = "Create an account to continue!  ";
@@ -44,26 +46,30 @@ class Strings {
   static const String uploaded = "Uploaded";
   static const String save = "Save";
   static const String notes = "Notes";
-  static const String documentFormats= "Document formats: PDF, PNG, and JPEG.";
+  static const String documentFormats = "Document formats: PDF, PNG, and JPEG.";
   static const String selectFile = "Select File";
   static const String certificates = "Certificates";
-  static const String employeeType= "Employee Type";
+  static const String employeeType = "Employee Type";
   static const String salariedEmployee = "Salaried Employee";
   static const String perDayCharge = "Per Day Charge";
-  static const String registrationFeeForFirstTimeUsers = "Registration fee for first-time users";
+  static const String registrationFeeForFirstTimeUsers =
+      "Registration fee for first-time users";
   static const String declined = "Declined";
   static const String pending = "Pending";
   static const String documents = "Documents";
   static const String wallet = "Wallet";
   static const String bankAccounts = "Bank Accounts";
   static const String balance = "Balance";
-  static const String youCanWithdrawOncePerMonth = "• You can withdraw only once per month.";
+  static const String youCanWithdrawOncePerMonth =
+      "• You can withdraw only once per month.";
   static const String nextWithdrawalOn = "• Next withdrawal on";
-  static const String minimumWithdrawalAmount = "• Minimum withdrawal amount is ";
+  static const String minimumWithdrawalAmount =
+      "• Minimum withdrawal amount is ";
   static const String withDraw = "Withdraw";
   static const String transactions = "Transactions";
   static const String addBankAccount = "Add Bank Account";
-  static const String accountHolderName = "Account Holder Name (As per bank records)";
+  static const String accountHolderName =
+      "Account Holder Name (As per bank records)";
   static const String bankName = "Bank Name";
   static const String accountNumber = "Account Number";
   static const String confirmAccountNumber = "Confirm Account Number";
@@ -71,14 +77,16 @@ class Strings {
   static const String branchName = "Branch Name";
   static const String bankAccount = "Bank Account";
   static const String deleteBankAccount = "Delete bank Account";
-  static const String areYouSureYouWantToDelete = "Are you sure you want to delete bank account?";
+  static const String areYouSureYouWantToDelete =
+      "Are you sure you want to delete bank account?";
   static const String thisActionCantBeUndone = "This action cannot be undone.";
   static const String yes = "Yes";
   static const String no = "No";
   static const String withdraw = "Withdraw";
   static const String withdrawalRequestSend = "Withdrawal Request Sent!";
   static const String w = "Withdrawal Request Sent!";
-  static const String weHaveReceivedYourRequest= "We have received your withdrawal request. The amount will credited to your bank account within 24 hours..";
+  static const String weHaveReceivedYourRequest =
+      "We have received your withdrawal request. The amount will credited to your bank account within 24 hours..";
   static const String home = "Home";
   static const String bookings = "Bookings";
   static const String profile = "Profile";
@@ -100,7 +108,8 @@ class Strings {
   static const String totalDays = "Total Days";
   static const String shiftType = "Shift Type";
   static const String serviceRequirement = "Service Requirement";
-  static const String dummy = "Cupidatat irure theas Laborum magna nulla duis ullamco cillum dolor. Sed ut perspicviatis unde omnis iste natus error sit voluptatem.";
+  static const String dummy =
+      "Cupidatat irure theas Laborum magna nulla duis ullamco cillum dolor. Sed ut perspicviatis unde omnis iste natus error sit voluptatem.";
   static const String nurseFee = "Nurse Fee";
   static const String ok = "Ok";
   static const String confirm = "Confirm";
@@ -113,29 +122,35 @@ class Strings {
   static const String verifylocation = "Verify Location";
   static const String searchplace = "Search Place";
   static const String checkinmsg = "Are you sure you want to check-in?";
-  static const String cant_checkin_msg = "You can check in only 15 minutes prior to the shift start time";
-  static const String openCamera_msg = "Take a selfie to verify your identity and ensure accurate check-in tracking.";
+  static const String cant_checkin_msg =
+      "You can check in only 15 minutes prior to the shift start time";
+  static const String openCamera_msg =
+      "Take a selfie to verify your identity and ensure accurate check-in tracking.";
   static const String checkoutmsg2 = "You have successfully checked-out.";
   static const String successfullyCheckedin = "Successful Checked-in!";
-  static const String successfullyCheckedinmsg = "You've successfully checked-in.";
+  static const String successfullyCheckedinmsg =
+      "You've successfully checked-in.";
   static const String takeLeave = "Take Leave";
   static const String in_value = "in ";
   static const String out_value = " out ";
   static const String downloadSalarySlip = "Download Salary Slip";
-  static const String callUs= "Call us at";
-  static const String emailUs= "Email us at";
-  static const String companyOffice= "Company Office";
-  static const String faqs= "FAQs";
-  static const String needsAnUpdate= "The WADA Needs An Update";
-  static const String aNewUpdateIsAvailableForThisAppPleaseDownload= "A new update is available for this app.\nPlease download the latest version to\ncontinue using the app.";
-  static const String update= "UPDATE";
+  static const String callUs = "Call us at";
+  static const String emailUs = "Email us at";
+  static const String companyOffice = "Company Office";
+  static const String faqs = "FAQs";
+  static const String needsAnUpdate = "The WADA Needs An Update";
+  static const String aNewUpdateIsAvailableForThisAppPleaseDownload =
+      "A new update is available for this app.\nPlease download the latest version to\ncontinue using the app.";
+  static const String update = "UPDATE";
   static const String feedback = "For feedback or suggestions";
   static const String wellBeBackSoon = "We'll Be Back Soon";
-  static const String sorryWereDownForMaintenanceWellBeBackUpShortly = "Sorry, we're down for maintenance\nWe'll be back up shortly.";
+  static const String sorryWereDownForMaintenanceWellBeBackUpShortly =
+      "Sorry, we're down for maintenance\nWe'll be back up shortly.";
   static const String serverDown = "Server Down";
   static const String gotIt = "GOT IT";
   static const String noInternetConnection = "No Internet Connection";
-  static const String pleaseCheckYourInternetConnectionAndTryAgain = "Please check your internet connection and try again.";
+  static const String pleaseCheckYourInternetConnectionAndTryAgain =
+      "Please check your internet connection and try again.";
   static const String tryAgain = "Try Again";
   static const String supportHelp = "Support & Help";
   static const String aboutUs = "About Us";
@@ -146,17 +161,19 @@ class Strings {
   static const String leaveshiftMsg = "Are you sure you want to leave shift?";
   static const String leaveShift = "Leave Shift";
   static const String leaveSent = "Leave Request Sent";
-  static const String leaveRequestSent = "Your leave request has been successfully sent.";
+  static const String leaveRequestSent =
+      "Your leave request has been successfully sent.";
   static const String checkoutAndleave = "Now you can check out and leave";
   static const String checkoutMsg = "Are you sure you want to check-out?";
   static const String successfullyCheckedout = "Successful Checked-out!";
-  static const String successfullyCheckedoutmsg = "You've successfully checked-out.";
+  static const String successfullyCheckedoutmsg =
+      "You've successfully checked-out.";
   static const String notifications = "Notifications";
   static const String familyMembers = "Family Members";
   static const String membership = "Membership";
   static const String referral = "Referral";
   static const String logout = "Logout";
-  static const String changePassword= "Change Password";
+  static const String changePassword = "Change Password";
   static const String deleteAccount = "Delete Account";
   static const String checkForUpdate = "Check For Update";
   static const String editProfile = "Edit Profile";
@@ -164,10 +181,10 @@ class Strings {
   static const String verified = "Verified";
   static const String shiftDetails = "Shift Details";
   static const String logoutmsg = "Are you sure you want to logout?";
-  static const String reUpload= "Reupload";
-  static const String deleteAccountMessage = "Are you sure you want to delete account?";
-
-
-
-
+  static const String reUpload = "Reupload";
+  static const String deleteAccountMessage =
+      "Are you sure you want to delete account?";
+  static const String gallery = "Gallery";
+  static const String selectPhotoFrom = "Select photo from :";
+  static const String camera = "Camera";
 }
