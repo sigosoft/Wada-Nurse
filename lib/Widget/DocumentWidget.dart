@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 import 'package:waaada_nurseapp/Widget/UploadedFilesListView.dart';
@@ -7,9 +8,11 @@ import '../Resource/Colors.dart' show greenText, greyBorder, redColorText;
 
 class DocumentWidget extends StatelessWidget {
   final dynamic status;
+  final List<XFile> uploadedFiles;
+  final Function(int) onRemove;
 
   const DocumentWidget({
-    super.key,required this.status
+    super.key,required this.status, required this.uploadedFiles, required this.onRemove
   });
 
   @override
@@ -43,7 +46,7 @@ class DocumentWidget extends StatelessWidget {
             ],
           ),
           SizedBox(height: 30),
-          UploadedFilesListView(),
+          UploadedFilesListView(uploadedFiles: uploadedFiles, onRemove: onRemove),
         ],
       ),
     );

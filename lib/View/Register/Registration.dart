@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/RegistrationController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
-import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
 import 'package:waaada_nurseapp/Widget/CountryCodeAndPhoneNumber.dart';
 import 'package:waaada_nurseapp/Widget/DateofBirthField.dart';
 import 'package:waaada_nurseapp/Widget/GenderDropDownField.dart';
@@ -15,6 +14,7 @@ import 'package:waaada_nurseapp/Widget/ProfilePhotoWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextInputWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
+import 'package:waaada_nurseapp/Utils/ShowToast.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -25,117 +25,157 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final formKey = GlobalKey<FormState>();
+  late final RegistrationController controller;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = RegistrationController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isInitialized) {
+        _isInitialized = true;
+        controller.getCountryCodes();
+        controller.getLanguages();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
+    final screenWidth = media.size.width;
+    final height002 = media.size.height * 0.02;
+    final height0015 = media.size.height * 0.015;
+    final height005 = media.size.height * 0.05;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: GetBuilder(
-        init: RegistrationController(),
-        didChangeDependencies: (state) {
-          debugPrint("didChangeDependencies");
-          state.controller?.getCountryCodes();
-          state.controller?.getLanguages();
-        },
+      body: GetBuilder<RegistrationController>(
+        init: controller,
         builder:
             (controller) => SingleChildScrollView(
               child: SafeArea(
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
+                  width: screenWidth,
                   child: Form(
                     key: formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: media.size.height * 0.02),
+                        SizedBox(height: height002),
                         TextStyleInterWithPadding(
                           text: Strings.register,
                           color: Colors.black,
                           fontWeight: FontWeight.w700,
                           size: 22.00,
                         ),
-                        SizedBox(height: media.size.height * 0.02),
+                        SizedBox(height: height002),
                         TextStyleInterWithPadding(
                           text: Strings.createAccount,
                           color: blackTextColor,
                           fontWeight: FontWeight.w500,
                           size: 14.00,
                         ),
-                        SizedBox(height: media.size.height * 0.02),
+                        SizedBox(height: height002),
                         Center(
                           child: ProfilePhotoWidget(
                             image: controller.pickedImage,
                             onTap: () {
                               controller.showImageOptions(
                                 context,
-                                controller.selectedImage,
+                                image: controller.selectedImage,
                               );
                             },
                           ),
                         ),
-                        SizedBox(height: media.size.height * 0.02),
+                        SizedBox(height: height002),
                         TextInputWidget(
                           controller: controller.fullNameController,
                           label: Strings.fullName,
                           type: TextInputType.text,
                           height: 50,
-                          validatorText: "Full Name is required",
+                          validatorText: Strings.fullNameIsRequired,
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         CountryCodeAndPhoneNUmber(
+                          validatorText: Strings.phoneNumberIsRequired,
+                          countryCodeValidatorText:
+                              Strings.countryCodeIsRequired,
                           controller: controller.phoneNumberController,
                           name: Strings.phoneNumber,
                           countrycodes: controller.countryCodes,
+                          onCountryCodeSelected: (id) {
+                            controller.selectedCountryCodeId = id;
+                            controller.update();
+                          },
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         TextInputWidget(
                           controller: controller.emailController,
                           label: Strings.email,
                           type: TextInputType.emailAddress,
                           height: 50,
+                          validatorText: Strings.emailIsRequired,
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         Row(
                           children: [
-                            Expanded(child: DateOfBirthField()),
                             Expanded(
-                              child: GenderDropdownField(name: Strings.gender),
+                              child: DateOfBirthField(
+                                validatorText: Strings.dateOfBirthIsRequired,
+                                selectedDateOfBirth:
+                                    controller.selectedDateOfBirth,
+                                onDateSelected: (date) {
+                                 controller.onDateSelected(date);
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: GenderDropdownField(
+                                name: Strings.gender,
+                                validatorText: Strings.genderIsRequired,
+                                onGenderSelected: (gender) {
+                                  controller.selectedGender = gender;
+                                  controller.update();
+                                },
+                              ),
                             ),
                           ],
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         TextInputWidget(
                           controller: controller.qualificationController,
                           label: Strings.qualification,
                           type: TextInputType.text,
                           height: 50,
+                          validatorText: Strings.qualificationIsRequired,
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         LanguageDropDownWidget(
                           selectedLanguage: controller.selectedLanguage,
                           languageList:
-                              controller.languages?.data?.languages ?? [],
+                              controller.languages?.data?.languages ?? const [],
                           name: Strings.language,
+                          validatorText: Strings.languageIsRequired,
                           onChanged: (value) {
-                            setState(() {
-                              controller.selectedLanguage = value;
-                              if (value != null &&
-                                  !controller.selectedLanguages.contains(
-                                    value.language ?? '',
-                                  )) {
-                                controller.selectedLanguages.add(
+                            controller.selectedLanguage = value;
+                            if (value != null &&
+                                !controller.selectedLanguages.contains(
                                   value.language ?? '',
-                                );
-                              }
-                              controller.selectedLanguage = null;
-                              controller.update();
-                            });
+                                )) {
+                              controller.selectedLanguages.add(
+                                value.language ?? '',
+                              );
+                            }
+                            controller.selectedLanguage = null;
+                            controller.update();
                           },
                         ),
                         SizedBox(
                           height:
                               controller.selectedLanguages.isNotEmpty
-                                  ? media.size.height * 0.015
+                                  ? height0015
                                   : 0,
                         ),
                         Visibility(
@@ -147,19 +187,19 @@ class _RegisterState extends State<Register> {
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: controller.selectedLanguages.length,
+                                key: const ValueKey('language_chips'),
                                 itemBuilder: (context, index) {
                                   return Padding(
+                                    key: ValueKey('language_chip_$index'),
                                     padding: const EdgeInsets.only(right: 8),
                                     child: LanguageChip(
                                       label:
                                           controller.selectedLanguages[index],
                                       onDeleted: () {
-                                        setState(() {
-                                          controller.selectedLanguages.removeAt(
-                                            index,
-                                          );
-                                          controller.update();
-                                        });
+                                        controller.selectedLanguages.removeAt(
+                                          index,
+                                        );
+                                        controller.update();
                                       },
                                     ),
                                   );
@@ -168,7 +208,7 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         PasswordTextField(
                           label: Strings.newPassword,
                           passwordController: controller.newPasswordController,
@@ -184,14 +224,13 @@ class _RegisterState extends State<Register> {
                                       fit: BoxFit.scaleDown,
                                     ),
                             onPressed: () {
-                              setState(() {
-                                controller.isObscureNewPassword =
-                                    !controller.isObscureNewPassword;
-                              });
+                              controller.isObscureNewPassword =
+                                  !controller.isObscureNewPassword;
+                              controller.update();
                             },
                           ),
                         ),
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                         PasswordTextField(
                           label: Strings.confirmNewPassword,
                           passwordController:
@@ -208,27 +247,59 @@ class _RegisterState extends State<Register> {
                                       fit: BoxFit.scaleDown,
                                     ),
                             onPressed: () {
-                              setState(() {
-                                controller.isObscureConfirmPassword =
-                                    !controller.isObscureConfirmPassword;
-                              });
+                              controller.isObscureConfirmPassword =
+                                  !controller.isObscureConfirmPassword;
+                              controller.update();
                             },
                           ),
                         ),
-                        SizedBox(height: media.size.height * 0.05),
+                        SizedBox(height: height005),
                         Container(
                           margin: EdgeInsets.symmetric(horizontal: 10),
                           child: SubmitButtonWidget(
                             onTap: () {
+                              debugPrint(
+                                "slectedGender: ${controller.selectedGender}",
+                              );
                               if (formKey.currentState?.validate() ?? false) {
-                                Get.off(DocumentationUploadScreen());
+                                controller.navigatingToNextPage(
+                                  fullname: controller.fullNameController.text,
+                                  countryCode:
+                                      controller.selectedCountryCodeId
+                                          ?.toString() ??
+                                      '',
+                                  mobile: controller.phoneNumberController.text,
+                                  email: controller.emailController.text,
+                                  dob:
+                                      controller.selectedDateOfBirth != null
+                                          ? "${controller.selectedDateOfBirth!.toLocal()}"
+                                              .split(' ')[0]
+                                          : '',
+                                  gender:
+                                      controller.selectedGender.toString() ==
+                                              "Male"
+                                          ? "1"
+                                          : controller.selectedGender
+                                                  .toString() ==
+                                              "Female"
+                                          ? "2"
+                                          : "3",
+                                  qualification:
+                                      controller.qualificationController.text,
+                                  password:
+                                      controller.newPasswordController.text,
+                                  passwordConfirmation:
+                                      controller.confirmPasswordController.text,
+                                  image: controller.pickedImage ?? '',
+                                  languages: controller.selectedLanguages,
+                                );
                               }
                             },
                             text: Strings.next,
                           ),
                         ),
 
-                        SizedBox(height: media.size.height * 0.015),
+                        SizedBox(height: height0015),
                       ],
                     ),
                   ),

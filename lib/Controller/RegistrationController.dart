@@ -7,36 +7,50 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:waaada_nurseapp/ApiConfigs/ApiConfigs.dart';
 import 'package:waaada_nurseapp/Model/LanguageModel.dart';
+import 'package:waaada_nurseapp/Model/CountryCodeModel.dart';
+import 'package:waaada_nurseapp/Model/RegistrationData.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Utils/CheckNetworkConnectivity.dart';
 import 'package:waaada_nurseapp/Utils/HandleDioExceptions.dart';
 import 'package:waaada_nurseapp/Utils/ShowToast.dart';
+import 'package:waaada_nurseapp/View/Home/Home.dart';
+import 'package:waaada_nurseapp/View/OtpVerification/Otpverification.dart';
+import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
 import 'package:waaada_nurseapp/View/Register/Widgets/ChooseImageWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 
-Future<List<String>> _fetchCountryCodesInIsolate(String url) async {
+Future<List<CountryCode>> _fetchCountryCodesInIsolate(String url) async {
   try {
     final dio = Dio();
     final response = await dio.get(url);
     if (response.statusCode == 200) {
       final responseData = response.data;
       final data = responseData['data'];
+      final Set<String> seenCodes = {};
+      final List<CountryCode> countryCodes = [];
+
       if (data is Map && data.containsKey('country_codes')) {
         final countryCodesList = data['country_codes'];
         if (countryCodesList is List) {
-          return countryCodesList
-              .map((e) => e['country_code'].toString())
-              .toSet()
-              .toList()
-              .cast<String>();
+          for (var e in countryCodesList) {
+            final countryCode = CountryCode.fromJson(e as Map<String, dynamic>);
+            if (!seenCodes.contains(countryCode.countryCode)) {
+              seenCodes.add(countryCode.countryCode);
+              countryCodes.add(countryCode);
+            }
+          }
+          return countryCodes;
         }
       } else if (data is List) {
-        return data
-            .map((e) => e['country_code'].toString())
-            .toSet()
-            .toList()
-            .cast<String>();
+        for (var e in data) {
+          final countryCode = CountryCode.fromJson(e as Map<String, dynamic>);
+          if (!seenCodes.contains(countryCode.countryCode)) {
+            seenCodes.add(countryCode.countryCode);
+            countryCodes.add(countryCode);
+          }
+        }
+        return countryCodes;
       }
     }
     return [];
@@ -79,13 +93,68 @@ class RegistrationController extends GetxController {
   final ImagePicker imagePicker = ImagePicker();
   final Dio dio = Dio();
   bool isLoading = false;
-  List<String> countryCodes = [];
+  List<CountryCode> countryCodes = [];
+  int? selectedCountryCodeId;
   TextEditingController phoneNumberController = TextEditingController();
   LanguageModel? languages;
-
+  DateTime? selectedDateOfBirth;
+  List<XFile> idProofImages = [];
+  List<XFile> certificatesImages = [];
+  String? otp;
+  double registrationFee = 0.0;
   // variables should not be declared below this line
 
-  Future<void> openCamera() async {
+  void onDateSelected(DateTime? date) {
+    debugPrint("onDateSelected called with date: $date");
+    if (date != null) {
+      final normalizedDate = DateTime(date.year, date.month, date.day);
+      final today = DateTime.now();
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+
+      debugPrint("onDateSelected - Normalized date: $normalizedDate");
+      debugPrint("onDateSelected - Normalized today: $normalizedToday");
+
+      if (normalizedDate.isAfter(normalizedToday) ||
+          normalizedDate.isAtSameMomentAs(normalizedToday)) {
+        debugPrint("onDateSelected - Date is today or in future, rejecting");
+        showToast(
+          "Date of birth cannot be today or in the future",
+          isError: true,
+        );
+        return;
+      }
+
+      final maxAllowedDate = DateTime(
+        normalizedToday.year - 18,
+        normalizedToday.month,
+        normalizedToday.day,
+      );
+
+      debugPrint("onDateSelected - Max allowed date: $maxAllowedDate");
+      debugPrint(
+        "onDateSelected - Is date after max allowed? ${normalizedDate.isAfter(maxAllowedDate)}",
+      );
+
+      if (normalizedDate.isAfter(maxAllowedDate)) {
+        debugPrint(
+          "onDateSelected - Date is less than 18 years old, rejecting",
+        );
+        showToast("Minimum age should be 18 years", isError: true);
+        return;
+      }
+
+      debugPrint(
+        "onDateSelected - Date validation passed, setting selectedDateOfBirth",
+      );
+    }
+    selectedDateOfBirth = date;
+    debugPrint(
+      "onDateSelected - selectedDateOfBirth set to: $selectedDateOfBirth",
+    );
+    update();
+  }
+
+  Future<void> openCamera({bool? isIdProof, bool? isCertificates}) async {
     try {
       cameraStatus = await Permission.camera.request();
       if (cameraStatus == PermissionStatus.granted) {
@@ -95,7 +164,21 @@ class RegistrationController extends GetxController {
           preferredCameraDevice: CameraDevice.rear,
         );
         if (image != null) {
-          selectedImage = image;
+          if (isIdProof ?? false) {
+            if (idProofImages.length >= 5) {
+              showToast("Maximum 5 ID proof photos allowed", isError: true);
+              return;
+            }
+            idProofImages.add(image);
+          } else if (isCertificates ?? false) {
+            if (certificatesImages.length >= 5) {
+              showToast("Maximum 5 certificates photos allowed", isError: true);
+              return;
+            }
+            certificatesImages.add(image);
+          } else {
+            selectedImage = image;
+          }
           debugPrint("Image captured from camera: ${image.path}");
           Get.back();
           pickedImage = image.path;
@@ -177,7 +260,7 @@ class RegistrationController extends GetxController {
     }
   }
 
-  Future<void> openGallery() async {
+  Future<void> openGallery({bool? isIdProof, bool? isCertificates}) async {
     try {
       bool hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -188,7 +271,29 @@ class RegistrationController extends GetxController {
         imageQuality: 80,
       );
       if (image != null) {
-        selectedImage = image;
+        if (isIdProof ?? false) {
+          if (idProofImages.isNotEmpty && idProofImages.length >= 1) {
+            showToast("Maximum 1 ID proof photos allowed", isError: true);
+            return;
+          }
+          if (idProofImages.contains(image)) {
+            showToast("ID proof already uploaded", isError: true);
+            return;
+          }
+          idProofImages.add(image);
+        } else if (isCertificates ?? false) {
+          if (certificatesImages.length >= 5) {
+            showToast("Maximum 5 certificates photos allowed", isError: true);
+            return;
+          }
+          if (certificatesImages.contains(image)) {
+            showToast("Certificate already uploaded", isError: true);
+            return;
+          }
+          certificatesImages.add(image);
+        } else {
+          selectedImage = image;
+        }
         debugPrint("Image selected from gallery: ${image.path}");
         Get.back();
         pickedImage = image.path;
@@ -200,7 +305,13 @@ class RegistrationController extends GetxController {
     }
   }
 
-  showImageOptions(BuildContext context, dynamic jobDetails) {
+  showImageOptions(
+    BuildContext context, {
+    XFile? image,
+    bool? isIdProof,
+    bool? isCertificates,
+    List<XFile>? imagesList,
+  }) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -231,7 +342,10 @@ class RegistrationController extends GetxController {
                 children: [
                   ChooseImageWidget(
                     onTap: () {
-                      openCamera();
+                      openCamera(
+                        isIdProof: isIdProof,
+                        isCertificates: isCertificates,
+                      );
                     },
                     media: media,
                     icon: Icons.camera_alt,
@@ -239,7 +353,10 @@ class RegistrationController extends GetxController {
                   ),
                   ChooseImageWidget(
                     onTap: () {
-                      openGallery();
+                      openGallery(
+                        isIdProof: isIdProof,
+                        isCertificates: isCertificates,
+                      );
                     },
                     media: media,
                     icon: Icons.photo_library,
@@ -310,45 +427,112 @@ class RegistrationController extends GetxController {
     }
   }
 
-  bool validateRegistrationData(
-    String fullname,
-    int countryCode,
-    String mobile,
-    String email,
-    String dob,
-    String gender,
-    String qualification,
-    String password,
-    String passwordConfirmation,
-  ) {
-    if (fullname.isEmpty) {
-      showToast("Full Name is required");
+  bool navigatingToNextPage({
+    required String fullname,
+    required String countryCode,
+    required String mobile,
+    required String email,
+    required String dob,
+    required String gender,
+    required String qualification,
+    required String password,
+    required String passwordConfirmation,
+    required String image,
+    required List<String> languages,
+  }) {
+    debugPrint("fullname: $fullname");
+    debugPrint("countryCode: $countryCode");
+    debugPrint("mobile: $mobile");
+    debugPrint("email: $email");
+    debugPrint("dob: $dob");
+    debugPrint("gender: $gender");
+    debugPrint("qualification: $qualification");
+    debugPrint("password: $password");
+    debugPrint("passwordConfirmation: $passwordConfirmation");
+    debugPrint("image: $image");
+    debugPrint("languages: $languages");
+    if (email.isNotEmpty) {
+      final emailRegex = RegExp(
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      );
+      if (!emailRegex.hasMatch(email)) {
+        showToast("Enter a valid email address", isError: true);
+        return false;
+      }
+    }
+    if (mobile.isNotEmpty) {
+      if (mobile.length != 10) {
+        showToast("Enter a valid mobile number", isError: true);
+        return false;
+      }
+    }
+    if (password.isNotEmpty) {
+      if (password.length < 8) {
+        showToast("Password must be at least 8 characters long", isError: true);
+        return false;
+      }
+    }
+    if (passwordConfirmation.isNotEmpty) {
+      if (passwordConfirmation != password) {
+        showToast("Password and confirm password do not match", isError: true);
+        return false;
+      }
+    }
+    if (image.isEmpty) {
+      showToast("Please upload a profile photo", isError: true);
       return false;
     }
-    if (countryCode == 0) {
-      showToast("Country Code is required");
-      return false;
-    }
+    Get.to(
+      () => DocumentationUploadScreen(
+        image: XFile(image),
+        fullName: fullname,
+        countryCode: countryCode,
+        phoneNumber: mobile,
+        email: email,
+        dateOfBirth: dob,
+        gender: gender,
+        qualification: qualification,
+        languages: languages,
+        password: password,
+        confirmPassword: passwordConfirmation,
+        otp: otp.toString(),
+      ),
+    );
     return true;
   }
 
-  Future<void> postRegistrationData(
-    String fullname,
-    int countryCode,
-    String mobile,
-    String email,
-    String dob,
-    String gender,
-    String qualification,
-    String password,
-    String passwordConfirmation,
-    String image,
-    String idProof,
-    String certificates,
-    String salaryType,
-    String otp,
-    List<String> languages,
-  ) async {
+  void validateRegister(RegistrationData data) {
+    debugPrint("fullname: ${data.fullname}");
+    debugPrint("countryCode: ${data.countryCode}");
+    debugPrint("mobile: ${data.mobile}");
+    debugPrint("email: ${data.email}");
+    debugPrint("dob: ${data.dob}");
+    debugPrint("gender: ${data.gender}");
+    debugPrint("qualification: ${data.qualification}");
+    debugPrint("password: ${data.password}");
+    debugPrint("passwordConfirmation: ${data.passwordConfirmation}");
+    debugPrint("image: ${data.image.path}");
+    debugPrint("languages: ${data.languages}");
+    debugPrint("idProof: ${data.idProof}");
+    debugPrint("certificates: ${data.certificates}");
+    debugPrint("salaryType: ${data.salaryType}");
+    debugPrint("otp: ${data.otp}");
+    if (data.idProof.isEmpty) {
+      showToast("Please upload ID proof", isError: true);
+      return;
+    }
+    if (data.certificates.isEmpty) {
+      showToast("Please upload certificates", isError: true);
+      return;
+    }
+    sendRegisterOtp(
+      mobile: data.mobile,
+      countryCode: data.countryCode,
+      registrationData: data,
+    );
+  }
+
+  Future<void> postRegistrationData(RegistrationData data) async {
     isLoading = true;
     checkNetworkAndRedirectOffAll();
     try {
@@ -362,68 +546,70 @@ class RegistrationController extends GetxController {
       }
 
       Map<String, dynamic> formMap = {
-        "name": fullname,
-        "country_code": countryCode,
-        "mobile": mobile,
-        "email": email,
-        "dob": dob,
-        "gender": gender,
-        "qualification": qualification,
-        "password": password,
-        "password_confirmation": passwordConfirmation,
-        "languages": languages,
-        "salary_type": salaryType,
-        "otp": otp,
+        "name": data.fullname,
+        "country_code": data.countryCodeAsInt,
+        "mobile": data.mobile,
+        "email": data.email,
+        "dob": data.dob,
+        "gender": data.gender,
+        "qualification": data.qualification,
+        "password": data.password,
+        "password_confirmation": data.passwordConfirmation,
+        "languages": data.languages,
+        "salary_type": data.salaryType == "Salaried Employee" ? "1" : "2",
+        "otp": data.otp,
       };
       List<MapEntry<String, MultipartFile>> files = [];
-      if (image.isNotEmpty) {
+      if (data.imagePath.isNotEmpty) {
         files.add(
           MapEntry(
             "image",
             await MultipartFile.fromFile(
-              image,
-              filename: fileNameFromPath(image),
+              data.imagePath,
+              filename: fileNameFromPath(data.imagePath),
             ),
           ),
         );
       }
-      if (idProof.isNotEmpty) {
-        files.add(
-          MapEntry(
-            "id_proof",
-            await MultipartFile.fromFile(
-              idProof,
-              filename: fileNameFromPath(idProof),
+      if (data.idProof.isNotEmpty) {
+        for (var idProofFile in data.idProof) {
+          files.add(
+            MapEntry(
+              "id_proof",
+              await MultipartFile.fromFile(
+                idProofFile.path,
+                filename: fileNameFromPath(idProofFile.path),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
-      if (certificates.isNotEmpty) {
-        files.add(
-          MapEntry(
-            "certificates",
-            await MultipartFile.fromFile(
-              certificates,
-              filename: fileNameFromPath(certificates),
+      if (data.certificates.isNotEmpty) {
+        for (var certificateFile in data.certificates) {
+          files.add(
+            MapEntry(
+              "certificates",
+              await MultipartFile.fromFile(
+                certificateFile.path,
+                filename: fileNameFromPath(certificateFile.path),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
 
       debugPrint("Form Map: $formMap");
-      FormData data = FormData.fromMap(formMap);
-      // Add files to FormData
+      FormData formData = FormData.fromMap(formMap);
       for (var fileEntry in files) {
-        data.files.add(fileEntry);
+        formData.files.add(fileEntry);
       }
-      final response = await dio.post(url, data: data);
+      final response = await dio.post(url, data: formData);
       debugPrint("Response Data: ${response.data}");
       debugPrint("Response Status Code: ${response.statusCode}");
       if (response.statusCode == 200) {
         debugPrint("Registration successful!");
         showToast("Registration successful!");
-        // Handle successful registration here
-        // You can add navigation or other success actions
+        Get.offAll(() => Home());
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
@@ -440,5 +626,80 @@ class RegistrationController extends GetxController {
       isLoading = false;
       update();
     }
+  }
+
+  Future<void> getRegistrationFee() async {
+    isLoading = true;
+    checkNetworkAndRedirectOffAll();
+    try {
+      String url = ApiConfigs.baseUrl + APIEndpoints.getRegistrationFee;
+      dio.options.queryParameters = {};
+      debugPrint("URL: $url");
+      debugPrint("Query Parameters: ${dio.options.queryParameters}");
+      final response = await dio.get(url);
+      debugPrint("Response: ${response.data}");
+      if (response.statusCode == 200) {
+        final fee = response.data['data']?['registration_fee'];
+        if (fee != null) {
+          registrationFee = (fee is num) ? fee.toDouble() : 0.0;
+        } else {
+          registrationFee = 0.0;
+        }
+        update();
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+      registrationFee = 0.0;
+      update();
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      registrationFee = 0.0;
+      update();
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> sendRegisterOtp({
+    required String mobile,
+    required String countryCode,
+    required RegistrationData registrationData,
+  }) async {
+    isLoading = true;
+    checkNetworkAndRedirectOffAll();
+    try {
+      String url = ApiConfigs.baseUrl + APIEndpoints.sendRegisterOtp;
+      dio.options.queryParameters = {};
+      debugPrint("URL: $url");
+      debugPrint("Query Parameters: ${dio.options.queryParameters}");
+      final response = await dio.post(
+        url,
+        data: {"country_code": countryCode, "mobile": mobile},
+      );
+      debugPrint(
+        "Data Sent: ${{"country_code": countryCode, "mobile": mobile}}",
+      );
+      debugPrint("Response: ${response.data}");
+      if (response.statusCode == 200) {
+        Get.to(() => OtpVerification(registrationData: registrationData));
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+    } finally {}
   }
 }

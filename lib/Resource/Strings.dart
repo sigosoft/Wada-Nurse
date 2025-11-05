@@ -3,8 +3,8 @@ class Strings {
   static const String enterYourPhoneNumber = "Enter your phone number";
   static const String dontHaveAnAccount = "Don’t have an account?  ";
   static const String signUp = "Sign Up";
-  static const String phoneNumber = "Phone Number";
-  static const String countryCode = "Country Code";
+  static const String phoneNumber = "Phone Number*";
+  static const String countryCode = "Country Code*";
   static const String next = "Next";
   static const String password = "Password";
   static const String forgotPassword = "Forgot Password?";
@@ -26,15 +26,15 @@ class Strings {
   static const String createAccount = "Create an account to continue!  ";
   static const String fullName = "Full Name*";
   static const String email = "Email*";
-  static const String dob = "Date of Birth";
-  static const String gender = "Gender";
+  static const String dob = "Date of Birth*";
+  static const String gender = "Gender*";
   static const String referralCode = "Referral Code";
   static const String agreeWith = "I agree with ";
   static const String termsAndConditions = "Terms & Conditions";
   static const String and = " and ";
   static const String privacyPolicy = "Privacy Policy";
-  static const String qualification = "Qualification*";
-  static const String language = "Language";
+  static const String qualification = "Qualification";
+  static const String language = "Language*";
   static const String confirmNewPassword = "Confirm New Password";
   static const String uploadMedicalRecords = "Upload Medical Records";
   static const String idProof = "ID Proof";
@@ -187,4 +187,12 @@ class Strings {
   static const String gallery = "Gallery";
   static const String selectPhotoFrom = "Select photo from :";
   static const String camera = "Camera";
+  static const String fullNameIsRequired = "Full Name is required";
+  static const String phoneNumberIsRequired = "Phone Number is required";
+  static const String emailIsRequired = "Email is required";
+  static const String dateOfBirthIsRequired = "Date of Birth is required";
+  static const String genderIsRequired = "Gender is required";
+  static const String qualificationIsRequired = "Qualification is required";
+  static const String languageIsRequired = "Language is required";
+  static const String countryCodeIsRequired = "Country Code is required";
 }

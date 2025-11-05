@@ -10,50 +10,45 @@ class ProfilePhotoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final mediaSize = media.size;
+    final devicePixelRatio = media.devicePixelRatio;
+    final width = image != null ? mediaSize.width * 0.30 : mediaSize.width * 0.17;
+    final height = image != null ? mediaSize.height * 0.15 : mediaSize.height * 0.08;
+    
     return SizedBox(
-      width:
-          image != null
-              ? MediaQuery.of(context).size.width * 0.30
-              : MediaQuery.of(context).size.width * 0.17,
-      height:
-          image != null
-              ? MediaQuery.of(context).size.height * 0.15
-              : MediaQuery.of(context).size.height * 0.08,
+      width: width,
+      height: height,
       child: InkWell(
         onTap: onTap,
         child: Stack(
           children: [
             Container(
-              width:
-                  image != null
-                      ? MediaQuery.of(context).size.width * 0.30
-                      : MediaQuery.of(context).size.width * 0.17,
-              height:
-                  image != null
-                      ? MediaQuery.of(context).size.height * 0.15
-                      : MediaQuery.of(context).size.height * 0.08,
+              width: width,
+              height: height,
               decoration: BoxDecoration(
                 border: Border.all(color: profilePicColor, width: 4),
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
-              child:
-                  image != null
-                      ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(image!),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      )
-                      : Center(
-                        child: SvgPicture.asset(
-                          "lib/Assets/Images/profilePicIcon.svg",
-                          fit: BoxFit.scaleDown,
-                        ),
+              child: image != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(image!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        cacheWidth: (width * devicePixelRatio).round(),
+                        cacheHeight: (height * devicePixelRatio).round(),
                       ),
+                    )
+                  : Center(
+                      child: SvgPicture.asset(
+                        "lib/Assets/Images/profilePicIcon.svg",
+                        fit: BoxFit.scaleDown,
+                      ),
+                    ),
             ),
             Positioned(
               bottom: 0,

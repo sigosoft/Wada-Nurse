@@ -20,11 +20,12 @@ class PasswordTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height * 0.06;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Container(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.06,
+        height: height,
         decoration: BoxDecoration(
           color: greyBg,
           borderRadius: BorderRadius.circular(10),

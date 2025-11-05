@@ -1,15 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 
 class UploadedFilesListView extends StatelessWidget {
-  final List<String> uploadedFiles = [
-    'lib/Assets/Images/uploadedImageDummy.png',
-  ];
+  final List<XFile> uploadedFiles;
+  final Function(int) onRemove;
+  const UploadedFilesListView({
+    super.key,
+    required this.uploadedFiles,
+    required this.onRemove,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110, // Provide a fixed height
+      height: 100,
       child: ListView.builder(
         itemCount: uploadedFiles.length,
         scrollDirection: Axis.horizontal,
@@ -23,7 +30,7 @@ class UploadedFilesListView extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   image: DecorationImage(
-                    image: AssetImage(uploadedFiles[index]),
+                    image: FileImage(File(uploadedFiles[index].path)),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -33,7 +40,7 @@ class UploadedFilesListView extends StatelessWidget {
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    // Handle close button action
+                    onRemove(index);
                   },
                   child: Container(
                     width: 22,
@@ -42,11 +49,7 @@ class UploadedFilesListView extends StatelessWidget {
                       color: blackTextColor,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 14,
-                    ),
+                    child: Icon(Icons.close, color: Colors.white, size: 14),
                   ),
                 ),
               ),

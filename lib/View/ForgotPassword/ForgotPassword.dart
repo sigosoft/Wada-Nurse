@@ -6,6 +6,7 @@ import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/OtpVerification/Otpverification.dart';
 import 'package:waaada_nurseapp/Widget/AppbarWithoutElevation.dart';
 import 'package:waaada_nurseapp/Widget/CountryCodeAndPhoneNumber.dart';
+import 'package:waaada_nurseapp/Model/CountryCodeModel.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 
@@ -49,17 +50,21 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     ),
                     SizedBox(height: 20),
                     CountryCodeAndPhoneNUmber(
+                      validatorText: "Phone Number is required",
                       controller: TextEditingController(),
                       name: Strings.phoneNumber,
-                      countrycodes: ['+91', '+1', '+44', '+61'],
+                      countrycodes: [
+                        CountryCode(id: 1, countryCode: '+91'),
+                        CountryCode(id: 2, countryCode: '+1'),
+                        CountryCode(id: 3, countryCode: '+44'),
+                        CountryCode(id: 4, countryCode: '+61'),
+                      ],
                     ),
                     SizedBox(height: 20),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
                       child: SubmitButtonWidget(
-                        onTap: () {
-                          Get.off(OtpVerification());
-                        },
+                        onTap: () {},
                         text: Strings.submit,
                       ),
                     ),

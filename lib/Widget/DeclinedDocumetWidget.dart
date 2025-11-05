@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
@@ -7,9 +8,7 @@ import 'package:waaada_nurseapp/Widget/UploadRecordWidget.dart';
 import 'package:waaada_nurseapp/Widget/UploadedFilesListView.dart';
 
 class DeclinedDocumentWidget extends StatelessWidget {
-  const DeclinedDocumentWidget({
-    super.key,
-  });
+  const DeclinedDocumentWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +40,10 @@ class DeclinedDocumentWidget extends StatelessWidget {
             ],
           ),
           SizedBox(height: 30),
-          UploadedFilesListView(),
+          UploadedFilesListView(
+            uploadedFiles: List<XFile>.empty(),
+            onRemove: (index) {},
+          ),
           SizedBox(height: 10),
           TextStyleInterWithPadding(
             text: Strings.reUpload,
@@ -58,14 +60,15 @@ class DeclinedDocumentWidget extends StatelessWidget {
           SizedBox(height: 10),
           UploadRecordWidget(),
           SizedBox(height: 20),
-          UploadedFilesListView(),
+          UploadedFilesListView(
+            uploadedFiles: List<XFile>.empty(),
+            onRemove: (index) {},
+          ),
           SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SubmitButtonWidget(
-              text: Strings.submit,
-            ),
-          )
+            child: SubmitButtonWidget(text: Strings.submit),
+          ),
         ],
       ),
     );

@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 
-
 class PinPutWidget extends StatelessWidget {
+  final int length;
+  final Function(String) onCompleted;
   const PinPutWidget({
+    required this.length,
+    required this.onCompleted,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal:10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Center(
         child: Pinput(
-          length: 6,
+          length: length,
           defaultPinTheme: PinTheme(
             width: 50,
             height: 50,
@@ -28,6 +31,7 @@ class PinPutWidget extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          onCompleted: onCompleted,
         ),
       ),
     );

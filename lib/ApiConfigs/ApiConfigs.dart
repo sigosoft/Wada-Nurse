@@ -11,4 +11,6 @@ class APIEndpoints {
   static const String getCountryCodes = "getCountryCodes";
   static const String getLanguages = "getLanguages";
   static const String register = "register";
+  static const String getRegistrationFee = "reg_fee";
+  static const String sendRegisterOtp = "send_reg_otp";
 }

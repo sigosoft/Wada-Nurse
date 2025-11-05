@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/LoginController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
@@ -8,6 +6,7 @@ import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/ForgotPassword/ForgotPassword.dart';
 import 'package:waaada_nurseapp/View/Register/Registration.dart';
 import 'package:waaada_nurseapp/Widget/CountryCodeAndPhoneNumber.dart';
+import 'package:waaada_nurseapp/Model/CountryCodeModel.dart';
 import 'package:waaada_nurseapp/Widget/PasswordTextField.dart';
 import 'package:waaada_nurseapp/Widget/RichTextWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
@@ -52,9 +51,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     SizedBox(height: 20),
                     CountryCodeAndPhoneNUmber(
+                      validatorText: "Phone Number is required",
                       controller: TextEditingController(),
                       name: Strings.phoneNumber,
-                      countrycodes: ['+91', '+1', '+44', '+61'],
+                      countrycodes: [
+                        CountryCode(id: 1, countryCode: '+91'),
+                        CountryCode(id: 2, countryCode: '+1'),
+                        CountryCode(id: 3, countryCode: '+44'),
+                        CountryCode(id: 4, countryCode: '+61'),
+                      ],
                     ),
                     SizedBox(height: 20),
                     PasswordTextField(
