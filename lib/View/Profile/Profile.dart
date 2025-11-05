@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:waaada_nurseapp/ApiConfigs/ApiConfigs.dart';
 import 'package:waaada_nurseapp/Controller/ProfileController.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/View/ChangePassword/ChangePassword.dart';
@@ -19,9 +20,6 @@ import 'package:waaada_nurseapp/Widget/ProfileRowWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 
 import '../../Resource/Colors.dart';
-
-
-
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -45,6 +43,11 @@ class _ProfileState extends State<Profile> {
           width: MediaQuery.of(context).size.width,
           child: GetBuilder(
             init: ProfileController(),
+            didChangeDependencies: (state){
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                state.controller?.getProfile();
+              });
+            },
             builder:
                 (controller) => Column(
               children: [
@@ -53,6 +56,10 @@ class _ProfileState extends State<Profile> {
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: DoctorDetailsWidget(
                     premiumMembership: controller.premiumMembership,
+                  name: controller.name,
+                    mobile: controller.mobile,
+                    salaried_or_not: controller.salaried_or_not,
+                  image: ApiConfigs.Image_URL+ controller.image.toString(),
                   onTapEdit: (){
                       Get.to(EditProfile());
                   },

@@ -9,10 +9,18 @@ import '../../Resource/Colors.dart' show blackTextColor2, boxGradient, colorPrim
 class DoctorDetailsWidget extends StatelessWidget {
   final dynamic premiumMembership;
   final dynamic onTapEdit;
+  final dynamic name;
+  final dynamic mobile;
+  final dynamic salaried_or_not;
+  final dynamic image;
 
   const DoctorDetailsWidget({
     super.key,this.onTapEdit,
     this.premiumMembership = false,
+    this.name,
+    this.mobile,
+    this.salaried_or_not,
+    this.image
   });
 
   @override
@@ -26,65 +34,67 @@ class DoctorDetailsWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              flex: 1,
+              child: CustomClipRRect(
+                borderRadius: 60,
+                imagePath:
+                image,
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomClipRRect(
-                    borderRadius: 60,
-                    imagePath:
-                    "lib/Assets/Images/profileImageDummy.png",
+                  TextStyleInterWithPadding(
+                    text: name.toString(),
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    size: 18.00,
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextStyleInterWithPadding(
-                        text: "John Jacob",
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        size: 18.00,
-                      ),
-                      const SizedBox(height: 5),
-                      TextStyleInterWithPadding(
-                        text: "+91 987654321",
-                        color: grayText,
-                        fontWeight: FontWeight.w400,
-                        size: 12.00,
-                      ),
-                      const SizedBox(height: 5),
-                      InkWell(
-                        onTap: () {
-
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: Row(
-                            children: [
-                              TextStyleInterWithoutPadding(
-                                text: "Salaried Employee",
-                                color: grayText,
-                                fontWeight: FontWeight.w500,
-                                size: 12.00,
-                              ),
-                              SizedBox(width: MediaQuery.of(context).size.width * 0.13),
-                              InkWell(
-                                onTap: onTapEdit,
-                                child: TextStyleInterWithoutPadding(
-                                  text: "Edit Profile >",
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                  size: 12.00,
-                                ),
-                              ),
-                            ],
+                  const SizedBox(height: 5),
+                  TextStyleInterWithPadding(
+                    text: mobile.toString(),
+                    color: grayText,
+                    fontWeight: FontWeight.w400,
+                    size: 12.00,
+                  ),
+                  const SizedBox(height: 5),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextStyleInterWithoutPadding(
+                            text: "Salaried Employee",
+                            color: grayText,
+                            fontWeight: FontWeight.w500,
+                            size: 12.00,
                           ),
                         ),
-                      ),
-                    ],
+
+                        Expanded(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: onTapEdit,
+                            child: TextStyleInterWithoutPadding(
+                              text: "Edit Profile >",
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                              size: 12.00,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
