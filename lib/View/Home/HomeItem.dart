@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:waaada_nurseapp/Controller/ProfileController.dart';
 import 'package:waaada_nurseapp/Widget/NurseShiftItem.dart';
 
 import '../../Controller/HomeController.dart';
@@ -15,6 +18,7 @@ class HomeItem extends StatefulWidget {
 }
 
 class _HomeItemState extends State<HomeItem> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,6 +28,9 @@ class _HomeItemState extends State<HomeItem> {
         child: SingleChildScrollView(
           child: GetBuilder(
             init: HomeController(),
+            didChangeDependencies: (state){
+
+            },
             builder:
                 (controller) => Container(
                   margin: EdgeInsets.all(15),

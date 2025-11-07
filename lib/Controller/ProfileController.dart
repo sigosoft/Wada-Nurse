@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,9 +8,23 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 
+import '../ApiConfigs/ApiConfigs.dart';
+import '../Model/ProfileModel.dart';
 import '../Resource/Colors.dart';
+import '../Utils/CheckNetworkConnectivity.dart';
+import '../Utils/HandleDioExceptions.dart';
+import '../Utils/utils.dart';
 
 class ProfileController extends GetxController {
+  bool premiumMembership = true;
+  bool isLoading = false;
+  final Dio dio = Dio();
+  ProfileModel? profileModel;
+  String? name;
+  String? mobile;
+  String? salaried_or_not;
+  String? image;
+
   @override
   void onInit() {
     super.onInit();
@@ -22,10 +37,51 @@ class ProfileController extends GetxController {
     super.onClose();
   }
 
-  bool premiumMembership = true;
+  Future<void> getProfile() async {
+    isLoading = true;
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.home;
+      dio.options.headers["Authorization"] =
+          "Bearer 33|IrTZU8osKQ8Nb3LfQRnErkZtFkIjrDZpqDj1Brsmd73c40b6";
+      final response = await dio.get(url);
+      debugPrint("Response: ${response.data}");
+      if (response.statusCode == 200) {
+        profileModel = ProfileModel.fromJson(response.data);
+        name = profileModel?.data.nurse.location;
+        mobile =
+            profileModel!.data.nurse.countryCode.toString() +
+            " " +
+            profileModel!.data.nurse.mobile.toString();
+        salaried_or_not = profileModel?.data.nurse.location;
+        image =
+            ApiConfigs.Image_URL +
+            profileModel!.data.nurse.image.toString();
+        update();
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
 
-
-  void showCustomPopup(BuildContext context, String imagePath, String qrCodeId) {
+  void showCustomPopup(
+    BuildContext context,
+    String imagePath,
+    String qrCodeId,
+  ) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -69,8 +125,6 @@ class ProfileController extends GetxController {
       },
     );
   }
-
-
 
   void showLogoutShiftBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -143,9 +197,7 @@ class ProfileController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-            
-                          },
+                          onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
                             shape: RoundedRectangleBorder(
@@ -163,8 +215,6 @@ class ProfileController extends GetxController {
                         ),
                       ),
                     ),
-            
-            
                   ],
                 ),
                 SizedBox(height: 20),
@@ -175,8 +225,6 @@ class ProfileController extends GetxController {
       },
     );
   }
-
-
 
   void showDeleteAccountBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -258,9 +306,7 @@ class ProfileController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-
-                          },
+                          onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: redColorText2,
                             shape: RoundedRectangleBorder(
@@ -278,8 +324,6 @@ class ProfileController extends GetxController {
                         ),
                       ),
                     ),
-
-
                   ],
                 ),
                 SizedBox(height: 20),

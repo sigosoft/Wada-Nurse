@@ -3,7 +3,7 @@
 class ApiConfigs {
   static String baseUrl =
       "https://thewada.com/wada-backend/public/api/nurse/";
-      // static String Image_URL ="https://ourworks.co.in/airotrack-new/public/storage/";
+     static String Image_URL ="https://thewada.com/wada-backend/public/storage/";
 }
 
 
@@ -13,4 +13,5 @@ class APIEndpoints {
   static const String register = "register";
   static const String getRegistrationFee = "reg_fee";
   static const String sendRegisterOtp = "send_reg_otp";
+  static const String home = "home";
 }
