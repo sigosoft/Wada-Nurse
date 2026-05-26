@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:waaada_nurseapp/Utils/LoggingInterceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get/route_manager.dart';
@@ -19,8 +21,9 @@ import 'package:waaada_nurseapp/View/OtpVerification/Otpverification.dart';
 import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
 import 'package:waaada_nurseapp/View/Register/Widgets/ChooseImageWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
+import 'package:waaada_nurseapp/View/Login/Login.dart';
 
-Future<List<CountryCode>> _fetchCountryCodesInIsolate(String url) async {
+Future<List<CountryCode>> fetchCountryCodesInIsolate(String url) async {
   try {
     final dio = Dio();
     final response = await dio.get(url);
@@ -91,7 +94,7 @@ class RegistrationController extends GetxController {
   XFile? selectedImage;
   String? pickedImage;
   final ImagePicker imagePicker = ImagePicker();
-  final Dio dio = Dio();
+  final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
   bool isLoading = false;
   List<CountryCode> countryCodes = [];
   int? selectedCountryCodeId;
@@ -102,6 +105,7 @@ class RegistrationController extends GetxController {
   List<XFile> certificatesImages = [];
   String? otp;
   double registrationFee = 0.0;
+  TextEditingController expectedSalaryController = TextEditingController();
   // variables should not be declared below this line
 
   void onDateSelected(DateTime? date) {
@@ -156,6 +160,15 @@ class RegistrationController extends GetxController {
 
   Future<void> openCamera({bool? isIdProof, bool? isCertificates}) async {
     try {
+      cameraStatus = await Permission.camera.status;
+      if (cameraStatus.isPermanentlyDenied) {
+        showToast(
+          "Camera permission is permanently denied. Please enable it from app settings.",
+          isError: true,
+        );
+        await openAppSettings();
+        return;
+      }
       cameraStatus = await Permission.camera.request();
       if (cameraStatus == PermissionStatus.granted) {
         final XFile? image = await imagePicker.pickImage(
@@ -184,8 +197,17 @@ class RegistrationController extends GetxController {
           pickedImage = image.path;
           update();
         }
+      } else if (cameraStatus.isPermanentlyDenied) {
+        showToast(
+          "Camera permission is permanently denied. Please enable it from app settings.",
+          isError: true,
+        );
+        await openAppSettings();
       } else {
-        showToast("Camera permission is required to capture photos");
+        showToast(
+          "Camera permission is required to capture photos",
+          isError: true,
+        );
       }
     } catch (e) {
       debugPrint("Error capturing image: $e");
@@ -195,47 +217,42 @@ class RegistrationController extends GetxController {
 
   Future<bool> requestStoragePermission() async {
     try {
-      Permission permission = Permission.photos;
-      PermissionStatus status = await permission.status;
-      if (status.isGranted) {
-        photosStatus = PermissionStatus.granted;
-        return true;
-      }
-      if (status.isPermanentlyDenied) {
-        showToast(
-          "Storage permission is permanently denied. Please enable it from app settings.",
-          isError: true,
-        );
-        await openAppSettings();
-        return false;
-      }
-      photosStatus = await permission.request();
-      if (photosStatus.isGranted) {
-        return true;
-      } else if (photosStatus.isPermanentlyDenied) {
-        showToast(
-          "Storage permission is permanently denied. Please enable it from app settings.",
-          isError: true,
-        );
-        await openAppSettings();
-        return false;
-      } else {
-        showToast(
-          "Permission is required to access photos from gallery",
-          isError: true,
-        );
-        return false;
-      }
-    } catch (e) {
-      debugPrint("Error requesting storage permission: $e");
-      try {
+      if (Platform.isAndroid) {
+        int sdkVersion = 0;
+        try {
+          final match = RegExp(
+            r'SDK\s+(\d+)',
+          ).firstMatch(Platform.operatingSystemVersion);
+          if (match != null) {
+            sdkVersion = int.parse(match.group(1)!);
+          }
+        } catch (e) {
+          debugPrint("Error parsing SDK version: $e");
+        }
+
+        // Android 13+ (API 33+) does not require storage permissions for image picker.
+        if (sdkVersion >= 33) {
+          return true;
+        }
+
+        // For Android 12 and below, request storage permission
+        PermissionStatus status = await Permission.storage.status;
+        if (status.isGranted || status.isLimited) {
+          photosStatus = status;
+          return true;
+        }
+        if (status.isPermanentlyDenied) {
+          showToast(
+            "Storage permission is permanently denied. Please enable it from app settings.",
+            isError: true,
+          );
+          await openAppSettings();
+          return false;
+        }
         photosStatus = await Permission.storage.request();
-        if (photosStatus.isGranted) {
+        if (photosStatus.isGranted || photosStatus.isLimited) {
           return true;
         } else if (photosStatus.isPermanentlyDenied) {
-          debugPrint(
-            "Storage permission is permanently denied. Please enable it from app settings.",
-          );
           showToast(
             "Storage permission is permanently denied. Please enable it from app settings.",
             isError: true,
@@ -249,9 +266,12 @@ class RegistrationController extends GetxController {
           );
           return false;
         }
-      } catch (e2) {
-        debugPrint("Error requesting storage permission fallback: $e2");
       }
+
+      // iOS and other platforms do not require runtime storage permission for image picker.
+      return true;
+    } catch (e) {
+      debugPrint("Error requesting storage permission: $e");
       showToast(
         "Failed to request storage permission: ${e.toString()}",
         isError: true,
@@ -305,13 +325,36 @@ class RegistrationController extends GetxController {
     }
   }
 
-  showImageOptions(
+  Future<void> showImageOptions(
     BuildContext context, {
     XFile? image,
     bool? isIdProof,
     bool? isCertificates,
     List<XFile>? imagesList,
-  }) {
+  }) async {
+    // Request camera permission
+    await Permission.camera.request();
+
+    // Request gallery/storage permission only for Android < 13
+    if (Platform.isAndroid) {
+      int sdkVersion = 0;
+      try {
+        final match = RegExp(
+          r'SDK\s+(\d+)',
+        ).firstMatch(Platform.operatingSystemVersion);
+        if (match != null) {
+          sdkVersion = int.parse(match.group(1)!);
+        }
+      } catch (e) {
+        debugPrint("Error parsing SDK version: $e");
+      }
+      if (sdkVersion > 0 && sdkVersion < 33) {
+        await Permission.storage.request();
+      }
+    }
+
+    if (!context.mounted) return;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -377,8 +420,17 @@ class RegistrationController extends GetxController {
     checkNetworkAndRedirectOffAll();
     try {
       String url = ApiConfigs.baseUrl + APIEndpoints.getCountryCodes;
+      debugPrint("=== HTTP REQUEST (Isolate) ===");
       debugPrint("URL: $url");
-      countryCodes = await compute(_fetchCountryCodesInIsolate, url);
+      debugPrint("Method: GET");
+      debugPrint("====================\n");
+      countryCodes = await compute(fetchCountryCodesInIsolate, url);
+      debugPrint("=== HTTP RESPONSE (Isolate) ===");
+      debugPrint("URL: $url");
+      debugPrint(
+        "Response Body: ${countryCodes.map((e) => e.toJson()).toList()}",
+      );
+      debugPrint("=====================\n");
       if (countryCodes.isEmpty) {
         debugPrint("No country codes retrieved from API");
       } else {
@@ -482,6 +534,24 @@ class RegistrationController extends GetxController {
       showToast("Please upload a profile photo", isError: true);
       return false;
     }
+    List<String> languageIds = [];
+    if (this.languages?.data?.languages != null) {
+      for (var name in languages) {
+        for (var lang in this.languages!.data!.languages!) {
+          if (lang.language?.toLowerCase().trim() ==
+              name.toLowerCase().trim()) {
+            if (lang.id != null) {
+              languageIds.add(lang.id.toString());
+            }
+            break;
+          }
+        }
+      }
+    }
+    if (languageIds.isEmpty && languages.isNotEmpty) {
+      languageIds = languages;
+    }
+
     Get.to(
       () => DocumentationUploadScreen(
         image: XFile(image),
@@ -492,7 +562,7 @@ class RegistrationController extends GetxController {
         dateOfBirth: dob,
         gender: gender,
         qualification: qualification,
-        languages: languages,
+        languages: languageIds,
         password: password,
         confirmPassword: passwordConfirmation,
         otp: otp.toString(),
@@ -537,7 +607,6 @@ class RegistrationController extends GetxController {
     checkNetworkAndRedirectOffAll();
     try {
       String url = ApiConfigs.baseUrl + APIEndpoints.register;
-      debugPrint("URL: $url");
       String fileNameFromPath(String path) {
         if (path.isEmpty) return "";
         var normalized = path.replaceAll('\\\\', '/');
@@ -555,9 +624,10 @@ class RegistrationController extends GetxController {
         "qualification": data.qualification,
         "password": data.password,
         "password_confirmation": data.passwordConfirmation,
-        "languages": data.languages,
+        "languages": "[${data.languages.join(',')}]",
         "salary_type": data.salaryType == "Salaried Employee" ? "1" : "2",
-        "otp": data.otp,
+        "salary": data.salary,
+        "otp": otp ?? data.otp,
       };
       List<MapEntry<String, MultipartFile>> files = [];
       if (data.imagePath.isNotEmpty) {
@@ -588,7 +658,7 @@ class RegistrationController extends GetxController {
         for (var certificateFile in data.certificates) {
           files.add(
             MapEntry(
-              "certificates",
+              "certificates[]",
               await MultipartFile.fromFile(
                 certificateFile.path,
                 filename: fileNameFromPath(certificateFile.path),
@@ -598,18 +668,33 @@ class RegistrationController extends GetxController {
         }
       }
 
+      debugPrint("=== API REQUEST: register ===");
+      debugPrint("URL: $url");
+      debugPrint("Method: POST");
       debugPrint("Form Map: $formMap");
+      debugPrint("Files: ${files.map((e) => e.key).toList()}");
+      debugPrint("=============================");
+
       FormData formData = FormData.fromMap(formMap);
       for (var fileEntry in files) {
         formData.files.add(fileEntry);
       }
       final response = await dio.post(url, data: formData);
-      debugPrint("Response Data: ${response.data}");
-      debugPrint("Response Status Code: ${response.statusCode}");
+
+      debugPrint("=== API RESPONSE: register ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("==============================");
+
       if (response.statusCode == 200) {
-        debugPrint("Registration successful!");
-        showToast("Registration successful!");
-        Get.offAll(() => Home());
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          debugPrint("Registration successful!");
+          showToast(resData['message'] ?? "Registration successful!");
+          Get.offAll(() => const LoginScreen());
+        } else {
+          showToast(resData['message'] ?? "Registration failed", isError: true);
+        }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
@@ -677,16 +762,29 @@ class RegistrationController extends GetxController {
     try {
       String url = ApiConfigs.baseUrl + APIEndpoints.sendRegisterOtp;
       dio.options.queryParameters = {};
+
+      final String token =
+          dio.options.headers['Authorization']?.toString() ?? 'No Token';
+      final Map<String, dynamic> requestBody = {
+        "country_code": countryCode,
+        "mobile": mobile,
+      };
+
+      debugPrint("=== API REQUEST: send_reg_otp ===");
       debugPrint("URL: $url");
-      debugPrint("Query Parameters: ${dio.options.queryParameters}");
-      final response = await dio.post(
-        url,
-        data: {"country_code": countryCode, "mobile": mobile},
-      );
-      debugPrint(
-        "Data Sent: ${{"country_code": countryCode, "mobile": mobile}}",
-      );
-      debugPrint("Response: ${response.data}");
+      debugPrint("Method: POST");
+      debugPrint("Token: $token");
+      debugPrint("Headers: ${dio.options.headers}");
+      debugPrint("Request Body: $requestBody");
+      debugPrint("=================================");
+
+      final response = await dio.post(url, data: requestBody);
+
+      debugPrint("=== API RESPONSE: send_reg_otp ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("==================================");
+
       if (response.statusCode == 200) {
         Get.to(() => OtpVerification(registrationData: registrationData));
       } else {
@@ -700,6 +798,9 @@ class RegistrationController extends GetxController {
       }
     } catch (e) {
       debugPrint("Unexpected Error: $e");
-    } finally {}
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 }

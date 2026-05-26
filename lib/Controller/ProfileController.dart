@@ -13,12 +13,14 @@ import '../Model/ProfileModel.dart';
 import '../Resource/Colors.dart';
 import '../Utils/CheckNetworkConnectivity.dart';
 import '../Utils/HandleDioExceptions.dart';
+import '../Utils/LoggingInterceptor.dart';
 import '../Utils/utils.dart';
+import '../View/Login/Login.dart';
 
 class ProfileController extends GetxController {
   bool premiumMembership = true;
   bool isLoading = false;
-  final Dio dio = Dio();
+  final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
   ProfileModel? profileModel;
   String? name;
   String? mobile;
@@ -197,7 +199,10 @@ class ProfileController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            await removename("token");
+                            Get.offAll(() => const LoginScreen());
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
                             shape: RoundedRectangleBorder(

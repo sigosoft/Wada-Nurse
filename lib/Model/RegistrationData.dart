@@ -15,6 +15,7 @@ class RegistrationData {
   final List<XFile> idProof;
   final List<XFile> certificates;
   final String salaryType;
+  final String salary;
   final String otp;
 
   RegistrationData({
@@ -32,6 +33,7 @@ class RegistrationData {
     required this.idProof,
     required this.certificates,
     required this.salaryType,
+    required this.salary,
     required this.otp,
   });
 
@@ -48,11 +50,10 @@ class RegistrationData {
   String get imagePath => image.path;
 
   // Helper method to get first idProof path (if needed)
-  String? get firstIdProofPath => idProof.isNotEmpty ? idProof.first.path : null;
+  String? get firstIdProofPath =>
+      idProof.isNotEmpty ? idProof.first.path : null;
 
   // Helper method to get first certificate path (if needed)
-  String? get firstCertificatePath => certificates.isNotEmpty ? certificates.first.path : null;
+  String? get firstCertificatePath =>
+      certificates.isNotEmpty ? certificates.first.path : null;
 }
-
-
-

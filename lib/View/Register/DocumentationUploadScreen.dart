@@ -14,6 +14,8 @@ import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 import 'package:waaada_nurseapp/Widget/UploadRecordWidget.dart';
 import 'package:waaada_nurseapp/Widget/UploadedFilesListView.dart';
+import 'package:waaada_nurseapp/Widget/TextInputWidget.dart';
+import 'package:waaada_nurseapp/Utils/ShowToast.dart';
 
 class DocumentationUploadScreen extends StatefulWidget {
   const DocumentationUploadScreen({
@@ -156,7 +158,7 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                       },
                     ),
                     SizedBox(height: 15),
-                    CustomRadioTile(
+                     CustomRadioTile(
                       label: Strings.perDayCharge,
                       value: Strings.perDayCharge,
                       groupValue: controller.selectedType,
@@ -165,6 +167,21 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                         debugPrint("selectedType: ${controller.selectedType}");
                         controller.update();
                       },
+                    ),
+                    SizedBox(height: 20),
+                    TextStyleInterWithPadding(
+                      text: "Expected Salary",
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                      size: 16.0,
+                    ),
+                    SizedBox(height: 10),
+                    TextInputWidget(
+                      controller: controller.expectedSalaryController,
+                      label: "Enter Expected Salary*",
+                      type: TextInputType.number,
+                      height: 50,
+                      validatorText: "Expected salary is required",
                     ),
                     SizedBox(height: 20),
                     Row(
@@ -214,6 +231,11 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                             return;
                           }
 
+                          if (controller.expectedSalaryController.text.trim().isEmpty) {
+                            showToast("Expected salary is required", isError: true);
+                            return;
+                          }
+
                           // Validate privacy policy checkbox
                           if (!_isTermsChecked) {
                             setState(() {
@@ -236,14 +258,15 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                             idProof: controller.idProofImages,
                             certificates: controller.certificatesImages,
                             salaryType: controller.selectedType,
+                            salary: controller.expectedSalaryController.text.trim(),
                             otp: widget.otp,
                           );
                           controller.validateRegister(registrationData);
                         },
                         text:
                             controller.registrationFee > 0
-                                ? "₹${controller.registrationFee.toStringAsFixed(0)}"
-                                : "₹0",
+                                ? "Pay ₹${controller.registrationFee.toStringAsFixed(0)}"
+                                : "Pay ₹0",
                       ),
                     ),
                     SizedBox(height: 15),

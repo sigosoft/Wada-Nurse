@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:waaada_nurseapp/Resource/colors.dart';
 
 void showToast(
@@ -21,17 +21,13 @@ void showToast(
       ),
     );
   } else {
-    Get.snackbar(
-      isError ? 'Error' : 'Message',
-      message,
-      snackPosition: SnackPosition.TOP,
-      duration: duration ?? const Duration(seconds: 3),
-      backgroundColor: isError ? Colors.red : colorPrimary,
-      colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
-      isDismissible: true,
-      dismissDirection: DismissDirection.horizontal,
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: isError ? Colors.red : Colors.black,
+      textColor: Colors.white,
+      fontSize: 16.0,
     );
   }
 }

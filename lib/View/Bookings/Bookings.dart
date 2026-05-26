@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import '../../Controller/BookingsController.dart';
 import '../../Resource/Colors.dart';
 import '../../Resource/Strings.dart';
 import '../../Widget/CustomAppBar.dart';
@@ -16,7 +17,9 @@ class Bookings extends StatefulWidget {
 
 class _BookingsState extends State<Bookings>
     with SingleTickerProviderStateMixin {
+  final BookingsController controller = Get.put(BookingsController());
   late TabController _tabController;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -24,6 +27,21 @@ class _BookingsState extends State<Bookings>
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       setState(() {}); // Rebuild UI when tab changes
+      if (_tabController.index == 0) {
+        controller.getBookingRequests();
+      } else if (_tabController.index == 1) {
+        controller.getPendingBookings();
+      } else if (_tabController.index == 2) {
+        controller.getOngoingBookings();
+      } else if (_tabController.index == 3) {
+        controller.getCompletedBookings();
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isInitialized) {
+        _isInitialized = true;
+        controller.getBookingRequests();
+      }
     });
   }
 
@@ -56,12 +74,15 @@ class _BookingsState extends State<Bookings>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                  scrollDirection:
+                      Axis.horizontal, // Enable horizontal scrolling
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(5, (index) {
                       return Container(
-                        margin: EdgeInsets.only(right: index < 4 ? 10 : 0), // Add space between buttons
+                        margin: EdgeInsets.only(
+                          right: index < 4 ? 10 : 0,
+                        ), // Add space between buttons
                         child: InkWell(
                           onTap: () {
                             _tabController.animateTo(index);
@@ -70,9 +91,10 @@ class _BookingsState extends State<Bookings>
                             height: 50,
                             width: 100, // Adjust width as needed
                             decoration: BoxDecoration(
-                              color: _tabController.index == index
-                                  ? colorPrimary
-                                  : inactiveTab,
+                              color:
+                                  _tabController.index == index
+                                      ? colorPrimary
+                                      : inactiveTab,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             alignment: Alignment.center,
@@ -83,11 +105,14 @@ class _BookingsState extends State<Bookings>
                                   ? Strings.upcoming
                                   : index == 2
                                   ? Strings.ongoing
-                                  : index == 3? Strings.completed:Strings.cancelled,
+                                  : index == 3
+                                  ? Strings.completed
+                                  : Strings.cancelled,
                               style: TextStyle(
-                                color: _tabController.index == index
-                                    ? Colors.white
-                                    : colorPrimaryDark,
+                                color:
+                                    _tabController.index == index
+                                        ? Colors.white
+                                        : colorPrimaryDark,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -101,19 +126,22 @@ class _BookingsState extends State<Bookings>
               ),
               Expanded(
                 child: NotificationListener<OverscrollIndicatorNotification>(
-                  onNotification: (OverscrollIndicatorNotification notification) {
+                  onNotification: (
+                    OverscrollIndicatorNotification notification,
+                  ) {
                     notification.disallowIndicator(); // Disable overscroll glow
                     return true;
                   },
                   child: TabBarView(
                     controller: _tabController,
-                    physics: NeverScrollableScrollPhysics(), // Disable swipe scrolling
+                    physics:
+                        NeverScrollableScrollPhysics(), // Disable swipe scrolling
                     children: [
-                      TabBarItem(index:0,bookingType: "requests",),
-                      TabBarItem(index:1,bookingType: "upcoming",),
-                      TabBarItem(index:2,bookingType: "ongoing",),
-                      TabBarItem(index:3,bookingType: "completed",),
-                      TabBarItem(index:4,bookingType: "cancelled",),
+                      TabBarItem(index: 0, bookingType: "requests"),
+                      TabBarItem(index: 1, bookingType: "upcoming"),
+                      TabBarItem(index: 2, bookingType: "ongoing"),
+                      TabBarItem(index: 3, bookingType: "completed"),
+                      TabBarItem(index: 4, bookingType: "cancelled"),
                     ],
                   ),
                 ),

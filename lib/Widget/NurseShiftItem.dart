@@ -13,17 +13,74 @@ import '../../Widget/HomeShiftCardWidget.dart';
 class NurseShiftItem extends StatelessWidget {
   final bool showLocationText;
   final String bookingType;
+  final dynamic request;
 
   const NurseShiftItem({
     super.key,
     this.showLocationText = false,
-    this.bookingType = ""
+    this.bookingType = "",
+    this.request,
   });
+
+  int calculateAge(String dobString) {
+    if (dobString.isEmpty) return 0;
+    try {
+      DateTime dob = DateTime.parse(dobString);
+      DateTime today = DateTime.now();
+      int age = today.year - dob.year;
+      if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String formatDate(String dateString) {
+    if (dateString.isEmpty) return "";
+    try {
+      DateTime date = DateTime.parse(dateString);
+      List<String> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return "${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}";
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  String formatTime(String timeString) {
+    if (timeString.isEmpty) return "";
+    try {
+      List<String> parts = timeString.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        int minute = int.parse(parts[1]);
+        String period = hour >= 12 ? "PM" : "AM";
+        int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+        return "${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period";
+      }
+      return timeString;
+    } catch (e) {
+      return timeString;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final patientName = request?['patient']?['name'] ?? request?['user']?['name'] ?? "Patient";
+    final dob = request?['patient']?['dob'] ?? request?['user']?['dob'] ?? "";
+    final age = calculateAge(dob);
+    final genderNum = request?['patient']?['gender'] ?? request?['user']?['gender'];
+    final gender = genderNum == 1 ? "M" : (genderNum == 2 ? "F" : "O");
+    final location = request?['location'] ?? "Raipur, Chhattisgarh"; // Fallback to रायपुर if null
+    final checkinDate = formatDate(request?['from_date'] ?? "");
+    final checkinTime = formatTime(request?['checkin_time'] ?? "");
+    final checkoutDate = formatDate(request?['to_date'] ?? "");
+    final checkoutTime = formatTime(request?['checkout_time'] ?? "");
+
     return InkWell(
       onTap: () {
-        Get.to(ShiftDetails(bookingType: bookingType));
+        Get.to(ShiftDetails(bookingType: bookingType, bookingId: request?['id'] ?? 0));
       },
       child: Container(
         height: showLocationText?MediaQuery.of(context).size.height * 0.3:bookingType=="upcoming"||bookingType=="ongoing"?MediaQuery.of(context).size.height * 0.35:MediaQuery.of(context).size.height * 0.28,
@@ -44,23 +101,23 @@ class NurseShiftItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "David Thomas",
+                      patientName,
                       style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
-                      "Age: 75 | Gender: M",
+                      "Age: $age | Gender: $gender",
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -70,9 +127,9 @@ class NurseShiftItem extends StatelessWidget {
                           width: 13,
                           height: 13,
                         ),
-                        SizedBox(width: 5),
+                        const SizedBox(width: 5),
                         Text(
-                          "Raipur, Chhattisgarh",
+                          location,
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -81,47 +138,47 @@ class NurseShiftItem extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   ]),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: HomeShiftCardWidget(
-                      date: "08 Feb 2025",
+                      date: checkinDate,
                       type: Strings.checkindate,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: HomeShiftCardWidget(
-                      date: "09:00 AM",
+                      date: checkinTime,
                       type: Strings.checkintime,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: HomeShiftCardWidget(
-                      date: "08 Feb 2025",
+                      date: checkoutDate,
                       type: Strings.checkoutdate,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: HomeShiftCardWidget(
-                      date: "09:00 AM",
+                      date: checkoutTime,
                       type: Strings.checkouttime,
                     ),
                   ),
                 ],
               ),
               showLocationText||bookingType=="upcoming"||bookingType=="ongoing"?
-              SizedBox(height: 8):SizedBox(),
+              const SizedBox(height: 8):const SizedBox(),
               showLocationText?
               Text(
                 "Waiting for location share",
@@ -130,7 +187,7 @@ class NurseShiftItem extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Colors.grey,
                 ),
-              ):SizedBox(),
+              ):const SizedBox(),
               bookingType=="upcoming"||bookingType=="ongoing"?
               SubmitButtonWidget(text: bookingType=="upcoming"?Strings.checkin:Strings.checkout,):Container()
             ],
@@ -140,4 +197,3 @@ class NurseShiftItem extends StatelessWidget {
     );
   }
 }
-

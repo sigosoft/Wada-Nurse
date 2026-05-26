@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/RegistrationController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
-import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
 import 'package:waaada_nurseapp/Widget/CountryCodeAndPhoneNumber.dart';
-import 'package:waaada_nurseapp/Model/CountryCodeModel.dart';
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 import 'package:waaada_nurseapp/Widget/DateofBirthField.dart';
 import 'package:waaada_nurseapp/Widget/GenderDropDownField.dart';
 import 'package:waaada_nurseapp/Widget/LanguageChip.dart';
-import 'package:waaada_nurseapp/Widget/LanguageDropDownWidget.dart';
-import 'package:waaada_nurseapp/Widget/PasswordTextField.dart';
 import 'package:waaada_nurseapp/Widget/ProfilePhotoWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextInputWidget.dart';
-import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -27,6 +20,21 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  final formKey = GlobalKey<FormState>();
+  final RegistrationController controller = Get.put(RegistrationController());
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isInitialized) {
+        _isInitialized = true;
+        controller.getCountryCodes();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,115 +45,109 @@ class _EditProfileState extends State<EditProfile> {
           Get.back();
         },
       ),
-      body: GetBuilder(
-        init: RegistrationController(),
+      body: GetBuilder<RegistrationController>(
+        init: controller,
         builder:
             (controller) => SingleChildScrollView(
               child: SafeArea(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 20),
-                      Center(child: ProfilePhotoWidget()),
-                      SizedBox(height: 20),
-                      TextInputWidget(
-                        label: Strings.fullName,
-                        type: TextInputType.text,
-                        height: 50,
-                      ),
-                      SizedBox(height: 15),
-                      CountryCodeAndPhoneNUmber(
-                        validatorText: "Phone Number is required",
-                        controller: TextEditingController(),
-                        name: Strings.phoneNumber,
-                        countrycodes: [
-                          CountryCode(id: 1, countryCode: '+91'),
-                          CountryCode(id: 2, countryCode: '+1'),
-                          CountryCode(id: 3, countryCode: '+44'),
-                          CountryCode(id: 4, countryCode: '+61'),
-                        ],
-                      ),
-                      SizedBox(height: 15),
-                      TextInputWidget(
-                        label: Strings.email,
-                        type: TextInputType.emailAddress,
-                        height: 50,
-                      ),
-                      SizedBox(height: 15),
-                      Row(
-                        children: [
-                          Expanded(child: DateOfBirthField()),
-                          Expanded(
-                            child: GenderDropdownField(name: Strings.gender),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 15),
-                      TextInputWidget(
-                        label: Strings.qualification,
-                        type: TextInputType.text,
-                        height: 50,
-                      ),
-                      SizedBox(height: 15),
-                      // LanguageDropDownWidget(
-                      //   selectedGender: controller.selectedGender,
-                      //   name: Strings.language,
-                      //   onChanged: (value) {
-                      //     setState(() {
-                      //       controller.selectedGender = value;
-                      //       if (!controller.selectedLanguages.contains(value)) {
-                      //         controller.selectedLanguages.add(value);
-                      //       }
-                      //     });
-                      //   },
-                      // ),
-                      SizedBox(
-                        height:
-                            controller.selectedLanguages.isNotEmpty ? 15 : 0,
-                      ),
-                      Visibility(
-                        visible: controller.selectedLanguages.isNotEmpty,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: SizedBox(
-                            height: 40,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: controller.selectedLanguages.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                    right: 8,
-                                  ), // spacing between chips
-                                  child: LanguageChip(
-                                    label: controller.selectedLanguages[index],
-                                    onDeleted: () {
-                                      setState(() {
-                                        controller.selectedLanguages.removeAt(
-                                          index,
-                                        );
-                                      });
-                                    },
-                                  ),
-                                );
-                              },
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        Center(child: ProfilePhotoWidget()),
+                        const SizedBox(height: 20),
+                        TextInputWidget(
+                          label: Strings.fullName,
+                          type: TextInputType.text,
+                          height: 50,
+                        ),
+                        const SizedBox(height: 15),
+                        CountryCodeAndPhoneNUmber(
+                          validatorText: "Phone Number is required",
+                          controller: controller.phoneNumberController,
+                          name: Strings.phoneNumber,
+                          countrycodes: controller.countryCodes,
+                          onCountryCodeSelected: (id) {
+                            controller.selectedCountryCodeId = id;
+                            controller.update();
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        TextInputWidget(
+                          label: Strings.email,
+                          type: TextInputType.emailAddress,
+                          height: 50,
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            const Expanded(child: DateOfBirthField()),
+                            Expanded(
+                              child: GenderDropdownField(name: Strings.gender),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        TextInputWidget(
+                          label: Strings.qualification,
+                          type: TextInputType.text,
+                          height: 50,
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          height:
+                              controller.selectedLanguages.isNotEmpty ? 15 : 0,
+                        ),
+                        Visibility(
+                          visible: controller.selectedLanguages.isNotEmpty,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: SizedBox(
+                              height: 40,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: controller.selectedLanguages.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                      right: 8,
+                                    ), // spacing between chips
+                                    child: LanguageChip(
+                                      label:
+                                          controller.selectedLanguages[index],
+                                      onDeleted: () {
+                                        setState(() {
+                                          controller.selectedLanguages.removeAt(
+                                            index,
+                                          );
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 50),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10),
-                        child: SubmitButtonWidget(
-                          onTap: () {},
-                          text: Strings.next,
+                        const SizedBox(height: 50),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          child: SubmitButtonWidget(
+                            onTap: () {
+                              if (formKey.currentState?.validate() ?? false) {
+                                // Form submission logic
+                              }
+                            },
+                            text: Strings.next,
+                          ),
                         ),
-                      ),
-
-                      SizedBox(height: 15),
-                    ],
+                        const SizedBox(height: 15),
+                      ],
+                    ),
                   ),
                 ),
               ),

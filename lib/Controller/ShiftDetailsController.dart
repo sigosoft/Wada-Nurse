@@ -1,15 +1,19 @@
 // import 'package:camera/camera.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../ApiConfigs/ApiConfigs.dart';
 import '../Resource/Colors.dart';
 import '../Resource/Strings.dart';
+import '../Utils/CheckNetworkConnectivity.dart';
+import '../Utils/HandleDioExceptions.dart';
+import '../Utils/LoggingInterceptor.dart';
+import '../Utils/utils.dart';
 import '../View/Map/ChooseLocation.dart';
 import '../View/SuccessPages/LeaveShiftSuccessfully.dart';
 import '../View/SuccessPages/ShiftAcceptedSuccessfully.dart';
@@ -20,6 +24,50 @@ import '../Widget/TextInputWidget.dart';
 class ShiftDetailsController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
+
+  bool isLoading = false;
+  final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
+  Map<String, dynamic>? booking;
+  List<dynamic> shifts = [];
+
+  Future<void> getShiftDetails(int bookingId) async {
+    booking = null;
+    shifts = [];
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("Token: $token");
+      String url = "${ApiConfigs.baseUrl}${APIEndpoints.shiftDetails}?booking_id=$bookingId";
+      dio.options.headers["Authorization"] = "Bearer $token";
+      final response = await dio.get(url);
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          final data = resData['data'];
+          if (data is Map<String, dynamic>) {
+            booking = data['booking'];
+            shifts = data['shifts'] is List ? data['shifts'] : [];
+          }
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+    } catch (e, stackTrace) {
+      debugPrint("Unexpected Error: $e");
+      debugPrint("Stack Trace: $stackTrace");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
 
   @override
   void onInit() {

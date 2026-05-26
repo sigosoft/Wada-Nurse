@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Controller/RegistrationController.dart';
+import 'package:waaada_nurseapp/Controller/LoginController.dart';
 import 'package:waaada_nurseapp/Model/RegistrationData.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
@@ -11,8 +12,18 @@ import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 
 class OtpVerification extends StatefulWidget {
-  const OtpVerification({super.key, required this.registrationData});
-  final RegistrationData registrationData;
+  const OtpVerification({
+    super.key,
+    this.registrationData,
+    this.isForgotPassword = false,
+    this.mobile,
+    this.countryCode,
+  });
+  final RegistrationData? registrationData;
+  final bool isForgotPassword;
+  final String? mobile;
+  final String? countryCode;
+
   @override
   State<OtpVerification> createState() => _OtpScreen2State();
 }
@@ -62,9 +73,17 @@ class _OtpScreen2State extends State<OtpVerification> {
                           showToast("Please enter a valid OTP", isError: true);
                           return;
                         } else {
-                          controller.postRegistrationData(
-                            widget.registrationData,
-                          );
+                          if (widget.isForgotPassword) {
+                            Get.find<LoginController>().verifyForgotOtp(
+                              mobile: widget.mobile!,
+                              countryCodeId: widget.countryCode!,
+                              otp: controller.otp!,
+                            );
+                          } else {
+                            controller.postRegistrationData(
+                              widget.registrationData!,
+                            );
+                          }
                         }
                       },
                     ),
@@ -73,11 +92,18 @@ class _OtpScreen2State extends State<OtpVerification> {
                       text1: Strings.didNotReceiveCode,
                       text2: Strings.resend,
                       onTap: () {
-                        controller.sendRegisterOtp(
-                          mobile: widget.registrationData.mobile,
-                          countryCode: widget.registrationData.countryCode,
-                          registrationData: widget.registrationData,
-                        );
+                        if (widget.isForgotPassword) {
+                          Get.find<LoginController>().sendForgotOtp(
+                            mobile: widget.mobile!,
+                            countryCodeId: widget.countryCode!,
+                          );
+                        } else {
+                          controller.sendRegisterOtp(
+                            mobile: widget.registrationData!.mobile,
+                            countryCode: widget.registrationData!.countryCode,
+                            registrationData: widget.registrationData!,
+                          );
+                        }
                       },
                     ),
                   ],

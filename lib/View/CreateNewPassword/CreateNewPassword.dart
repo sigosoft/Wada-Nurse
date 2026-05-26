@@ -12,6 +12,7 @@ import 'package:waaada_nurseapp/Widget/PasswordTextField.dart';
 import 'package:waaada_nurseapp/Widget/RichTextWidget.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
+import 'package:waaada_nurseapp/Utils/ShowToast.dart';
 
 class CreateNewPassword extends StatefulWidget {
   const CreateNewPassword({super.key});
@@ -74,7 +75,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                     ),
                     SizedBox(height: 20),
                     PasswordTextField(
-                      label: Strings.createNewPassword,
+                      label: Strings.confirmNewPassword,
                       passwordController:
                           controller.passwordControllerCreatePassword2,
                       isObscured: controller.isObscuredForCreateNewPassword2,
@@ -98,7 +99,27 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                     SizedBox(height: 20),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
-                        child: SubmitButtonWidget(onTap: () {}, text: Strings.submit)),
+                      child: SubmitButtonWidget(
+                        onTap: () {
+                          final p1 = controller.passwordControllerCreatePassword1.text;
+                          final p2 = controller.passwordControllerCreatePassword2.text;
+                          if (p1.isEmpty || p2.isEmpty) {
+                            showToast("Please fill in all fields", isError: true);
+                            return;
+                          }
+                          if (p1.length < 8) {
+                            showToast("Password must be at least 8 characters long", isError: true);
+                            return;
+                          }
+                          if (p1 != p2) {
+                            showToast("Passwords do not match", isError: true);
+                            return;
+                          }
+                          controller.resetPassword();
+                        },
+                        text: Strings.submit,
+                      ),
+                    ),
                   ],
                 ),
               ),
