@@ -12,8 +12,9 @@ import '../../Resource/Strings.dart';
 import '../../Widget/SubmitButtonWidget.dart';
 
 class ChooseLocation extends StatefulWidget {
-  const ChooseLocation({Key? key,required this.shiftType}) : super(key: key);
+  const ChooseLocation({Key? key, required this.shiftType, required this.bookingId}) : super(key: key);
   final String shiftType; // To handle different shift types if needed
+  final int bookingId;
   @override
   _ChooseLocationState createState() => _ChooseLocationState();
 }
@@ -97,8 +98,12 @@ class _ChooseLocationState extends State<ChooseLocation> {
                       height: 45,
                       child: ElevatedButton(
                         onPressed: () {
-                         Get.to(ShiftAcceptedSuccessfully(title:  widget.shiftType=="checkin"?Strings.successfullyCheckedin:Strings.successfullyCheckedout,message:  widget.shiftType=="checkin"?Strings.successfullyCheckedinmsg:Strings.successfullyCheckedoutmsg));
-                          },
+                         Get.to(ShiftAcceptedSuccessfully(
+                           title: widget.shiftType == "checkin" ? Strings.successfullyCheckedin : Strings.successfullyCheckedout,
+                           message: widget.shiftType == "checkin" ? Strings.successfullyCheckedinmsg : Strings.successfullyCheckedoutmsg,
+                           bookingId: widget.bookingId,
+                         ));
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorPrimary,
                           shape: RoundedRectangleBorder(

@@ -36,9 +36,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   width: 50,
                   child: ClipOval(
                     child:
-                        nurseImage != null && nurseImage.isNotEmpty
+                        nurseImage != null && nurseImage.toString().isNotEmpty && nurseImage.toString() != "null"
                             ? CachedNetworkImage(
-                              imageUrl: ApiConfigs.Image_URL + nurseImage,
+                              imageUrl: ApiConfigs.Image_URL + nurseImage.toString(),
                               fit: BoxFit.cover,
                               placeholder:
                                   (context, url) => const Center(

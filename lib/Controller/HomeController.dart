@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -18,20 +19,32 @@ class HomeController extends GetxController {
   List<dynamic> pendingRequests = [];
   List<dynamic> recentRequests = [];
 
+  Timer? _timer;
+
   @override
   void onInit() {
     super.onInit();
+    _startAutoUpdate();
   }
 
   @override
   void onClose() {
+    _timer?.cancel();
     super.onClose();
   }
 
-  Future<void> getHome() async {
-    isLoading = true;
-    update();
-    checkNetworkAndRedirectOffAll();
+  void _startAutoUpdate() {
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      getHome(silent: true);
+    });
+  }
+
+  Future<void> getHome({bool silent = false}) async {
+    if (!silent) {
+      isLoading = true;
+      update();
+      checkNetworkAndRedirectOffAll();
+    }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
@@ -54,16 +67,20 @@ class HomeController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
+      if (!silent) {
+        if (e.response != null) {
+          handleDioException(e);
+        } else {
+          debugPrint("Dio Exception without response: ${e.message}");
+        }
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isLoading = false;
+      if (!silent) {
+        isLoading = false;
+      }
       update();
     }
   }

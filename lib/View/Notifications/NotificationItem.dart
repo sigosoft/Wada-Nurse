@@ -6,9 +6,26 @@ import 'package:waaada_nurseapp/Resource/Colors.dart';
 
 
 class NotificationItem extends StatelessWidget {
+  final dynamic notification;
+
+  const NotificationItem({super.key, this.notification});
 
   @override
   Widget build(BuildContext context) {
+    final String title = notification?['title']?.toString() ?? 
+                         notification?['data']?['title']?.toString() ?? 
+                         "Notification";
+    final String body = notification?['message']?.toString() ?? 
+                        notification?['body']?.toString() ?? 
+                        notification?['description']?.toString() ?? 
+                        notification?['data']?['message']?.toString() ?? 
+                        notification?['data']?['body']?.toString() ?? 
+                        "";
+    final String time = notification?['time_ago']?.toString() ?? 
+                        notification?['converted_created_at']?.toString() ?? 
+                        notification?['created_at']?.toString() ?? 
+                        "";
+
     return Container(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -19,13 +36,13 @@ class NotificationItem extends StatelessWidget {
               Row(
                 children: [
                   Expanded(child:
-                  Text("duis deserunt mollit dolore ",
+                  Text(title,
                       style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Colors.black)),),
                   Text(
-                    "25 min",
+                    time,
                     style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
@@ -34,7 +51,7 @@ class NotificationItem extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 10,),
-              Text("Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint.",
+              Text(body,
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,

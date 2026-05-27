@@ -26,6 +26,7 @@ class _BookingsState extends State<Bookings>
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
+      controller.activeTabIndex = _tabController.index;
       setState(() {}); // Rebuild UI when tab changes
       if (_tabController.index == 0) {
         controller.getBookingRequests();
@@ -40,6 +41,7 @@ class _BookingsState extends State<Bookings>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _isInitialized = true;
+        controller.activeTabIndex = 0;
         controller.getBookingRequests();
       }
     });

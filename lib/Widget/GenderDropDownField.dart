@@ -8,10 +8,12 @@ class GenderDropdownField extends StatefulWidget {
     required this.name,
     this.validatorText,
     this.onGenderSelected,
+    this.initialGender,
   });
   final String name;
   final String? validatorText;
   final Function(String?)? onGenderSelected;
+  final String? initialGender;
 
   @override
   State<GenderDropdownField> createState() => _GenderDropdownFieldState();
@@ -21,11 +23,27 @@ class _GenderDropdownFieldState extends State<GenderDropdownField> {
   String? _selectedGender;
 
   @override
+  void initState() {
+    super.initState();
+    _selectedGender = widget.initialGender;
+  }
+
+  @override
+  void didUpdateWidget(GenderDropdownField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialGender != widget.initialGender) {
+      setState(() {
+        _selectedGender = widget.initialGender;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10),
       child: FormField<String>(
-        initialValue: null,
+        initialValue: _selectedGender,
         autovalidateMode: AutovalidateMode.disabled,
         validator: (value) {
           if (value == null || value.isEmpty) {

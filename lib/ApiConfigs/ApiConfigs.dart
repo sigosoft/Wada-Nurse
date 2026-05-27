@@ -21,4 +21,9 @@ class APIEndpoints {
   static const String sendForgotOtp = "send_forgot_otp";
   static const String verifyForgotOtp = "verify_forgot_otp";
   static const String resetPassword = "resetPassword";
+  static const String profile = "profile";
+  static const String updateProfile = "updateProfile";
+  static const String changePassword = "changePassword";
+  static const String notifications = "notifications";
+  static const String updateAcceptStatus = "updateAcceptStatus";
 }

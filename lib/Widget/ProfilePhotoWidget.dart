@@ -34,14 +34,21 @@ class ProfilePhotoWidget extends StatelessWidget {
               child: image != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(image!),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        cacheWidth: (width * devicePixelRatio).round(),
-                        cacheHeight: (height * devicePixelRatio).round(),
-                      ),
+                      child: image!.startsWith('http')
+                          ? Image.network(
+                              image!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            )
+                          : Image.file(
+                              File(image!),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              cacheWidth: (width * devicePixelRatio).round(),
+                              cacheHeight: (height * devicePixelRatio).round(),
+                            ),
                     )
                   : Center(
                       child: SvgPicture.asset(

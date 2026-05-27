@@ -10,6 +10,7 @@ import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 import 'package:waaada_nurseapp/Widget/PasswordTextField.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
+import 'package:waaada_nurseapp/Utils/ShowToast.dart';
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -117,7 +118,42 @@ class _ChangePasswordState extends State<ChangePassword> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
                       child: SubmitButtonWidget(
-                        onTap: () {},
+                        onTap: () {
+                          final currentPass = controller.currentPasswordController.text.trim();
+                          final newPass = controller.newPasswordController.text.trim();
+                          final confirmPass = controller.confirmNewPasswordController.text.trim();
+
+                          if (currentPass.isEmpty) {
+                            showToast("Please enter current password", isError: true);
+                            return;
+                          }
+                          if (newPass.isEmpty) {
+                            showToast("Please enter new password", isError: true);
+                            return;
+                          }
+                          if (newPass.length < 8) {
+                            showToast("New password must be at least 8 characters long", isError: true);
+                            return;
+                          }
+                          if (confirmPass.isEmpty) {
+                            showToast("Please confirm your new password", isError: true);
+                            return;
+                          }
+                          if (newPass != confirmPass) {
+                            showToast("New passwords do not match", isError: true);
+                            return;
+                          }
+
+                          controller.changePassword(
+                            currentPassword: currentPass,
+                            newPassword: newPass,
+                            confirmPassword: confirmPass,
+                          ).then((success) {
+                            if (success) {
+                              Get.back(); // Go back on success
+                            }
+                          });
+                        },
                         text: Strings.save,
                       ),
                     ),

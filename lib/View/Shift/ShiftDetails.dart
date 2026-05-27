@@ -15,7 +15,11 @@ import '../../Widget/SiftDetailsWidget.dart';
 import 'ShiftDetailsListing.dart';
 
 class ShiftDetails extends StatefulWidget {
-  const ShiftDetails({super.key, this.bookingType = "", required this.bookingId});
+  const ShiftDetails({
+    super.key,
+    this.bookingType = "",
+    required this.bookingId,
+  });
 
   final String bookingType;
   final int bookingId;
@@ -45,7 +49,8 @@ class _ShiftDetailsState extends State<ShiftDetails> {
       DateTime dob = DateTime.parse(dobString);
       DateTime today = DateTime.now();
       int age = today.year - dob.year;
-      if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+      if (today.month < dob.month ||
+          (today.month == dob.month && today.day < dob.day)) {
         age--;
       }
       return age;
@@ -58,7 +63,20 @@ class _ShiftDetailsState extends State<ShiftDetails> {
     if (dateString.isEmpty) return "";
     try {
       DateTime date = DateTime.parse(dateString);
-      List<String> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      List<String> months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return "${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}";
     } catch (e) {
       return dateString;
@@ -85,123 +103,156 @@ class _ShiftDetailsState extends State<ShiftDetails> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ShiftDetailsController>(
-        init: controller,
-        builder: (controller) {
-          final booking = controller.booking;
-          final patientName = booking?['patient']?['name'] ?? booking?['user']?['name'] ?? "Patient";
-          final dob = booking?['patient']?['dob'] ?? booking?['user']?['dob'] ?? "";
-          final age = calculateAge(dob);
-          final genderNum = booking?['patient']?['gender'] ?? booking?['user']?['gender'];
-          final gender = genderNum == 1 ? "M" : (genderNum == 2 ? "F" : "O");
+      init: controller,
+      builder: (controller) {
+        final booking = controller.booking;
+        final patientName =
+            booking?['patient']?['name'] ??
+            booking?['user']?['name'] ??
+            "Patient";
+        final dob =
+            booking?['patient']?['dob'] ?? booking?['user']?['dob'] ?? "";
+        final age = calculateAge(dob);
+        final genderNum =
+            booking?['patient']?['gender'] ?? booking?['user']?['gender'];
+        final gender = genderNum == 1 ? "M" : (genderNum == 2 ? "F" : "O");
 
-          final checkinDate = formatDate(booking?['from_date'] ?? "");
-          final checkinTime = formatTime(booking?['checkin_time'] ?? "");
-          final checkoutDate = formatDate(booking?['to_date'] ?? "");
-          final checkoutTime = formatTime(booking?['checkout_time'] ?? "");
+        final checkinDate = formatDate(booking?['from_date'] ?? "");
+        final checkinTime = formatTime(booking?['checkin_time'] ?? "");
+        final checkoutDate = formatDate(booking?['to_date'] ?? "");
+        final checkoutTime = formatTime(booking?['checkout_time'] ?? "");
 
-          int totalDaysVal = 0;
-          if (booking?['from_date'] != null && booking?['to_date'] != null) {
-            try {
-              DateTime from = DateTime.parse(booking!['from_date']);
-              DateTime to = DateTime.parse(booking['to_date']);
-              totalDaysVal = to.difference(from).inDays + 1;
-            } catch (_) {}
+        int totalDaysVal = 0;
+        if (booking?['from_date'] != null && booking?['to_date'] != null) {
+          try {
+            DateTime from = DateTime.parse(booking!['from_date']);
+            DateTime to = DateTime.parse(booking['to_date']);
+            totalDaysVal = to.difference(from).inDays + 1;
+          } catch (_) {}
+        }
+        final totalDays =
+            booking?['total_days']?.toString() ??
+            (totalDaysVal > 0 ? totalDaysVal.toString() : "0");
+
+        final rawShiftType = booking?['shift_type'];
+        String shiftType = "4 Hours";
+        if (rawShiftType != null) {
+          final valStr = rawShiftType.toString();
+          if (RegExp(r'^\d+$').hasMatch(valStr)) {
+            shiftType = "$valStr Hours";
+          } else {
+            shiftType = valStr;
           }
-          final totalDays = booking?['total_days']?.toString() ?? (totalDaysVal > 0 ? totalDaysVal.toString() : "0");
+        }
 
-          final rawShiftType = booking?['shift_type'];
-          String shiftType = "4 Hours";
-          if (rawShiftType != null) {
-            final valStr = rawShiftType.toString();
-            if (RegExp(r'^\d+$').hasMatch(valStr)) {
-              shiftType = "$valStr Hours";
-            } else {
-              shiftType = valStr;
-            }
+        final service =
+            booking?['service']?['name'] ??
+            booking?['service']?.toString() ??
+            "Wound Care and Dressing";
+        final notes =
+            booking?['notes'] ??
+            booking?['note'] ??
+            booking?['remarks'] ??
+            Strings.dummy;
+
+        final rawFee =
+            booking?['total'] ??
+            booking?['amount'] ??
+            booking?['fee'] ??
+            booking?['price'];
+        String nurseFee = "₹512";
+        if (rawFee != null) {
+          final valStr = rawFee.toString();
+          if (valStr.startsWith('₹')) {
+            nurseFee = valStr;
+          } else {
+            nurseFee = "₹$valStr";
           }
-
-          final service = booking?['service']?['name'] ?? booking?['service']?.toString() ?? "Wound Care and Dressing";
-          final notes = booking?['notes'] ?? booking?['note'] ?? booking?['remarks'] ?? Strings.dummy;
-
-          final rawFee = booking?['total'] ?? booking?['amount'] ?? booking?['fee'] ?? booking?['price'];
-          String nurseFee = "₹512";
-          if (rawFee != null) {
-            final valStr = rawFee.toString();
-            if (valStr.startsWith('₹')) {
-              nurseFee = valStr;
-            } else {
-              nurseFee = "₹$valStr";
-            }
-          }
+        }
 
         return Scaffold(
           backgroundColor: Colors.white,
-          appBar: widget.bookingType=="ongoing"?AppBar(
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.white,
-            shadowColor: Colors.black.withOpacity(0.3),
-            leading: InkWell(
-              onTap: () {
-                Get.back();
-              },
-              child: SvgPicture.asset(
-                "lib/Assets/Images/BackButton.svg",
-                fit: BoxFit.scaleDown,
-                color: Colors.black,
-              ),
-            ),
-            title: TextStyleInterWithoutPadding(
-              text: Strings.ongoing,
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-              size: 20.00,
-            ),
-            titleSpacing: -10.0, // Adjust this value to reduce the gap
-            toolbarHeight: 50,
-            centerTitle: false,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 0),
-                child: PopupMenuButton<int>(
-                  color: Colors.white,
-                  icon: Container(
-                    width: 20,
-                    height: 20,
-                    child: SvgPicture.asset(
-                      "lib/Assets/Images/settings.svg",
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
-                  onSelected: (value) {
-                    if (value == 1) {
-                      controller.addReasonForLeaveBottomSheet(context);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 1,
-                      height: 30,
-                      child: Text(
-                        Strings.takeLeave,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.red,
-                        ),
+          appBar:
+              widget.bookingType == "ongoing"
+                  ? AppBar(
+                    backgroundColor: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    shadowColor: Colors.black.withOpacity(0.3),
+                    leading: InkWell(
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: SvgPicture.asset(
+                        "lib/Assets/Images/BackButton.svg",
+                        fit: BoxFit.scaleDown,
+                        color: Colors.black,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
-            elevation: 3,
-            scrolledUnderElevation: 3.0,
-          ):
-          CustomAppBar(label: widget.bookingType=="completed"?Strings.completed:widget.bookingType=="cancelled"?Strings.cancelled:Strings.shiftdetails, showCloseIcon: false,onTap: Get.back ,),
+                    title: TextStyleInterWithoutPadding(
+                      text: Strings.ongoing,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                      size: 20.00,
+                    ),
+                    titleSpacing: -10.0, // Adjust this value to reduce the gap
+                    toolbarHeight: 50,
+                    centerTitle: false,
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 0),
+                        child: PopupMenuButton<int>(
+                          color: Colors.white,
+                          icon: Container(
+                            width: 20,
+                            height: 20,
+                            child: SvgPicture.asset(
+                              "lib/Assets/Images/settings.svg",
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                          onSelected: (value) {
+                            if (value == 1) {
+                              controller.addReasonForLeaveBottomSheet(context);
+                            }
+                          },
+                          itemBuilder:
+                              (context) => [
+                                PopupMenuItem(
+                                  value: 1,
+                                  height: 30,
+                                  child: Text(
+                                    Strings.takeLeave,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                        ),
+                      ),
+                    ],
+                    elevation: 3,
+                    scrolledUnderElevation: 3.0,
+                  )
+                  : CustomAppBar(
+                    label:
+                        widget.bookingType == "completed"
+                            ? Strings.completed
+                            : widget.bookingType == "cancelled"
+                            ? Strings.cancelled
+                            : Strings.shiftdetails,
+                    showCloseIcon: false,
+                    onTap: Get.back,
+                  ),
           body: SafeArea(
-            child: controller.isLoading
-                ? Center(child: CircularProgressIndicator(color: colorPrimary))
-                : controller.booking == null
+            child:
+                controller.isLoading
+                    ? Center(
+                      child: CircularProgressIndicator(color: colorPrimary),
+                    )
+                    : controller.booking == null
                     ? const Center(child: Text("No booking details found"))
                     : Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -250,13 +301,25 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                             : Container(),
                                       ],
                                     ),
-                                    SizedBox(height: widget.bookingType=="ongoing"||widget.bookingType=="completed"?15:0),
-                                    widget.bookingType=="ongoing"||widget.bookingType=="completed"?
-                                    InkWell(
-                                        onTap: (){
-                                          Get.to(ShiftDetailsListing());
-                                        },
-                                        child: SubmitButtonWidget(text: Strings.shiftdetails,)):Container(),
+                                    SizedBox(
+                                      height:
+                                          widget.bookingType == "ongoing" ||
+                                                  widget.bookingType ==
+                                                      "completed"
+                                              ? 15
+                                              : 0,
+                                    ),
+                                    widget.bookingType == "ongoing" ||
+                                            widget.bookingType == "completed"
+                                        ? InkWell(
+                                          onTap: () {
+                                            Get.to(ShiftDetailsListing());
+                                          },
+                                          child: SubmitButtonWidget(
+                                            text: Strings.shiftdetails,
+                                          ),
+                                        )
+                                        : Container(),
                                     SizedBox(height: 15),
                                     Text(
                                       Strings.requestdetails,
@@ -378,37 +441,60 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                       ],
                                     ),
                                     SizedBox(height: 10),
-                                    widget.bookingType=="completed"?
-                                    Text(Strings.downloadSalarySlip,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ):Container(),
+                                    widget.bookingType == "completed"
+                                        ? Text(
+                                          Strings.downloadSalarySlip,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        )
+                                        : Container(),
                                   ],
                                 ),
                               ),
                             ),
                           ),
                         ),
-                         widget.bookingType == "upcoming"||widget.bookingType=="ongoing"
+                        widget.bookingType == "upcoming" ||
+                                widget.bookingType == "ongoing"
                             ? Container(
-                              padding: EdgeInsets.only(left: 15, right: 15, bottom: 20),
+                              padding: EdgeInsets.only(
+                                left: 15,
+                                right: 15,
+                                bottom: 20,
+                              ),
                               child: InkWell(
                                 onTap: () {
-                                  if(widget.bookingType=="ongoing"){
-                                    controller.openCameraBottomSheet(context, "checkout");
-                                  }else {
-                                    controller.showCantCheckinBottomSheet(context);
+                                  if (widget.bookingType == "ongoing") {
+                                    controller.openCameraBottomSheet(
+                                      context,
+                                      "checkout",
+                                    );
+                                  } else {
+                                    controller.showCantCheckinBottomSheet(
+                                      context,
+                                    );
                                   }
-
                                 },
-                                  child: SubmitButtonWidget(text: widget.bookingType=="ongoing"?Strings.checkout:Strings.checkin)),
-                            ):widget.bookingType == "requests"?
-                        Container(
-                              padding: EdgeInsets.only(left: 15, right: 15, bottom: 20),
+                                child: SubmitButtonWidget(
+                                  text:
+                                      widget.bookingType == "ongoing"
+                                          ? Strings.checkout
+                                          : Strings.checkin,
+                                ),
+                              ),
+                            )
+                            : widget.bookingType == "requests"
+                            ? Container(
+                              padding: EdgeInsets.only(
+                                left: 15,
+                                right: 15,
+                                bottom: 20,
+                              ),
                               child: Row(
                                 children: [
                                   Expanded(
@@ -416,12 +502,16 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                       height: 45,
                                       child: ElevatedButton(
                                         onPressed: () {
-                                          controller.showInfoBottomSheet(context);
+                                          controller.showInfoBottomSheet(
+                                            context,
+                                          );
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Color(0xFFFFC3C4),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -441,12 +531,17 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                       height: 45,
                                       child: ElevatedButton(
                                         onPressed: () {
-                                          controller.showAcceptBottomSheet(context);
+                                          controller.showAcceptBottomSheet(
+                                            context,
+                                            widget.bookingId,
+                                          );
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Color(0xFF039300),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -462,12 +557,13 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                   ),
                                 ],
                               ),
-                            ):Container(),
+                            )
+                            : Container(),
                       ],
                     ),
           ),
         );
-      }
+      },
     );
   }
 }

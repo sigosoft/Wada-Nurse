@@ -13,7 +13,8 @@ import '../Resource/Strings.dart';
 import '../Utils/CheckNetworkConnectivity.dart';
 import '../Utils/HandleDioExceptions.dart';
 import '../Utils/LoggingInterceptor.dart';
-import '../Utils/utils.dart';
+import '../Utils/utils.dart' hide showToast;
+import '../Utils/ShowToast.dart';
 import '../View/Map/ChooseLocation.dart';
 import '../View/SuccessPages/LeaveShiftSuccessfully.dart';
 import '../View/SuccessPages/ShiftAcceptedSuccessfully.dart';
@@ -69,6 +70,65 @@ class ShiftDetailsController extends GetxController {
     }
   }
 
+  Future<bool> updateAcceptStatus(int bookingId, int status) async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.updateAcceptStatus;
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      dio.options.queryParameters = {
+        "booking_id": bookingId,
+        "booking id": bookingId,
+        "status": status,
+      };
+
+      debugPrint("=== API REQUEST: updateAcceptStatus ===");
+      debugPrint("URL: $url");
+      debugPrint("Query Params: ${dio.options.queryParameters}");
+      debugPrint("=======================================");
+
+      final response = await dio.get(url);
+
+      debugPrint("=== API RESPONSE: updateAcceptStatus ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("====================================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          showToast(resData['message'] ?? "Request accepted successfully.");
+          return true;
+        } else {
+          showToast(
+            resData['message'] ?? "Failed to accept request",
+            isError: true,
+          );
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -86,7 +146,8 @@ class ShiftDetailsController extends GetxController {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
         _image = photo;
-        Get.to(ChooseLocation(shiftType: shiftType));
+        final int bId = int.tryParse(booking?['id']?.toString() ?? "") ?? 0;
+        Get.to(ChooseLocation(shiftType: shiftType, bookingId: bId));
     }
   }
   void showInfoBottomSheet(BuildContext context) {
@@ -160,7 +221,7 @@ class ShiftDetailsController extends GetxController {
     );
   }
 
-  void showAcceptBottomSheet(BuildContext context) {
+  void showAcceptBottomSheet(BuildContext context, int bookingId) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -232,8 +293,16 @@ class ShiftDetailsController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Get.to(ShiftAcceptedSuccessfully(title: Strings.accepted,message: Strings.acceptedmsg,));
+                          onPressed: () async {
+                            Get.back();
+                            bool success = await updateAcceptStatus(bookingId, 1);
+                            if (success) {
+                              Get.to(ShiftAcceptedSuccessfully(
+                                title: Strings.accepted,
+                                message: Strings.acceptedmsg,
+                                bookingId: bookingId,
+                              ));
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,

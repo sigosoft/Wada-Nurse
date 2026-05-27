@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:waaada_nurseapp/Controller/BookingsController.dart';
+import 'package:waaada_nurseapp/Controller/HomeController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/View/Shift/ShiftDetails.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
@@ -28,7 +29,8 @@ class NurseShiftItem extends StatelessWidget {
       DateTime dob = DateTime.parse(dobString);
       DateTime today = DateTime.now();
       int age = today.year - dob.year;
-      if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+      if (today.month < dob.month ||
+          (today.month == dob.month && today.day < dob.day)) {
         age--;
       }
       return age;
@@ -41,7 +43,20 @@ class NurseShiftItem extends StatelessWidget {
     if (dateString.isEmpty) return "";
     try {
       DateTime date = DateTime.parse(dateString);
-      List<String> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      List<String> months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return "${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}";
     } catch (e) {
       return dateString;
@@ -67,12 +82,16 @@ class NurseShiftItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final patientName = request?['patient']?['name'] ?? request?['user']?['name'] ?? "Patient";
+    final patientName =
+        request?['patient']?['name'] ?? request?['user']?['name'] ?? "Patient";
     final dob = request?['patient']?['dob'] ?? request?['user']?['dob'] ?? "";
     final age = calculateAge(dob);
-    final genderNum = request?['patient']?['gender'] ?? request?['user']?['gender'];
+    final genderNum =
+        request?['patient']?['gender'] ?? request?['user']?['gender'];
     final gender = genderNum == 1 ? "M" : (genderNum == 2 ? "F" : "O");
-    final location = request?['location'] ?? "Raipur, Chhattisgarh"; // Fallback to रायपुर if null
+    final location =
+        request?['location'] ??
+        "Raipur, Chhattisgarh"; // Fallback to रायपुर if null
     final checkinDate = formatDate(request?['from_date'] ?? "");
     final checkinTime = formatTime(request?['checkin_time'] ?? "");
     final checkoutDate = formatDate(request?['to_date'] ?? "");
@@ -80,10 +99,27 @@ class NurseShiftItem extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Get.to(ShiftDetails(bookingType: bookingType, bookingId: request?['id'] ?? 0));
+        Get.to(
+          ShiftDetails(
+            bookingType: bookingType,
+            bookingId: request?['id'] ?? 0,
+          ),
+        )?.then((_) {
+          if (Get.isRegistered<HomeController>()) {
+            Get.find<HomeController>().getHome(silent: true);
+          }
+          if (Get.isRegistered<BookingsController>()) {
+            Get.find<BookingsController>().refreshActiveTab(silent: true);
+          }
+        });
       },
       child: Container(
-        height: showLocationText?MediaQuery.of(context).size.height * 0.3:bookingType=="upcoming"||bookingType=="ongoing"?MediaQuery.of(context).size.height * 0.35:MediaQuery.of(context).size.height * 0.28,
+        height:
+            showLocationText
+                ? MediaQuery.of(context).size.height * 0.3
+                : bookingType == "upcoming" || bookingType == "ongoing"
+                ? MediaQuery.of(context).size.height * 0.35
+                : MediaQuery.of(context).size.height * 0.28,
         margin: const EdgeInsets.only(bottom: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -97,49 +133,50 @@ class NurseShiftItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      patientName,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    patientName,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    "Age: $age | Gender: $gender",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'lib/Assets/Images/locations.svg',
+                        width: 13,
+                        height: 13,
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "Age: $age | Gender: $gender",
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
+                      const SizedBox(width: 5),
+                      Text(
+                        location,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: colorPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'lib/Assets/Images/locations.svg',
-                          width: 13,
-                          height: 13,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          location,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: colorPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                  ]),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -177,19 +214,29 @@ class NurseShiftItem extends StatelessWidget {
                   ),
                 ],
               ),
-              showLocationText||bookingType=="upcoming"||bookingType=="ongoing"?
-              const SizedBox(height: 8):const SizedBox(),
-              showLocationText?
-              Text(
-                "Waiting for location share",
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                ),
-              ):const SizedBox(),
-              bookingType=="upcoming"||bookingType=="ongoing"?
-              SubmitButtonWidget(text: bookingType=="upcoming"?Strings.checkin:Strings.checkout,):Container()
+              showLocationText ||
+                      bookingType == "upcoming" ||
+                      bookingType == "ongoing"
+                  ? const SizedBox(height: 8)
+                  : const SizedBox(),
+              showLocationText
+                  ? Text(
+                    "Waiting for location share",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  )
+                  : const SizedBox(),
+              bookingType == "upcoming" || bookingType == "ongoing"
+                  ? SubmitButtonWidget(
+                    text:
+                        bookingType == "upcoming"
+                            ? Strings.checkin
+                            : Strings.checkout,
+                  )
+                  : Container(),
             ],
           ),
         ),

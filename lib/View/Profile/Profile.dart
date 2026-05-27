@@ -59,7 +59,9 @@ class _ProfileState extends State<Profile> {
                   name: controller.name,
                     mobile: controller.mobile,
                     salaried_or_not: controller.salaried_or_not,
-                  image: ApiConfigs.Image_URL+ controller.image.toString(),
+                  image: controller.image == null || controller.image.toString().isEmpty || controller.image.toString() == "null"
+                      ? ""
+                      : ApiConfigs.Image_URL + controller.image.toString(),
                   onTapEdit: (){
                       Get.to(EditProfile());
                   },

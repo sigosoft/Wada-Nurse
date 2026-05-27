@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
@@ -14,7 +14,8 @@ import '../Resource/Colors.dart';
 import '../Utils/CheckNetworkConnectivity.dart';
 import '../Utils/HandleDioExceptions.dart';
 import '../Utils/LoggingInterceptor.dart';
-import '../Utils/utils.dart';
+import '../Utils/ShowToast.dart';
+import '../Utils/utils.dart' hide showToast;
 import '../View/Login/Login.dart';
 
 class ProfileController extends GetxController {
@@ -22,10 +23,10 @@ class ProfileController extends GetxController {
   bool isLoading = false;
   final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
   ProfileModel? profileModel;
-  String? name;
-  String? mobile;
-  String? salaried_or_not;
-  String? image;
+  String name = "";
+  String mobile = "";
+  String salaried_or_not = "";
+  String image = "";
 
   @override
   void onInit() {
@@ -45,22 +46,22 @@ class ProfileController extends GetxController {
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = ApiConfigs.baseUrl + APIEndpoints.home;
-      dio.options.headers["Authorization"] =
-          "Bearer 33|IrTZU8osKQ8Nb3LfQRnErkZtFkIjrDZpqDj1Brsmd73c40b6";
+      String url = ApiConfigs.baseUrl + APIEndpoints.profile;
+      dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
       debugPrint("Response: ${response.data}");
       if (response.statusCode == 200) {
         profileModel = ProfileModel.fromJson(response.data);
-        name = profileModel?.data.nurse.location;
+        name = profileModel?.data.nurse.name?.toString() ?? "";
         mobile =
-            profileModel!.data.nurse.countryCode.toString() +
+            (profileModel?.data.nurse.countryCode?.toString() ?? "") +
             " " +
-            profileModel!.data.nurse.mobile.toString();
-        salaried_or_not = profileModel?.data.nurse.location;
-        image =
-            ApiConfigs.Image_URL +
-            profileModel!.data.nurse.image.toString();
+            (profileModel?.data.nurse.mobile?.toString() ?? "");
+        salaried_or_not =
+            profileModel?.data.nurse.salaryType == 2
+                ? "Salaried Employee"
+                : "Hourly Employee";
+        image = profileModel?.data.nurse.image?.toString() ?? "";
         update();
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
@@ -73,6 +74,110 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       debugPrint("Unexpected Error: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String countryCode,
+    required String mobile,
+    required String email,
+    required String dob,
+    required String gender,
+    required String qualification,
+    required List<String> languages,
+    String? pickedImagePath,
+  }) async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.updateProfile;
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      int genderInt = 1;
+      if (gender == 'Female') {
+        genderInt = 2;
+      } else if (gender == 'Other') {
+        genderInt = 3;
+      }
+
+      Map<String, dynamic> formMap = {
+        "name": name,
+        "country_code": countryCode,
+        "mobile": mobile,
+        "email": email,
+        "dob": dob,
+        "gender": genderInt,
+        "qualification": qualification,
+        "languages": "[${languages.join(',')}]",
+      };
+
+      FormData formData = FormData.fromMap(formMap);
+
+      if (pickedImagePath != null &&
+          pickedImagePath.isNotEmpty &&
+          !pickedImagePath.startsWith('http')) {
+        String fileNameFromPath(String path) {
+          var normalized = path.replaceAll('\\\\', '/');
+          var parts = normalized.split('/');
+          return parts.isNotEmpty ? parts.last : "";
+        }
+
+        formData.files.add(
+          MapEntry(
+            "image",
+            await MultipartFile.fromFile(
+              pickedImagePath,
+              filename: fileNameFromPath(pickedImagePath),
+            ),
+          ),
+        );
+      }
+
+      debugPrint("=== API REQUEST: updateProfile ===");
+      debugPrint("URL: $url");
+      debugPrint("Body: $formMap");
+      debugPrint("==================================");
+
+      final response = await dio.post(url, data: formData);
+
+      debugPrint("=== API RESPONSE: updateProfile ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("===================================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          showToast(resData['message'] ?? "Profile updated successfully.");
+          await getProfile();
+          return true;
+        } else {
+          showToast(
+            resData['message'] ?? "Failed to update profile",
+            isError: true,
+          );
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception without response: ${e.message}");
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      return false;
     } finally {
       isLoading = false;
       update();

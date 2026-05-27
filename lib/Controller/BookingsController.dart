@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -7,7 +8,6 @@ import '../Utils/CheckNetworkConnectivity.dart';
 import '../Utils/HandleDioExceptions.dart';
 import '../Utils/LoggingInterceptor.dart';
 import '../Utils/utils.dart';
-
 
 class BookingsController extends GetxController {
   bool isLoading = false;
@@ -20,14 +20,38 @@ class BookingsController extends GetxController {
   List<dynamic> ongoingBookings = [];
   List<dynamic> completedBookings = [];
 
-  Future<void> getBookingRequests() async {
-    isLoading = true;
-    update();
-    checkNetworkAndRedirectOffAll();
+  int activeTabIndex = 0;
+  Timer? _timer;
+
+  void _startAutoUpdate() {
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      refreshActiveTab(silent: true);
+    });
+  }
+
+  void refreshActiveTab({bool silent = false}) {
+    if (activeTabIndex == 0) {
+      getBookingRequests(silent: silent);
+    } else if (activeTabIndex == 1) {
+      getPendingBookings(silent: silent);
+    } else if (activeTabIndex == 2) {
+      getOngoingBookings(silent: silent);
+    } else if (activeTabIndex == 3) {
+      getCompletedBookings(silent: silent);
+    }
+  }
+
+  Future<void> getBookingRequests({bool silent = false}) async {
+    if (!silent) {
+      isLoading = true;
+      update();
+      checkNetworkAndRedirectOffAll();
+    }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = "${ApiConfigs.baseUrl}${APIEndpoints.bookingRequests}?limit=10";
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.bookingRequests}?limit=10";
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
       if (response.statusCode == 200) {
@@ -42,32 +66,41 @@ class BookingsController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
+      if (!silent) {
+        if (e.response != null) {
+          handleDioException(e);
+        } else {
+          debugPrint("Dio Exception without response: ${e.message}");
+        }
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isLoading = false;
+      if (!silent) {
+        isLoading = false;
+      }
       update();
     }
   }
 
-  Future<void> getPendingBookings() async {
-    isUpcomingLoading = true;
-    update();
-    checkNetworkAndRedirectOffAll();
+  Future<void> getPendingBookings({bool silent = false}) async {
+    if (!silent) {
+      isUpcomingLoading = true;
+      update();
+      checkNetworkAndRedirectOffAll();
+    }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = "${ApiConfigs.baseUrl}${APIEndpoints.pendingBookings}?limit=10";
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.pendingBookings}?limit=10";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
-      debugPrint("Response GET pendingBookings: ${response.statusCode} -> ${response.data}");
+      debugPrint(
+        "Response GET pendingBookings: ${response.statusCode} -> ${response.data}",
+      );
       if (response.statusCode == 200) {
         final resData = response.data;
         if (resData['status'] == "true" || resData['status'] == true) {
@@ -80,33 +113,42 @@ class BookingsController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        debugPrint("Dio Exception response: ${e.response?.data}");
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
+      if (!silent) {
+        if (e.response != null) {
+          debugPrint("Dio Exception response: ${e.response?.data}");
+          handleDioException(e);
+        } else {
+          debugPrint("Dio Exception without response: ${e.message}");
+        }
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isUpcomingLoading = false;
+      if (!silent) {
+        isUpcomingLoading = false;
+      }
       update();
     }
   }
 
-  Future<void> getOngoingBookings() async {
-    isOngoingLoading = true;
-    update();
-    checkNetworkAndRedirectOffAll();
+  Future<void> getOngoingBookings({bool silent = false}) async {
+    if (!silent) {
+      isOngoingLoading = true;
+      update();
+      checkNetworkAndRedirectOffAll();
+    }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = "${ApiConfigs.baseUrl}${APIEndpoints.ongoingBookings}?limit=10";
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.ongoingBookings}?limit=10";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
-      debugPrint("Response GET ongoingBookings: ${response.statusCode} -> ${response.data}");
+      debugPrint(
+        "Response GET ongoingBookings: ${response.statusCode} -> ${response.data}",
+      );
       if (response.statusCode == 200) {
         final resData = response.data;
         if (resData['status'] == "true" || resData['status'] == true) {
@@ -119,33 +161,42 @@ class BookingsController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        debugPrint("Dio Exception response: ${e.response?.data}");
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
+      if (!silent) {
+        if (e.response != null) {
+          debugPrint("Dio Exception response: ${e.response?.data}");
+          handleDioException(e);
+        } else {
+          debugPrint("Dio Exception without response: ${e.message}");
+        }
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isOngoingLoading = false;
+      if (!silent) {
+        isOngoingLoading = false;
+      }
       update();
     }
   }
 
-  Future<void> getCompletedBookings() async {
-    isCompletedLoading = true;
-    update();
-    checkNetworkAndRedirectOffAll();
+  Future<void> getCompletedBookings({bool silent = false}) async {
+    if (!silent) {
+      isCompletedLoading = true;
+      update();
+      checkNetworkAndRedirectOffAll();
+    }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = "${ApiConfigs.baseUrl}${APIEndpoints.completedBookings}?limit=10";
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.completedBookings}?limit=10";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
-      debugPrint("Response GET completedBookings: ${response.statusCode} -> ${response.data}");
+      debugPrint(
+        "Response GET completedBookings: ${response.statusCode} -> ${response.data}",
+      );
       if (response.statusCode == 200) {
         final resData = response.data;
         if (resData['status'] == "true" || resData['status'] == true) {
@@ -158,17 +209,21 @@ class BookingsController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        debugPrint("Dio Exception response: ${e.response?.data}");
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
+      if (!silent) {
+        if (e.response != null) {
+          debugPrint("Dio Exception response: ${e.response?.data}");
+          handleDioException(e);
+        } else {
+          debugPrint("Dio Exception without response: ${e.message}");
+        }
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      isCompletedLoading = false;
+      if (!silent) {
+        isCompletedLoading = false;
+      }
       update();
     }
   }
@@ -177,12 +232,13 @@ class BookingsController extends GetxController {
   void onInit() {
     super.onInit();
     print("BookingsController initialized");
+    _startAutoUpdate();
   }
 
   @override
   void onClose() {
     print("BookingsController disposed");
+    _timer?.cancel();
     super.onClose();
   }
-
 }

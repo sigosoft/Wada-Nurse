@@ -66,6 +66,7 @@ class Nurse {
   final dynamic deletedAt;
   final dynamic createdAt;
   final dynamic updatedAt;
+  final dynamic name;
   final dynamic countryCode;
   final dynamic mobile;
   final dynamic email;
@@ -93,6 +94,7 @@ class Nurse {
     required this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
+    required this.name,
     required this.countryCode,
     required this.mobile,
     required this.email,
@@ -118,18 +120,19 @@ class Nurse {
     salaryType: json["salary_type"],
     salary: json["salary"],
     regPaymentId: json["reg_payment_id"],
-    deletedAt: DateTime.parse(json["deleted_at"]),
+    deletedAt: json["deleted_at"] == null ? null : DateTime.tryParse(json["deleted_at"].toString()),
     createdAt: json["created_at"],
-    updatedAt: DateTime.parse(json["updated_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"].toString()),
+    name: json["name"],
     countryCode: json["country_code"],
     mobile: json["mobile"],
     email: json["email"],
     image: json["image"],
-    dob: DateTime.parse(json["dob"]),
+    dob: json["dob"] == null ? null : DateTime.tryParse(json["dob"].toString()),
     gender: json["gender"],
     convertedCreatedAt: json["converted_created_at"],
-    nurseLanguages: List<NurseLanguage>.from(json["nurse_languages"].map((x) => NurseLanguage.fromJson(x))),
-    nurseCertificates: List<dynamic>.from(json["nurse_certificates"].map((x) => x)),
+    nurseLanguages: json["nurse_languages"] == null ? [] : List<NurseLanguage>.from(json["nurse_languages"].map((x) => NurseLanguage.fromJson(x))),
+    nurseCertificates: json["nurse_certificates"] == null ? [] : List<dynamic>.from(json["nurse_certificates"].map((x) => x)),
   );
 
   Map<String, dynamic> toJson() => {
@@ -146,14 +149,15 @@ class Nurse {
     "salary_type": salaryType,
     "salary": salary,
     "reg_payment_id": regPaymentId,
-    "deleted_at": deletedAt.toIso8601String(),
+    "deleted_at": deletedAt?.toIso8601String(),
     "created_at": createdAt,
-    "updated_at": updatedAt.toIso8601String(),
+    "updated_at": updatedAt?.toIso8601String(),
+    "name": name,
     "country_code": countryCode,
     "mobile": mobile,
     "email": email,
     "image": image,
-    "dob": "${dob.year.toString().padLeft(4, '0')}-${dob.month.toString().padLeft(2, '0')}-${dob.day.toString().padLeft(2, '0')}",
+    "dob": dob == null ? null : "${dob.year.toString().padLeft(4, '0')}-${dob.month.toString().padLeft(2, '0')}-${dob.day.toString().padLeft(2, '0')}",
     "gender": gender,
     "converted_created_at": convertedCreatedAt,
     "nurse_languages": List<dynamic>.from(nurseLanguages.map((x) => x.toJson())),
@@ -180,7 +184,7 @@ class NurseLanguage {
     id: json["id"],
     nurseId: json["nurse_id"],
     languageId: json["language_id"],
-    createdAt: DateTime.parse(json["created_at"]),
+    createdAt: json["created_at"] == null ? null : DateTime.tryParse(json["created_at"].toString()),
     updatedAt: json["updated_at"],
   );
 
@@ -188,7 +192,7 @@ class NurseLanguage {
     "id": id,
     "nurse_id": nurseId,
     "language_id": languageId,
-    "created_at": createdAt.toIso8601String(),
+    "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt,
   };
 }
