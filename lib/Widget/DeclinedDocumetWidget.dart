@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:waaada_nurseapp/Controller/RegistrationController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
@@ -8,7 +9,8 @@ import 'package:waaada_nurseapp/Widget/UploadRecordWidget.dart';
 import 'package:waaada_nurseapp/Widget/UploadedFilesListView.dart';
 
 class DeclinedDocumentWidget extends StatelessWidget {
-  const DeclinedDocumentWidget({super.key});
+  final RegistrationController controller;
+  const DeclinedDocumentWidget({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,7 @@ class DeclinedDocumentWidget extends StatelessWidget {
           ),
           SizedBox(height: 30),
           UploadedFilesListView(
-            uploadedFiles: List<XFile>.empty(),
+            uploadedFiles: controller.declinedIdProofImages,
             onRemove: (index) {},
           ),
           SizedBox(height: 10),
@@ -58,16 +60,32 @@ class DeclinedDocumentWidget extends StatelessWidget {
             size: 14.0,
           ),
           SizedBox(height: 10),
-          UploadRecordWidget(),
+          UploadRecordWidget(
+            onTap: () {
+              controller.showImageOptions(
+                context,
+                isCertificates: true,
+                isReupload: true,
+              );
+            },
+          ),
           SizedBox(height: 20),
           UploadedFilesListView(
-            uploadedFiles: List<XFile>.empty(),
-            onRemove: (index) {},
+            uploadedFiles: controller.reuploadCertificates,
+            onRemove: (index) {
+              controller.reuploadCertificates.removeAt(index);
+              controller.update();
+            },
           ),
           SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SubmitButtonWidget(text: Strings.submit),
+            child: SubmitButtonWidget(
+              onTap: () {
+                controller.uploadDocuments();
+              },
+              text: Strings.submit,
+            ),
           ),
         ],
       ),

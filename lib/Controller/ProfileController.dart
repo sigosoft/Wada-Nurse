@@ -233,6 +233,97 @@ class ProfileController extends GetxController {
     );
   }
 
+  Future<void> logout() async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("=== Requesting Logout ===");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.logout;
+      debugPrint("URL: $url");
+      debugPrint("Method: GET");
+
+      if (token != null) {
+        dio.options.headers["Authorization"] = "Bearer $token";
+      }
+
+      final response = await dio.get(url);
+
+      debugPrint("=== Response for Logout ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['status'] == "true" || data['status'] == true) {
+          showToast(data['message'] ?? "Logged out successfully.");
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception during logout: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error during logout: $e");
+    } finally {
+      await removename("token");
+      isLoading = false;
+      update();
+      Get.offAll(() => const LoginScreen());
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("=== Requesting Delete Account ===");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.deleteAccount;
+      debugPrint("URL: $url");
+      debugPrint("Method: POST");
+
+      if (token != null) {
+        dio.options.headers["Authorization"] = "Bearer $token";
+      }
+
+      final response = await dio.post(url);
+
+      debugPrint("=== Response for Delete Account ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['status'] == "true" || data['status'] == true) {
+          showToast(data['message'] ?? "Account deleted successfully.");
+        } else {
+          showToast(
+            data['message'] ?? "Failed to delete account.",
+            isError: true,
+          );
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception during delete account: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error during delete account: $e");
+    } finally {
+      await removename("token");
+      isLoading = false;
+      update();
+      Get.offAll(() => const LoginScreen());
+    }
+  }
+
   void showLogoutShiftBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -305,8 +396,8 @@ class ProfileController extends GetxController {
                         height: 45,
                         child: ElevatedButton(
                           onPressed: () async {
-                            await removename("token");
-                            Get.offAll(() => const LoginScreen());
+                            Get.back();
+                            await logout();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
@@ -416,7 +507,10 @@ class ProfileController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            Get.back();
+                            await deleteAccount();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: redColorText2,
                             shape: RoundedRectangleBorder(

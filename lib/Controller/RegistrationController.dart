@@ -16,6 +16,7 @@ import 'package:waaada_nurseapp/Resource/Strings.dart';
 import 'package:waaada_nurseapp/Utils/CheckNetworkConnectivity.dart';
 import 'package:waaada_nurseapp/Utils/HandleDioExceptions.dart';
 import 'package:waaada_nurseapp/Utils/ShowToast.dart';
+import 'package:waaada_nurseapp/Utils/utils.dart' hide showToast;
 import 'package:waaada_nurseapp/View/Home/Home.dart';
 import 'package:waaada_nurseapp/View/OtpVerification/Otpverification.dart';
 import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
@@ -103,6 +104,8 @@ class RegistrationController extends GetxController {
   DateTime? selectedDateOfBirth;
   List<XFile> idProofImages = [];
   List<XFile> certificatesImages = [];
+  List<XFile> declinedIdProofImages = [];
+  List<XFile> reuploadCertificates = [];
   String? otp;
   double registrationFee = 0.0;
   TextEditingController expectedSalaryController = TextEditingController();
@@ -158,7 +161,7 @@ class RegistrationController extends GetxController {
     update();
   }
 
-  Future<void> openCamera({bool? isIdProof, bool? isCertificates}) async {
+  Future<void> openCamera({bool? isIdProof, bool? isCertificates, bool isReupload = false}) async {
     try {
       cameraStatus = await Permission.camera.status;
       if (cameraStatus.isPermanentlyDenied) {
@@ -177,7 +180,13 @@ class RegistrationController extends GetxController {
           preferredCameraDevice: CameraDevice.rear,
         );
         if (image != null) {
-          if (isIdProof ?? false) {
+          if (isReupload) {
+            if (reuploadCertificates.length >= 5) {
+              showToast("Maximum 5 certificates photos allowed", isError: true);
+              return;
+            }
+            reuploadCertificates.add(image);
+          } else if (isIdProof ?? false) {
             if (idProofImages.length >= 5) {
               showToast("Maximum 5 ID proof photos allowed", isError: true);
               return;
@@ -280,7 +289,7 @@ class RegistrationController extends GetxController {
     }
   }
 
-  Future<void> openGallery({bool? isIdProof, bool? isCertificates}) async {
+  Future<void> openGallery({bool? isIdProof, bool? isCertificates, bool isReupload = false}) async {
     try {
       bool hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -291,7 +300,17 @@ class RegistrationController extends GetxController {
         imageQuality: 80,
       );
       if (image != null) {
-        if (isIdProof ?? false) {
+        if (isReupload) {
+          if (reuploadCertificates.length >= 5) {
+            showToast("Maximum 5 certificates photos allowed", isError: true);
+            return;
+          }
+          if (reuploadCertificates.contains(image)) {
+            showToast("Certificate already uploaded", isError: true);
+            return;
+          }
+          reuploadCertificates.add(image);
+        } else if (isIdProof ?? false) {
           if (idProofImages.isNotEmpty && idProofImages.length >= 1) {
             showToast("Maximum 1 ID proof photos allowed", isError: true);
             return;
@@ -331,6 +350,7 @@ class RegistrationController extends GetxController {
     bool? isIdProof,
     bool? isCertificates,
     List<XFile>? imagesList,
+    bool isReupload = false,
   }) async {
     // Request camera permission
     await Permission.camera.request();
@@ -388,6 +408,7 @@ class RegistrationController extends GetxController {
                       openCamera(
                         isIdProof: isIdProof,
                         isCertificates: isCertificates,
+                        isReupload: isReupload,
                       );
                     },
                     media: media,
@@ -399,6 +420,7 @@ class RegistrationController extends GetxController {
                       openGallery(
                         isIdProof: isIdProof,
                         isCertificates: isCertificates,
+                        isReupload: isReupload,
                       );
                     },
                     media: media,
@@ -798,6 +820,209 @@ class RegistrationController extends GetxController {
       }
     } catch (e) {
       debugPrint("Unexpected Error: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> getDocuments() async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("=== Requesting Documents ===");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.documents;
+      debugPrint("URL: $url");
+      debugPrint("Method: GET");
+
+      dio.options.headers["Authorization"] = "Bearer $token";
+      final response = await dio.get(url);
+
+      debugPrint("=== Response for Documents ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          final data = resData['data'];
+
+          idProofImages = [];
+          certificatesImages = [];
+          declinedIdProofImages = [];
+
+          String getFullUrl(String path) {
+            if (path.startsWith('http') || path.startsWith('https')) {
+              return path;
+            }
+            return ApiConfigs.Image_URL + path;
+          }
+
+          if (data is Map<String, dynamic>) {
+            final idProof = data['id_proof'];
+            if (idProof is List) {
+              for (var file in idProof) {
+                if (file is String && file.isNotEmpty) {
+                  idProofImages.add(XFile(getFullUrl(file)));
+                } else if (file is Map) {
+                  final path =
+                      file['id_proof_url'] ??
+                      file['image'] ??
+                      file['file'] ??
+                      file['path'];
+                  final status = file['status']?.toString().toLowerCase();
+                  if (path != null) {
+                    final fullUrl = getFullUrl(path.toString());
+                    if (status == "declined" || status == "decline") {
+                      declinedIdProofImages.add(XFile(fullUrl));
+                    } else {
+                      idProofImages.add(XFile(fullUrl));
+                    }
+                  }
+                }
+              }
+            } else if (idProof is Map) {
+              final path =
+                  idProof['id_proof_url'] ??
+                  idProof['image'] ??
+                  idProof['file'] ??
+                  idProof['path'];
+              final status = idProof['status']?.toString().toLowerCase();
+              if (path != null) {
+                final fullUrl = getFullUrl(path.toString());
+                if (status == "declined" || status == "decline") {
+                  declinedIdProofImages.add(XFile(fullUrl));
+                } else {
+                  idProofImages.add(XFile(fullUrl));
+                }
+              }
+            } else if (idProof is String && idProof.isNotEmpty) {
+              idProofImages.add(XFile(getFullUrl(idProof)));
+            }
+
+            final certs = data['certificates'] ?? data['certificate'];
+            if (certs is List) {
+              for (var file in certs) {
+                if (file is String && file.isNotEmpty) {
+                  certificatesImages.add(XFile(getFullUrl(file)));
+                } else if (file is Map) {
+                  final path =
+                      file['certificate_url'] ??
+                      file['image'] ??
+                      file['certificate'] ??
+                      file['url'] ??
+                      file['file'] ??
+                      file['path'];
+                  if (path != null) {
+                    certificatesImages.add(XFile(getFullUrl(path.toString())));
+                  }
+                }
+              }
+            } else if (certs is String && certs.isNotEmpty) {
+              certificatesImages.add(XFile(getFullUrl(certs)));
+            }
+          } else if (data is List) {
+            for (var item in data) {
+              if (item is Map) {
+                final type = item['type']?.toString();
+                final file =
+                    item['image'] ??
+                    item['certificate'] ??
+                    item['document'] ??
+                    item['file'] ??
+                    "";
+                if (file.toString().isNotEmpty) {
+                  final fullUrl = getFullUrl(file.toString());
+                  if (type == "1" || type?.toLowerCase() == "id_proof") {
+                    idProofImages.add(XFile(fullUrl));
+                  } else {
+                    certificatesImages.add(XFile(fullUrl));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception fetching documents: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error fetching documents: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> uploadDocuments() async {
+    if (reuploadCertificates.isEmpty) {
+      showToast("Please select certificates to upload", isError: true);
+      return;
+    }
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.uploadDocuments;
+      debugPrint("=== Requesting uploadDocuments ===");
+      debugPrint("URL: $url");
+      debugPrint("Token: $token");
+
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      List<MapEntry<String, MultipartFile>> files = [];
+      for (var file in reuploadCertificates) {
+        String fileName = file.path.split('/').last;
+        files.add(
+          MapEntry(
+            "certificates[]",
+            await MultipartFile.fromFile(
+              file.path,
+              filename: fileName,
+            ),
+          ),
+        );
+      }
+
+      FormData requestBody = FormData.fromMap({});
+      requestBody.files.addAll(files);
+
+      final response = await dio.post(url, data: requestBody);
+
+      debugPrint("=== Response uploadDocuments ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          showToast(resData['message']?.toString() ?? "Documents uploaded successfully.");
+          reuploadCertificates.clear();
+          await getDocuments();
+        } else {
+          showToast(resData['message']?.toString() ?? "Failed to upload documents.", isError: true);
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception uploading documents: ${e.message}");
+        showToast("Error uploading documents: ${e.message}", isError: true);
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error uploading documents: $e");
+      showToast("Error: $e", isError: true);
     } finally {
       isLoading = false;
       update();

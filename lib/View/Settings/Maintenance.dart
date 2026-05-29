@@ -6,14 +6,13 @@ import '../../Resource/Strings.dart';
 
 
 class Maintenance extends StatelessWidget {
-  const Maintenance({super.key});
+  final String? serverDownReason;
+  const Maintenance({super.key, this.serverDownReason});
 
   @override
-
-
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:Colors.white,
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
@@ -40,14 +39,15 @@ class Maintenance extends StatelessWidget {
               height: 10,
             ),
             Text(
-             Strings.sorryWereDownForMaintenanceWellBeBackUpShortly,
+              (serverDownReason != null && serverDownReason!.isNotEmpty && serverDownReason != "null")
+                  ? serverDownReason!.replaceAll(RegExp(r'<[^>]*>'), '').trim()
+                  : Strings.sorryWereDownForMaintenanceWellBeBackUpShortly,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
                   color: Colors.black),
             ),
-
           ],
         ),
       ),

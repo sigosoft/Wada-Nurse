@@ -7,6 +7,8 @@ import 'package:waaada_nurseapp/Controller/HomeController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/View/Shift/ShiftDetails.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
+import '../Controller/ShiftDetailsController.dart';
+
 
 import '../../Resource/Strings.dart';
 import '../../Widget/HomeShiftCardWidget.dart';
@@ -231,11 +233,20 @@ class NurseShiftItem extends StatelessWidget {
                   : const SizedBox(),
               bookingType == "upcoming" || bookingType == "ongoing"
                   ? SubmitButtonWidget(
-                    text:
-                        bookingType == "upcoming"
-                            ? Strings.checkin
-                            : Strings.checkout,
-                  )
+                      text:
+                          bookingType == "upcoming"
+                              ? Strings.checkin
+                              : Strings.checkout,
+                      onTap: () {
+                        final controller = Get.put(ShiftDetailsController());
+                        controller.booking = request;
+                        if (bookingType == "ongoing") {
+                          controller.openCameraBottomSheet(context, "checkout");
+                        } else {
+                          controller.showCantCheckinBottomSheet(context);
+                        }
+                      },
+                    )
                   : Container(),
             ],
           ),

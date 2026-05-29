@@ -4,32 +4,39 @@ import 'package:get/get.dart';
 import 'package:waaada_nurseapp/Utils/ShowToast.dart';
 import 'package:waaada_nurseapp/View/Settings/ServerDown.dart';
 
+String _extractMessage(dynamic value) {
+  if (value == null) return "";
+  if (value is String) return value;
+  if (value is List) {
+    if (value.isEmpty) return "";
+    return _extractMessage(value.first);
+  }
+  if (value is Map) {
+    if (value.containsKey('message') && value['message'] != null) {
+      final msg = _extractMessage(value['message']);
+      if (msg.isNotEmpty) return msg;
+    }
+    if (value.containsKey('error') && value['error'] != null) {
+      final msg = _extractMessage(value['error']);
+      if (msg.isNotEmpty) return msg;
+    }
+    if (value.containsKey('errors') && value['errors'] != null) {
+      final msg = _extractMessage(value['errors']);
+      if (msg.isNotEmpty) return msg;
+    }
+    for (var val in value.values) {
+      final msg = _extractMessage(val);
+      if (msg.isNotEmpty) return msg;
+    }
+  }
+  return value.toString();
+}
+
 String getErrorMessage(dynamic data) {
   if (data == null) return "Something went wrong";
-  if (data is Map) {
-    if (data.containsKey('message') &&
-        data['message'] != null &&
-        data['message'].toString().isNotEmpty) {
-      return data['message'].toString();
-    }
-    if (data.containsKey('error') &&
-        data['error'] != null &&
-        data['error'].toString().isNotEmpty) {
-      return data['error'].toString();
-    }
-    if (data.containsKey('errors') && data['errors'] != null) {
-      final errors = data['errors'];
-      if (errors is Map && errors.isNotEmpty) {
-        final firstError = errors.values.first;
-        if (firstError is List && firstError.isNotEmpty) {
-          return firstError.first.toString();
-        }
-        return firstError.toString();
-      }
-    }
-    return data.toString();
-  }
-  return data.toString();
+  final extracted = _extractMessage(data);
+  final cleaned = extracted.replaceAll(RegExp(r'[{}[\]]'), '').trim();
+  return cleaned.isNotEmpty ? cleaned : "Something went wrong";
 }
 
 void handleDioException(DioException e) {

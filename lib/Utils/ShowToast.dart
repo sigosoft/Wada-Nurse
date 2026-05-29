@@ -9,10 +9,11 @@ void showToast(
   Duration? duration,
   bool isError = false,
 }) {
+  final cleanMessage = message.replaceAll(RegExp(r'[{}[\]]'), '').trim();
   if (context != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(cleanMessage),
         duration: duration ?? const Duration(seconds: 3),
         backgroundColor: isError ? Colors.red : colorPrimary,
         behavior: SnackBarBehavior.floating,
@@ -22,7 +23,7 @@ void showToast(
     );
   } else {
     Fluttertoast.showToast(
-      msg: message,
+      msg: cleanMessage,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       backgroundColor: isError ? Colors.red : Colors.black,

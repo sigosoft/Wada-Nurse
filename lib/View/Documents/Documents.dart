@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:waaada_nurseapp/Controller/RegistrationController.dart';
 
 import 'package:waaada_nurseapp/Resource/Strings.dart';
+import 'package:waaada_nurseapp/Resource/Colors.dart';
 
 import 'package:waaada_nurseapp/Widget/CustomAppBar.dart';
 
@@ -30,33 +31,44 @@ class _DocumentsState extends State<Documents> {
           Get.back();
         },
       ),
-      body: SingleChildScrollView(
-        child: GetBuilder(
-          init: RegistrationController(),
-          builder:
-              (controller) => SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20),
-                    DocumentWidget(
-                      onRemove: (index) {},
-                      status: "Pending",
-                      uploadedFiles: List<XFile>.empty(),
-                    ),
-                    SizedBox(height: 20),
-                    DocumentWidget(
-                      onRemove: (index) {},
-                      status: "Verified",
-                      uploadedFiles: List<XFile>.empty(),
-                    ),
-                    SizedBox(height: 20),
-                    DeclinedDocumentWidget(),
-                    SizedBox(height: 20),
-                  ],
-                ),
+      body: GetBuilder<RegistrationController>(
+        init: RegistrationController(),
+        initState: (state) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            state.controller?.getDocuments();
+          });
+        },
+        builder: (controller) {
+          if (controller.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: colorPrimary),
+            );
+          }
+          return SingleChildScrollView(
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20),
+                  DocumentWidget(
+                    onRemove: (index) {},
+                    status: "Pending",
+                    uploadedFiles: controller.idProofImages,
+                  ),
+                  SizedBox(height: 20),
+                  DocumentWidget(
+                    onRemove: (index) {},
+                    status: "Verified",
+                    uploadedFiles: controller.certificatesImages,
+                  ),
+                  SizedBox(height: 20),
+                  DeclinedDocumentWidget(controller: controller),
+                  SizedBox(height: 20),
+                ],
               ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

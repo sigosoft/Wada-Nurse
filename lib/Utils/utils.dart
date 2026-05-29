@@ -61,8 +61,10 @@ showErrorMessage(error) {
       } else {
         message = e.response!.data["exception"];
       }
+      final cleanMessage =
+          message.toString().replaceAll(RegExp(r'[{}[\]]'), '').trim();
       Fluttertoast.showToast(
-        msg: message.toString(),
+        msg: cleanMessage,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -71,8 +73,12 @@ showErrorMessage(error) {
         fontSize: 16.0,
       );
     } else {
+      final cleanErrorMsg =
+          (error?.toString() ?? "Oops Something went wrong try again !!")
+              .replaceAll(RegExp(r'[{}[\]]'), '')
+              .trim();
       Fluttertoast.showToast(
-        msg: error?.toString() ?? "Oops Something went wrong try again !!",
+        msg: cleanErrorMsg,
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -85,27 +91,30 @@ showErrorMessage(error) {
 }
 
 showToast(String message, {BuildContext? context, SnackBarAction? action}) {
+  final cleanMessage = message.replaceAll(RegExp(r'[{}[\]]'), '').trim();
   Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      timeInSecForIosWeb: 4,
-      gravity: ToastGravity.TOP,
-      webBgColor: '#000000',
-      backgroundColor: Colors.black,
-      webPosition: "center",
-      textColor: Colors.white,
-      fontSize: 16.0);
+    msg: cleanMessage,
+    toastLength: Toast.LENGTH_LONG,
+    timeInSecForIosWeb: 4,
+    gravity: ToastGravity.TOP,
+    webBgColor: '#000000',
+    backgroundColor: Colors.black,
+    webPosition: "center",
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
 }
 
 showFlushBar(String message) {
   Flushbar(
     flushbarPosition: FlushbarPosition.TOP,
-    messageText:  Text(
+    messageText: Text(
       message,
       style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w500),
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
     ),
     duration: const Duration(seconds: 3),
     backgroundColor: colorPrimary,
@@ -146,13 +155,15 @@ showErrorToast(Map<String, dynamic> message) {
     }
   }
 }
- Future<bool> checkNetwork() async {
+
+Future<bool> checkNetwork() async {
   try {
-    List<ConnectivityResult> connectivityResult = await Connectivity().checkConnectivity();
+    List<ConnectivityResult> connectivityResult =
+        await Connectivity().checkConnectivity();
     if (connectivityResult.contains(ConnectivityResult.wifi) ||
         connectivityResult.contains(ConnectivityResult.mobile)) {
       final result = await InternetAddress.lookup('google.com');
-  if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         return true;
       }
     }
@@ -161,5 +172,3 @@ showErrorToast(Map<String, dynamic> message) {
   }
   return false;
 }
-
-

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:waaada_nurseapp/Utils/utils.dart';
-import 'package:waaada_nurseapp/View/Home/Home.dart';
 import 'package:waaada_nurseapp/View/Splash/Splash.dart';
 
 void main() async {
@@ -18,10 +16,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final token = getSavedObject("token");
-    return GetMaterialApp(
+    return const GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: token != null ? Home() : const SplashScreen(),
+      home: SplashScreen(),
     );
   }
 }

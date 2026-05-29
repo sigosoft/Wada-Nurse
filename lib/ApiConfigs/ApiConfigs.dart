@@ -14,6 +14,7 @@ class APIEndpoints {
   static const String home = "home";
   static const String login = "login";
   static const String shiftDetails = "shiftDetails";
+  static const String bookingDetails = "bookingDetails";
   static const String bookingRequests = "bookingRequests";
   static const String pendingBookings = "pendingBookings";
   static const String ongoingBookings = "ongoingBookings";
@@ -26,4 +27,19 @@ class APIEndpoints {
   static const String changePassword = "changePassword";
   static const String notifications = "notifications";
   static const String updateAcceptStatus = "updateAcceptStatus";
+  static const String terms = "terms";
+  static const String privacyPolicy = "privacy_policy";
+  static const String about = "about";
+  static const String contactUs = "contact_us";
+  static const String faqs = "faqs";
+  static const String deleteAccount = "deleteAccount";
+  static const String documents = "documents";
+  static const String uploadDocuments = "uploadDocuments";
+  static const String settings = "settings";
+  static const String logout = "logout";
+  static const String checkIn = "checkIn";
+
+  ////////////////////////////Leaves////////////////////////
+  static const String requestLeave = "requestLeave";
+  static const String nurseLeaves = "nurseLeaves";
 }

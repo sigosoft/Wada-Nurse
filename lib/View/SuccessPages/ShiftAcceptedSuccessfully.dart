@@ -45,7 +45,7 @@ class _ShiftAcceptedSuccessfullyState extends State<ShiftAcceptedSuccessfully> {
     try {
       var token = await getSavedObject("token");
       String url =
-          "${ApiConfigs.baseUrl}${APIEndpoints.shiftDetails}?booking_id=${widget.bookingId}";
+          "${ApiConfigs.baseUrl}${APIEndpoints.bookingDetails}?booking_id=${widget.bookingId}";
       _dio.options.headers["Authorization"] = "Bearer $token";
       final response = await _dio.get(url);
       if (response.statusCode == 200) {
@@ -54,7 +54,7 @@ class _ShiftAcceptedSuccessfullyState extends State<ShiftAcceptedSuccessfully> {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
             setState(() {
-              _booking = data['booking'];
+              _booking = data['booking'] ?? data;
               _isLoading = false;
             });
             return;

@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -21,7 +21,6 @@ import '../View/SuccessPages/ShiftAcceptedSuccessfully.dart';
 import '../Widget/ReasonDropDownField.dart';
 import '../Widget/TextInputWidget.dart';
 
-
 class ShiftDetailsController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
@@ -30,6 +29,8 @@ class ShiftDetailsController extends GetxController {
   final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
   Map<String, dynamic>? booking;
   List<dynamic> shifts = [];
+  List<dynamic> upcomingLeaves = [];
+  List<dynamic> leaveHistory = [];
 
   Future<void> getShiftDetails(int bookingId) async {
     booking = null;
@@ -40,7 +41,8 @@ class ShiftDetailsController extends GetxController {
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
-      String url = "${ApiConfigs.baseUrl}${APIEndpoints.shiftDetails}?booking_id=$bookingId";
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.bookingDetails}?booking_id=$bookingId";
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
       if (response.statusCode == 200) {
@@ -48,7 +50,7 @@ class ShiftDetailsController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
-            booking = data['booking'];
+            booking = data['booking'] ?? data;
             shifts = data['shifts'] is List ? data['shifts'] : [];
           }
         }
@@ -80,18 +82,17 @@ class ShiftDetailsController extends GetxController {
       String url = ApiConfigs.baseUrl + APIEndpoints.updateAcceptStatus;
       dio.options.headers["Authorization"] = "Bearer $token";
 
-      dio.options.queryParameters = {
-        "booking_id": bookingId,
-        "booking id": bookingId,
-        "status": status,
-      };
+      // Clear any global query parameters to avoid pollution
+      dio.options.queryParameters = {};
+
+      final queryParams = {"booking id": bookingId, "status": status};
 
       debugPrint("=== API REQUEST: updateAcceptStatus ===");
       debugPrint("URL: $url");
-      debugPrint("Query Params: ${dio.options.queryParameters}");
+      debugPrint("Query Params: $queryParams");
       debugPrint("=======================================");
 
-      final response = await dio.get(url);
+      final response = await dio.get(url, queryParameters: queryParams);
 
       debugPrint("=== API RESPONSE: updateAcceptStatus ===");
       debugPrint("Status Code: ${response.statusCode}");
@@ -141,16 +142,89 @@ class ShiftDetailsController extends GetxController {
     super.onClose();
   }
 
-
   Future<void> openCamera(String shiftType) async {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
-        _image = photo;
-        final int bId = int.tryParse(booking?['id']?.toString() ?? "") ?? 0;
-        Get.to(ChooseLocation(shiftType: shiftType, bookingId: bId));
+      _image = photo;
+      final int bId = int.tryParse(booking?['id']?.toString() ?? "") ?? 0;
+      Get.to(ChooseLocation(shiftType: shiftType, bookingId: bId));
     }
   }
-  void showInfoBottomSheet(BuildContext context) {
+
+  XFile? get selfieImage => _image;
+
+  Future<bool> checkIn(int bookingId, double latitude, double longitude) async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.checkIn;
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      // Clear any global query parameters to avoid pollution
+      dio.options.queryParameters = {};
+
+      FormData requestBody = FormData.fromMap({
+        "booking_id": bookingId,
+        "latitude": latitude.toString(),
+        "longitude": longitude.toString(),
+      });
+
+      if (_image != null) {
+        String fileName = _image!.path.split('/').last;
+        requestBody.files.add(
+          MapEntry(
+            "selfie",
+            await MultipartFile.fromFile(_image!.path, filename: fileName),
+          ),
+        );
+      }
+
+      debugPrint("=== API REQUEST: checkIn ===");
+      debugPrint("URL: $url");
+      debugPrint("Fields: ${requestBody.fields}");
+      debugPrint(
+        "Files: ${requestBody.files.map((e) => "${e.key}: ${e.value.filename}")}",
+      );
+      debugPrint("============================");
+
+      final response = await dio.post(url, data: requestBody);
+
+      debugPrint("=== API RESPONSE: checkIn ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("=============================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          showToast(resData['message'] ?? "Checked in successfully.");
+          return true;
+        } else {
+          showToast(resData['message'] ?? "Failed to check in.", isError: true);
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception checking in: ${e.message}");
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  void showInfoBottomSheet(BuildContext context, int bookingId) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -195,7 +269,13 @@ class ShiftDetailsController extends GetxController {
                   height: 45,
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      Get.back();
+                      bool success = await updateAcceptStatus(bookingId, 7);
+                      if (success) {
+                        Get.back();
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorPrimary,
                       shape: RoundedRectangleBorder(
@@ -295,13 +375,18 @@ class ShiftDetailsController extends GetxController {
                         child: ElevatedButton(
                           onPressed: () async {
                             Get.back();
-                            bool success = await updateAcceptStatus(bookingId, 1);
+                            bool success = await updateAcceptStatus(
+                              bookingId,
+                              1,
+                            );
                             if (success) {
-                              Get.to(ShiftAcceptedSuccessfully(
-                                title: Strings.accepted,
-                                message: Strings.acceptedmsg,
-                                bookingId: bookingId,
-                              ));
+                              Get.to(
+                                ShiftAcceptedSuccessfully(
+                                  title: Strings.accepted,
+                                  message: Strings.acceptedmsg,
+                                  bookingId: bookingId,
+                                ),
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -450,7 +535,6 @@ class ShiftDetailsController extends GetxController {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-
                       // final cameras = await availableCameras();
                       // final frontCamera = cameras.firstWhere(
                       //       (camera) => camera.lensDirection == CameraLensDirection.front,
@@ -500,7 +584,7 @@ class ShiftDetailsController extends GetxController {
               children: [
                 SizedBox(height: 15),
                 Container(
-                  margin: EdgeInsets.only(left: 10,right: 10),
+                  margin: EdgeInsets.only(left: 10, right: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -510,27 +594,32 @@ class ShiftDetailsController extends GetxController {
                         width: 40,
                         height: 40,
                       ),
-          
+
                       InkWell(
                         onTap: () {
                           Get.back();
                         },
-                        child: IconButton(icon: Icon(Icons.close, color: Colors.black,), onPressed: () {  Get.back();},),
+                        child: IconButton(
+                          icon: Icon(Icons.close, color: Colors.black),
+                          onPressed: () {
+                            Get.back();
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 5),
                 Container(
-                  margin: EdgeInsets.only(left: 10,right: 10),
-                  child:
-                  Text(
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  child: Text(
                     Strings.reasonforLeaving,
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
-                    ),),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
                 ReasonDropdownField(),
@@ -542,8 +631,8 @@ class ShiftDetailsController extends GetxController {
                 ),
                 SizedBox(height: 30),
                 Container(
-                  margin: EdgeInsets.only(left: 10,right: 10),
-                  child:  SizedBox(
+                  margin: EdgeInsets.only(left: 10, right: 10),
+                  child: SizedBox(
                     height: 45,
                     width: double.infinity,
                     child: ElevatedButton(
@@ -648,8 +737,46 @@ class ShiftDetailsController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Get.to(LeaveShiftSuccessfully());
+                          onPressed: () async {
+                            Get.back(); // close confirm sheet
+                            Get.back(); // close reason sheet
+                            String fromDate = "";
+                            String toDate = "";
+                            if (booking != null) {
+                              if (booking?['from_date'] != null) {
+                                try {
+                                  fromDate =
+                                      booking?['from_date'].toString().split(
+                                        ' ',
+                                      )[0] ??
+                                      "";
+                                } catch (_) {}
+                              }
+                              if (booking?['to_date'] != null) {
+                                try {
+                                  toDate =
+                                      booking?['to_date'].toString().split(
+                                        ' ',
+                                      )[0] ??
+                                      "";
+                                } catch (_) {}
+                              }
+                            }
+                            if (fromDate.isEmpty) {
+                              fromDate =
+                                  "${DateTime.now().toLocal()}".split(' ')[0];
+                            }
+                            if (toDate.isEmpty) {
+                              toDate =
+                                  "${DateTime.now().toLocal()}".split(' ')[0];
+                            }
+                            bool success = await requestLeave(
+                              fromDate: fromDate,
+                              toDate: toDate,
+                            );
+                            if (success) {
+                              Get.to(LeaveShiftSuccessfully());
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorPrimary,
@@ -679,4 +806,105 @@ class ShiftDetailsController extends GetxController {
     );
   }
 
+  Future<bool> requestLeave({
+    required String fromDate,
+    required String toDate,
+  }) async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("=== Requesting Leave ===");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.requestLeave;
+      debugPrint("URL: $url");
+      debugPrint("Method: POST");
+
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      FormData formData = FormData.fromMap({
+        "from_date": fromDate,
+        "to_date": toDate,
+      });
+
+      debugPrint("Request Body: from_date: $fromDate, to_date: $toDate");
+
+      final response = await dio.post(url, data: formData);
+
+      debugPrint("=== Response for Request Leave ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['status'] == "true" || data['status'] == true) {
+          showToast(data['message'] ?? "Leave requested successfully.");
+          await getNurseLeaves();
+          return true;
+        } else {
+          showToast(
+            data['message'] ?? "Failed to request leave.",
+            isError: true,
+          );
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception requesting leave: ${e.message}");
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error requesting leave: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> getNurseLeaves() async {
+    try {
+      var token = await getSavedObject("token");
+      debugPrint("=== Requesting Nurse Leaves ===");
+      debugPrint("Token: $token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.nurseLeaves;
+      debugPrint("URL: $url");
+      debugPrint("Method: GET");
+
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      final response = await dio.get(url);
+
+      debugPrint("=== Response for Nurse Leaves ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          final data = resData['data'];
+          if (data is Map<String, dynamic>) {
+            upcomingLeaves =
+                data['upcoming_leaves'] is List ? data['upcoming_leaves'] : [];
+            leaveHistory =
+                data['leave_history'] is List ? data['leave_history'] : [];
+            update();
+          }
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        handleDioException(e);
+      } else {
+        debugPrint("Dio Exception fetching nurse leaves: ${e.message}");
+      }
+    } catch (e) {
+      debugPrint("Unexpected Error fetching nurse leaves: $e");
+    }
+  }
 }

@@ -145,10 +145,74 @@ class _ShiftDetailsState extends State<ShiftDetails> {
           }
         }
 
-        final service =
-            booking?['service']?['name'] ??
-            booking?['service']?.toString() ??
-            "Wound Care and Dressing";
+        List<String> servicesList = [];
+        if (booking != null) {
+          final categoryName = booking['category_name'];
+          if (categoryName != null &&
+              categoryName.toString().trim().isNotEmpty) {
+            final categoryNameStr = categoryName.toString();
+            if (categoryNameStr.contains(',')) {
+              servicesList.addAll(
+                categoryNameStr
+                    .split(',')
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty),
+              );
+            } else {
+              servicesList.add(categoryNameStr.trim());
+            }
+          }
+
+          if (servicesList.isEmpty) {
+            String? getServiceName(dynamic item) {
+              if (item == null) return null;
+              if (item is String) return item;
+              if (item is Map) {
+                return item['category_name']?.toString() ??
+                    item['category']?['name']?.toString() ??
+                    item['name']?.toString() ??
+                    item['service_name']?.toString() ??
+                    item['service']?['name']?.toString();
+              }
+              return null;
+            }
+
+            final bookingServices =
+                booking['booking_services'] ??
+                booking['bookingServices'] ??
+                booking['services'];
+            if (bookingServices is List) {
+              for (var item in bookingServices) {
+                final name = getServiceName(item);
+                if (name != null && name.isNotEmpty) {
+                  servicesList.add(name);
+                }
+              }
+            }
+
+            if (servicesList.isEmpty) {
+              final singleService = booking['service'];
+              if (singleService is List) {
+                for (var item in singleService) {
+                  final name = getServiceName(item);
+                  if (name != null && name.isNotEmpty) {
+                    servicesList.add(name);
+                  }
+                }
+              } else {
+                final name = getServiceName(singleService);
+                if (name != null && name.isNotEmpty) {
+                  servicesList.add(name);
+                }
+              }
+            }
+          }
+        }
+
+        if (servicesList.isEmpty) {
+          servicesList.add("Wound Care and Dressing");
+        }
+        servicesList = servicesList.toSet().toList();
         final notes =
             booking?['notes'] ??
             booking?['note'] ??
@@ -391,12 +455,14 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                       size: 15.00,
                                     ),
                                     SizedBox(height: 5),
-                                    CheckboxWdget(
-                                      content: service,
-                                      size: 13,
-                                      color: Colors.black,
-                                      isChecked: true,
-                                    ),
+                                    ...servicesList.map((serviceName) {
+                                      return CheckboxWdget(
+                                        content: serviceName,
+                                        size: 13,
+                                        color: Colors.black,
+                                        isChecked: true,
+                                      );
+                                    }).toList(),
                                     SizedBox(height: 10),
                                     TextStyleInterWithoutPadding(
                                       text: Strings.notes,
@@ -504,6 +570,7 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                         onPressed: () {
                                           controller.showInfoBottomSheet(
                                             context,
+                                            widget.bookingId,
                                           );
                                         },
                                         style: ElevatedButton.styleFrom(
