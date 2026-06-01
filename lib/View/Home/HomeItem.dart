@@ -6,6 +6,7 @@ import '../../Controller/HomeController.dart';
 import '../../Resource/Strings.dart';
 import '../../Resource/Colors.dart';
 import '../../Widget/TextStyleInterWithoutPadding.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'HomeAppBar.dart';
 
 class HomeItem extends StatefulWidget {
@@ -51,96 +52,133 @@ class _HomeItemState extends State<HomeItem> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (controller.ongoingRequests.isNotEmpty) ...[
-                          TextStyleInterWithoutPadding(
-                            textAlign: TextAlign.center,
-                            text: Strings.ongoing,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            size: 15.00,
+                        if (controller.ongoingRequests.isEmpty &&
+                            controller.upcomingRequests.isEmpty &&
+                            controller.pendingRequests.isEmpty &&
+                            controller.recentRequests.isEmpty) ...[
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.height * 0.15,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "lib/Assets/Images/No data.png",
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    height:
+                                        MediaQuery.of(context).size.height *
+                                        0.3,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    "No requests",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.ongoingRequests.length,
-                            itemBuilder: (context, index) {
-                              return NurseShiftItem(
-                                bookingType: "ongoing",
-                                showLocationText: false,
-                                request: controller.ongoingRequests[index],
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 5),
-                        ],
-                        if (controller.upcomingRequests.isNotEmpty) ...[
-                          TextStyleInterWithoutPadding(
-                            textAlign: TextAlign.center,
-                            text: Strings.upcoming,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            size: 15.00,
-                          ),
-                          const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.upcomingRequests.length,
-                            itemBuilder: (context, index) {
-                              return NurseShiftItem(
-                                bookingType: "upcoming",
-                                showLocationText: false,
-                                request: controller.upcomingRequests[index],
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 5),
-                        ],
-                        if (controller.pendingRequests.isNotEmpty) ...[
-                          TextStyleInterWithoutPadding(
-                            textAlign: TextAlign.center,
-                            text: Strings.requests,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            size: 15.00,
-                          ),
-                          const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.pendingRequests.length,
-                            itemBuilder: (context, index) {
-                              return NurseShiftItem(
-                                bookingType: "requests",
-                                showLocationText: false,
-                                request: controller.pendingRequests[index],
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 5),
-                        ],
-                        if (controller.recentRequests.isNotEmpty) ...[
-                          TextStyleInterWithoutPadding(
-                            textAlign: TextAlign.center,
-                            text: Strings.recentshifts,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            size: 15.00,
-                          ),
-                          const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.recentRequests.length,
-                            itemBuilder: (context, index) {
-                              return NurseShiftItem(
-                                bookingType: "recent",
-                                showLocationText: false,
-                                request: controller.recentRequests[index],
-                              );
-                            },
-                          ),
+                        ] else ...[
+                          if (controller.ongoingRequests.isNotEmpty) ...[
+                            TextStyleInterWithoutPadding(
+                              textAlign: TextAlign.center,
+                              text: Strings.ongoing,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              size: 15.00,
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.ongoingRequests.length,
+                              itemBuilder: (context, index) {
+                                return NurseShiftItem(
+                                  bookingType: "ongoing",
+                                  showLocationText: false,
+                                  request: controller.ongoingRequests[index],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 5),
+                          ],
+                          if (controller.upcomingRequests.isNotEmpty) ...[
+                            TextStyleInterWithoutPadding(
+                              textAlign: TextAlign.center,
+                              text: Strings.upcoming,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              size: 15.00,
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.upcomingRequests.length,
+                              itemBuilder: (context, index) {
+                                return NurseShiftItem(
+                                  bookingType: "upcoming",
+                                  showLocationText: false,
+                                  request: controller.upcomingRequests[index],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 5),
+                          ],
+                          if (controller.pendingRequests.isNotEmpty) ...[
+                            TextStyleInterWithoutPadding(
+                              textAlign: TextAlign.center,
+                              text: Strings.requests,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              size: 15.00,
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.pendingRequests.length,
+                              itemBuilder: (context, index) {
+                                return NurseShiftItem(
+                                  bookingType: "requests",
+                                  showLocationText: false,
+                                  request: controller.pendingRequests[index],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 5),
+                          ],
+                          if (controller.recentRequests.isNotEmpty) ...[
+                            TextStyleInterWithoutPadding(
+                              textAlign: TextAlign.center,
+                              text: Strings.recentshifts,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              size: 15.00,
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.recentRequests.length,
+                              itemBuilder: (context, index) {
+                                return NurseShiftItem(
+                                  bookingType: "recent",
+                                  showLocationText: false,
+                                  request: controller.recentRequests[index],
+                                );
+                              },
+                            ),
+                          ],
                         ],
                       ],
                     ),

@@ -10,6 +10,7 @@ import '../Utils/HandleDioExceptions.dart';
 import '../Utils/LoggingInterceptor.dart';
 import '../Utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../Model/ProfileModel.dart';
 import '../View/Settings/Maintenance.dart';
 import '../View/Settings/NeedAnUpdate.dart';
 
@@ -22,6 +23,7 @@ class HomeController extends GetxController {
   List<dynamic> upcomingRequests = [];
   List<dynamic> pendingRequests = [];
   List<dynamic> recentRequests = [];
+  String profileImage = "";
 
   Timer? _timer;
 
@@ -78,14 +80,17 @@ class HomeController extends GetxController {
               dynamic updateType = 0;
 
               if (Platform.isAndroid) {
-                latestVersion = data['android_nurse_version']?.toString() ?? "0.0.0";
+                latestVersion =
+                    data['android_nurse_version']?.toString() ?? "0.0.0";
                 updateType = data['android_nurse_update'];
               } else if (Platform.isIOS) {
-                latestVersion = data['ios_nurse_version']?.toString() ?? "0.0.0";
+                latestVersion =
+                    data['ios_nurse_version']?.toString() ?? "0.0.0";
                 updateType = data['ios_nurse_update'];
               }
 
-              if ((updateType == 2 || updateType == "2") && isVersionLessThan(currentVersion, latestVersion)) {
+              if ((updateType == 2 || updateType == "2") &&
+                  isVersionLessThan(currentVersion, latestVersion)) {
                 Get.offAll(() => const NeedAnUpdate());
                 return true;
               }
@@ -103,10 +108,15 @@ class HomeController extends GetxController {
 
   bool isVersionLessThan(String current, String latest) {
     try {
-      List<int> currentParts = current.split('+').first.split('.').map(int.parse).toList();
-      List<int> latestParts = latest.split('+').first.split('.').map(int.parse).toList();
-      
-      int length = currentParts.length > latestParts.length ? currentParts.length : latestParts.length;
+      List<int> currentParts =
+          current.split('+').first.split('.').map(int.parse).toList();
+      List<int> latestParts =
+          latest.split('+').first.split('.').map(int.parse).toList();
+
+      int length =
+          currentParts.length > latestParts.length
+              ? currentParts.length
+              : latestParts.length;
       for (int i = 0; i < length; i++) {
         int currentPart = i < currentParts.length ? currentParts[i] : 0;
         int latestPart = i < latestParts.length ? latestParts[i] : 0;
@@ -136,6 +146,30 @@ class HomeController extends GetxController {
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
+
+      // Fetch profile image from Profile API
+      try {
+        String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
+        dio.options.headers["Authorization"] = "Bearer $token";
+        final profileResponse = await dio.get(profileUrl);
+        if (profileResponse.statusCode == 200) {
+          final resBody = profileResponse.data;
+          if (resBody is Map) {
+            final nurseImage = resBody['data']?['nurse']?['image'];
+            if (nurseImage != null &&
+                nurseImage.toString().isNotEmpty &&
+                nurseImage.toString() != 'null') {
+              profileImage = nurseImage.toString();
+              debugPrint(
+                "HomeController profileImage updated from Profile API: $profileImage",
+              );
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint("Error fetching profile image from Profile API: $e");
+      }
+
       String url = ApiConfigs.baseUrl + APIEndpoints.home;
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);

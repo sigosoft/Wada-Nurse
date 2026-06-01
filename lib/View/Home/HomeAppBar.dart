@@ -25,7 +25,10 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         builder: (controller) {
           final nurseName =
               controller.homeData?['nurse']?['name'] ?? "Joy Thomas";
-          final nurseImage = controller.homeData?['nurse']?['image'];
+          final nurseImage =
+              controller.profileImage.isNotEmpty
+                  ? controller.profileImage
+                  : controller.homeData?['nurse']?['image'];
 
           return Container(
             margin: const EdgeInsets.only(left: 15),
@@ -36,9 +39,12 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   width: 50,
                   child: ClipOval(
                     child:
-                        nurseImage != null && nurseImage.toString().isNotEmpty && nurseImage.toString() != "null"
+                        nurseImage != null &&
+                                nurseImage.toString().isNotEmpty &&
+                                nurseImage.toString() != "null"
                             ? CachedNetworkImage(
-                              imageUrl: ApiConfigs.Image_URL + nurseImage.toString(),
+                              imageUrl:
+                                  ApiConfigs.Image_URL + nurseImage.toString(),
                               fit: BoxFit.cover,
                               placeholder:
                                   (context, url) => const Center(

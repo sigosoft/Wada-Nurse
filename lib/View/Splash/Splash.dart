@@ -5,6 +5,8 @@ import 'package:waaada_nurseapp/Resource/Colors.dart';
 import 'package:waaada_nurseapp/View/Login/Login.dart';
 import 'package:waaada_nurseapp/Widget/ButtonWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
+import 'package:waaada_nurseapp/Utils/utils.dart';
+import 'package:waaada_nurseapp/View/Home/Home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,6 +16,22 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() async {
+    final token = getSavedObject("token");
+    if (token != null && token.toString().isNotEmpty) {
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (mounted) {
+        Get.offAll(() => Home());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,16 +64,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 fit: BoxFit.scaleDown,
               ),
               SizedBox(height: 50),
-             TextStyleInterWithPadding(
+              TextStyleInterWithPadding(
                 text: "Lorem ipsum",
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
                 size: 25.00,
               ),
               SizedBox(height: 20),
-             TextStyleInterWithPadding(
+              TextStyleInterWithPadding(
                 text:
-                "Quis autem vel eum iure reprehenderit qui in eareda voluptate velit.",
+                    "Quis autem vel eum iure reprehenderit qui in eareda voluptate velit.",
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
                 size: 15.00,
@@ -63,10 +81,11 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: 40),
               ButtonWidget(
-                  onTap:(){
-                    Get.off(LoginScreen());
-                  },
-                  text: "Get Started"),
+                onTap: () {
+                  Get.off(LoginScreen());
+                },
+                text: "Get Started",
+              ),
             ],
           ),
         ),

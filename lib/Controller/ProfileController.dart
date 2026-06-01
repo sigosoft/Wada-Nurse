@@ -17,6 +17,7 @@ import '../Utils/LoggingInterceptor.dart';
 import '../Utils/ShowToast.dart';
 import '../Utils/utils.dart' hide showToast;
 import '../View/Login/Login.dart';
+import 'HomeController.dart';
 
 class ProfileController extends GetxController {
   bool premiumMembership = true;
@@ -62,6 +63,10 @@ class ProfileController extends GetxController {
                 ? "Salaried Employee"
                 : "Hourly Employee";
         image = profileModel?.data.nurse.image?.toString() ?? "";
+        if (Get.isRegistered<HomeController>()) {
+          Get.find<HomeController>().profileImage = image;
+          Get.find<HomeController>().update();
+        }
         update();
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");

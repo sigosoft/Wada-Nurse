@@ -9,7 +9,6 @@ import 'package:waaada_nurseapp/View/Shift/ShiftDetails.dart';
 import 'package:waaada_nurseapp/Widget/SubmitButtonWidget.dart';
 import '../Controller/ShiftDetailsController.dart';
 
-
 import '../../Resource/Strings.dart';
 import '../../Widget/HomeShiftCardWidget.dart';
 
@@ -91,9 +90,9 @@ class NurseShiftItem extends StatelessWidget {
     final genderNum =
         request?['patient']?['gender'] ?? request?['user']?['gender'];
     final gender = genderNum == 1 ? "M" : (genderNum == 2 ? "F" : "O");
-    final location =
-        request?['location'] ??
-        "Raipur, Chhattisgarh"; // Fallback to रायपुर if null
+    final location = request?['location']?.toString();
+    final hasLocation =
+        location != null && location.isNotEmpty && location != 'null';
     final checkinDate = formatDate(request?['from_date'] ?? "");
     final checkinTime = formatTime(request?['checkin_time'] ?? "");
     final checkoutDate = formatDate(request?['to_date'] ?? "");
@@ -155,27 +154,29 @@ class NurseShiftItem extends StatelessWidget {
                       color: Colors.grey,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'lib/Assets/Images/locations.svg',
-                        width: 13,
-                        height: 13,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        location,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: colorPrimary,
+                  if (hasLocation) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'lib/Assets/Images/locations.svg',
+                          width: 13,
+                          height: 13,
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 5),
+                        Text(
+                          location!,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: colorPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 10),
                 ],
               ),
@@ -233,20 +234,20 @@ class NurseShiftItem extends StatelessWidget {
                   : const SizedBox(),
               bookingType == "upcoming" || bookingType == "ongoing"
                   ? SubmitButtonWidget(
-                      text:
-                          bookingType == "upcoming"
-                              ? Strings.checkin
-                              : Strings.checkout,
-                      onTap: () {
-                        final controller = Get.put(ShiftDetailsController());
-                        controller.booking = request;
-                        if (bookingType == "ongoing") {
-                          controller.openCameraBottomSheet(context, "checkout");
-                        } else {
-                          controller.showCantCheckinBottomSheet(context);
-                        }
-                      },
-                    )
+                    text:
+                        bookingType == "upcoming"
+                            ? Strings.checkin
+                            : Strings.checkout,
+                    onTap: () {
+                      final controller = Get.put(ShiftDetailsController());
+                      controller.booking = request;
+                      if (bookingType == "ongoing") {
+                        controller.openCameraBottomSheet(context, "checkout");
+                      } else {
+                        controller.showCantCheckinBottomSheet(context);
+                      }
+                    },
+                  )
                   : Container(),
             ],
           ),
