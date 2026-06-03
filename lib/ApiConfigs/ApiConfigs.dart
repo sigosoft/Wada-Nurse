@@ -8,7 +8,7 @@ class ApiConfigs {
 class APIEndpoints {
   static const String getCountryCodes = "getCountryCodes";
   static const String getLanguages = "getLanguages";
-  static const String register = "register";
+  static const String register = "nurseRegistration";
   static const String getRegistrationFee = "reg_fee";
   static const String sendRegisterOtp = "send_reg_otp";
   static const String home = "home";
@@ -35,6 +35,8 @@ class APIEndpoints {
   static const String deleteAccount = "deleteAccount";
   static const String documents = "documents";
   static const String uploadDocuments = "uploadDocuments";
+  static const String uploadRegistrationDocuments =
+      "uploadRegistrationDocuments";
   static const String settings = "settings";
   static const String logout = "logout";
   static const String checkIn = "checkIn";
@@ -42,4 +44,8 @@ class APIEndpoints {
   ////////////////////////////Leaves////////////////////////
   static const String requestLeave = "requestLeave";
   static const String nurseLeaves = "nurseLeaves";
+
+  ////////////////////////////Razorpay////////////////////////
+  static const String createOrder = "razor-order";
+  static const String checkRegistrationStatus = "checkRegistrationStatus";
 }

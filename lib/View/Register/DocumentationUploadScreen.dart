@@ -32,6 +32,7 @@ class DocumentationUploadScreen extends StatefulWidget {
     required this.password,
     required this.confirmPassword,
     required this.otp,
+    this.isAfterLogin = false,
   });
   final XFile image;
   final String fullName;
@@ -45,6 +46,7 @@ class DocumentationUploadScreen extends StatefulWidget {
   final String password;
   final String confirmPassword;
   final String otp;
+  final bool isAfterLogin;
   @override
   State<DocumentationUploadScreen> createState() =>
       _DocumentationUploadScreenState();
@@ -65,6 +67,9 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
           init: RegistrationController(),
           didChangeDependencies: (state) {
             state.controller?.getRegistrationFee();
+            if (widget.isAfterLogin) {
+              state.controller?.fetchProfileAndPrefillData();
+            }
           },
           builder:
               (controller) => SafeArea(
@@ -227,41 +232,64 @@ class _DocumentationUploadScreenState extends State<DocumentationUploadScreen> {
                       margin: EdgeInsets.symmetric(horizontal: 10),
                       child: SubmitButtonWidget(
                         onTap: () {
-                          if (formKey.currentState?.validate() ?? false) {
-                            return;
-                          }
+                          if (widget.isAfterLogin) {
+                            if (controller.expectedSalaryController.text.trim().isEmpty) {
+                              showToast("Expected salary is required", isError: true);
+                              return;
+                            }
 
-                          if (controller.expectedSalaryController.text.trim().isEmpty) {
-                            showToast("Expected salary is required", isError: true);
-                            return;
-                          }
+                            if (!_isTermsChecked) {
+                              setState(() {
+                                _showTermsError = true;
+                              });
+                              return;
+                            }
 
-                          // Validate privacy policy checkbox
-                          if (!_isTermsChecked) {
-                            setState(() {
-                              _showTermsError = true;
-                            });
-                            return;
+                            controller.submitDocumentsAndPayAfterLogin(
+                              idProof: controller.idProofImages,
+                              certificates: controller.certificatesImages,
+                              salaryType: controller.selectedType,
+                              salary: controller.expectedSalaryController.text.trim(),
+                              contact: widget.phoneNumber,
+                              email: widget.email,
+                            );
+                          } else {
+                            if (formKey.currentState?.validate() ?? false) {
+                              return;
+                            }
+
+                            if (controller.expectedSalaryController.text.trim().isEmpty) {
+                              showToast("Expected salary is required", isError: true);
+                              return;
+                            }
+
+                            // Validate privacy policy checkbox
+                            if (!_isTermsChecked) {
+                              setState(() {
+                                _showTermsError = true;
+                              });
+                              return;
+                            }
+                            final registrationData = RegistrationData(
+                              fullname: widget.fullName,
+                              countryCode: widget.countryCode,
+                              mobile: widget.phoneNumber,
+                              email: widget.email,
+                              dob: widget.dateOfBirth,
+                              gender: widget.gender,
+                              qualification: widget.qualification,
+                              password: widget.password,
+                              passwordConfirmation: widget.confirmPassword,
+                              image: widget.image,
+                              languages: widget.languages,
+                              idProof: controller.idProofImages,
+                              certificates: controller.certificatesImages,
+                              salaryType: controller.selectedType,
+                              salary: controller.expectedSalaryController.text.trim(),
+                              otp: widget.otp,
+                            );
+                            controller.validateRegister(registrationData);
                           }
-                          final registrationData = RegistrationData(
-                            fullname: widget.fullName,
-                            countryCode: widget.countryCode,
-                            mobile: widget.phoneNumber,
-                            email: widget.email,
-                            dob: widget.dateOfBirth,
-                            gender: widget.gender,
-                            qualification: widget.qualification,
-                            password: widget.password,
-                            passwordConfirmation: widget.confirmPassword,
-                            image: widget.image,
-                            languages: widget.languages,
-                            idProof: controller.idProofImages,
-                            certificates: controller.certificatesImages,
-                            salaryType: controller.selectedType,
-                            salary: controller.expectedSalaryController.text.trim(),
-                            otp: widget.otp,
-                          );
-                          controller.validateRegister(registrationData);
                         },
                         text:
                             controller.registrationFee > 0

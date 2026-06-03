@@ -24,7 +24,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: GetBuilder<HomeController>(
         builder: (controller) {
           final nurseName =
-              controller.homeData?['nurse']?['name'] ?? "Joy Thomas";
+              controller.profileName.isNotEmpty
+                  ? controller.profileName
+                  : controller.homeData?['nurse']?['name'];
           final nurseImage =
               controller.profileImage.isNotEmpty
                   ? controller.profileImage
@@ -80,13 +82,26 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       fontWeight: FontWeight.w500,
                       size: 12.00,
                     ),
-                    TextStyleInterWithoutPadding(
-                      textAlign: TextAlign.center,
-                      text: nurseName,
-                      color: greyishBlack,
-                      fontWeight: FontWeight.w700,
-                      size: 16.00,
-                    ),
+                    if (nurseName != null && nurseName.toString().isNotEmpty)
+                      TextStyleInterWithoutPadding(
+                        textAlign: TextAlign.center,
+                        text: nurseName.toString(),
+                        color: greyishBlack,
+                        fontWeight: FontWeight.w700,
+                        size: 16.00,
+                      )
+                    else
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4.0),
+                        child: SizedBox(
+                          width: 15,
+                          height: 15,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorPrimary,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ],

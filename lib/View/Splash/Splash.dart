@@ -8,6 +8,8 @@ import 'package:waaada_nurseapp/Widget/TextStyleInterWithPadding.dart';
 import 'package:waaada_nurseapp/Utils/utils.dart';
 import 'package:waaada_nurseapp/View/Home/Home.dart';
 
+import 'package:waaada_nurseapp/Controller/LoginController.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -27,7 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token != null && token.toString().isNotEmpty) {
       await Future.delayed(const Duration(milliseconds: 1500));
       if (mounted) {
-        Get.offAll(() => Home());
+        final loginCtrl = Get.put(LoginController());
+        await loginCtrl.checkUserStatusAndNavigate();
       }
     }
   }

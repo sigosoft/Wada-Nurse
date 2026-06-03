@@ -15,6 +15,9 @@ import 'package:waaada_nurseapp/View/OtpVerification/Otpverification.dart';
 import 'package:waaada_nurseapp/View/CreateNewPassword/CreateNewPassword.dart';
 import 'package:waaada_nurseapp/View/Login/Login.dart';
 
+import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
+import 'package:image_picker/image_picker.dart';
+
 class LoginController extends GetxController {
   final Dio dio = Dio()..interceptors.add(LoggingInterceptor());
   bool isLoading = false;
@@ -40,6 +43,91 @@ class LoginController extends GetxController {
   void onClose() {
     print("LoginController disposed");
     super.onClose();
+  }
+
+  Future<void> checkUserStatusAndNavigate({bool showLoading = false}) async {
+    if (showLoading) {
+      isLoading = true;
+      update();
+    }
+    try {
+      var token = await getSavedObject("token");
+      String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
+      final Dio checkDio = Dio();
+      checkDio.options.headers["Authorization"] = "Bearer $token";
+      final profileResponse = await checkDio.get(profileUrl);
+
+      if (profileResponse.statusCode == 200) {
+        final resData = profileResponse.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          final nurseData = resData['data']?['nurse'];
+          if (nurseData != null) {
+            final idProof = nurseData['id_proof_url'];
+            final regPaymentId = nurseData['reg_payment_id'];
+            final nId = nurseData['id']?.toString();
+            if (nId != null) {
+              saveObject("nurse_id", nId);
+            }
+
+            // Fetch registration fee
+            double regFee = 0.0;
+            try {
+              String feeUrl =
+                  ApiConfigs.baseUrl + APIEndpoints.getRegistrationFee;
+              final feeResponse = await checkDio.get(feeUrl);
+              if (feeResponse.statusCode == 200) {
+                final fee =
+                    feeResponse.data['data']?['nurse_reg_fee'] ??
+                    feeResponse.data['data']?['registration_fee'];
+                if (fee != null) {
+                  regFee = double.tryParse(fee.toString()) ?? 0.0;
+                }
+              }
+            } catch (e) {
+              debugPrint("Error fetching registration fee: $e");
+            }
+
+            // Check if documents are uploaded and payment completed (if fee > 0)
+            bool needsDocuments =
+                (idProof == null || idProof.toString().trim().isEmpty);
+            bool needsPayment =
+                (regFee > 0 &&
+                    (regPaymentId == null ||
+                        regPaymentId.toString().trim().isEmpty));
+
+            if (needsDocuments || needsPayment) {
+              Get.offAll(
+                () => DocumentationUploadScreen(
+                  image: XFile(nurseData['image']?.toString() ?? ""),
+                  fullName: nurseData['name']?.toString() ?? "",
+                  countryCode: nurseData['country_code']?.toString() ?? "",
+                  phoneNumber: nurseData['mobile']?.toString() ?? "",
+                  email: nurseData['email']?.toString() ?? "",
+                  dateOfBirth: nurseData['dob']?.toString() ?? "",
+                  gender: nurseData['gender']?.toString() ?? "",
+                  qualification: nurseData['qualification']?.toString() ?? "",
+                  languages: const [],
+                  password: "",
+                  confirmPassword: "",
+                  otp: "",
+                  isAfterLogin: true,
+                ),
+              );
+              return;
+            }
+          }
+        }
+      }
+      Get.offAll(() => Home());
+    } catch (e) {
+      debugPrint("Error in checkUserStatusAndNavigate: $e");
+      Get.offAll(() => Home());
+    } finally {
+      if (showLoading) {
+        isLoading = false;
+        update();
+      }
+    }
   }
 
   Future<void> getCountryCodes() async {
@@ -107,7 +195,7 @@ class LoginController extends GetxController {
           }
           final message = data['message'] ?? "Logged in successfully";
           showToast(message);
-          Get.offAll(() => Home());
+          await checkUserStatusAndNavigate(showLoading: true);
         } else {
           final message = data['message'] ?? "Login failed";
           showToast(message, isError: true);

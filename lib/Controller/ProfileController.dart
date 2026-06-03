@@ -65,6 +65,7 @@ class ProfileController extends GetxController {
         image = profileModel?.data.nurse.image?.toString() ?? "";
         if (Get.isRegistered<HomeController>()) {
           Get.find<HomeController>().profileImage = image;
+          Get.find<HomeController>().profileName = name;
           Get.find<HomeController>().update();
         }
         update();

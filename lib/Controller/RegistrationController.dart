@@ -23,6 +23,9 @@ import 'package:waaada_nurseapp/View/Register/DocumentationUploadScreen.dart';
 import 'package:waaada_nurseapp/View/Register/Widgets/ChooseImageWidget.dart';
 import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 import 'package:waaada_nurseapp/View/Login/Login.dart';
+import 'package:waaada_nurseapp/Services/RazorpayService.dart';
+import 'package:waaada_nurseapp/View/SuccessPages/PaymentSuccessScreen.dart';
+import 'package:waaada_nurseapp/View/SuccessPages/PaymentFailedScreen.dart';
 
 Future<List<CountryCode>> fetchCountryCodesInIsolate(String url) async {
   try {
@@ -69,6 +72,7 @@ class RegistrationController extends GetxController {
   void onInit() {
     super.onInit();
     debugPrint("RegistrationController initialized");
+    nurseId = getSavedObject("nurse_id")?.toString();
   }
 
   @override
@@ -109,6 +113,7 @@ class RegistrationController extends GetxController {
   String? otp;
   double registrationFee = 0.0;
   TextEditingController expectedSalaryController = TextEditingController();
+  String? nurseId;
   // variables should not be declared below this line
 
   void onDateSelected(DateTime? date) {
@@ -161,7 +166,11 @@ class RegistrationController extends GetxController {
     update();
   }
 
-  Future<void> openCamera({bool? isIdProof, bool? isCertificates, bool isReupload = false}) async {
+  Future<void> openCamera({
+    bool? isIdProof,
+    bool? isCertificates,
+    bool isReupload = false,
+  }) async {
     try {
       cameraStatus = await Permission.camera.status;
       if (cameraStatus.isPermanentlyDenied) {
@@ -289,7 +298,11 @@ class RegistrationController extends GetxController {
     }
   }
 
-  Future<void> openGallery({bool? isIdProof, bool? isCertificates, bool isReupload = false}) async {
+  Future<void> openGallery({
+    bool? isIdProof,
+    bool? isCertificates,
+    bool isReupload = false,
+  }) async {
     try {
       bool hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -593,6 +606,99 @@ class RegistrationController extends GetxController {
     return true;
   }
 
+  bool startRegistrationFlow({
+    required String fullname,
+    required String countryCode,
+    required String mobile,
+    required String email,
+    required String dob,
+    required String gender,
+    required String qualification,
+    required String password,
+    required String passwordConfirmation,
+    required String image,
+    required List<String> languages,
+  }) {
+    if (email.isNotEmpty) {
+      final emailRegex = RegExp(
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      );
+      if (!emailRegex.hasMatch(email)) {
+        showToast("Enter a valid email address", isError: true);
+        return false;
+      }
+    }
+    if (mobile.isNotEmpty) {
+      if (mobile.length != 10) {
+        showToast("Enter a valid mobile number", isError: true);
+        return false;
+      }
+    }
+    if (password.isEmpty) {
+      showToast("Password is required", isError: true);
+      return false;
+    }
+    if (password.length < 8) {
+      showToast("Password must be at least 8 characters long", isError: true);
+      return false;
+    }
+    if (passwordConfirmation.isEmpty) {
+      showToast("Confirm password is required", isError: true);
+      return false;
+    }
+    if (passwordConfirmation != password) {
+      showToast("Password and confirm password do not match", isError: true);
+      return false;
+    }
+    if (image.isEmpty) {
+      showToast("Please upload a profile photo", isError: true);
+      return false;
+    }
+    List<String> languageIds = [];
+    if (this.languages?.data?.languages != null) {
+      for (var name in languages) {
+        for (var lang in this.languages!.data!.languages!) {
+          if (lang.language?.toLowerCase().trim() ==
+              name.toLowerCase().trim()) {
+            if (lang.id != null) {
+              languageIds.add(lang.id.toString());
+            }
+            break;
+          }
+        }
+      }
+    }
+    if (languageIds.isEmpty && languages.isNotEmpty) {
+      languageIds = languages;
+    }
+
+    final registrationData = RegistrationData(
+      fullname: fullname,
+      countryCode: countryCode,
+      mobile: mobile,
+      email: email,
+      dob: dob,
+      gender: gender,
+      qualification: qualification,
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+      image: XFile(image),
+      languages: languageIds,
+      idProof: const [],
+      certificates: const [],
+      salaryType: "",
+      salary: "",
+      otp: "",
+    );
+
+    sendRegisterOtp(
+      mobile: mobile,
+      countryCode: countryCode,
+      registrationData: registrationData,
+    );
+    return true;
+  }
+
   void validateRegister(RegistrationData data) {
     debugPrint("fullname: ${data.fullname}");
     debugPrint("countryCode: ${data.countryCode}");
@@ -713,6 +819,8 @@ class RegistrationController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           debugPrint("Registration successful!");
           showToast(resData['message'] ?? "Registration successful!");
+
+          // Navigate to Login Screen directly after registration
           Get.offAll(() => const LoginScreen());
         } else {
           showToast(resData['message'] ?? "Registration failed", isError: true);
@@ -746,9 +854,11 @@ class RegistrationController extends GetxController {
       final response = await dio.get(url);
       debugPrint("Response: ${response.data}");
       if (response.statusCode == 200) {
-        final fee = response.data['data']?['registration_fee'];
+        final fee =
+            response.data['data']?['nurse_reg_fee'] ??
+            response.data['data']?['registration_fee'];
         if (fee != null) {
-          registrationFee = (fee is num) ? fee.toDouble() : 0.0;
+          registrationFee = double.tryParse(fee.toString()) ?? 0.0;
         } else {
           registrationFee = 0.0;
         }
@@ -984,10 +1094,7 @@ class RegistrationController extends GetxController {
         files.add(
           MapEntry(
             "certificates[]",
-            await MultipartFile.fromFile(
-              file.path,
-              filename: fileName,
-            ),
+            await MultipartFile.fromFile(file.path, filename: fileName),
           ),
         );
       }
@@ -1004,11 +1111,17 @@ class RegistrationController extends GetxController {
       if (response.statusCode == 200) {
         final resData = response.data;
         if (resData['status'] == "true" || resData['status'] == true) {
-          showToast(resData['message']?.toString() ?? "Documents uploaded successfully.");
+          showToast(
+            resData['message']?.toString() ??
+                "Documents uploaded successfully.",
+          );
           reuploadCertificates.clear();
           await getDocuments();
         } else {
-          showToast(resData['message']?.toString() ?? "Failed to upload documents.", isError: true);
+          showToast(
+            resData['message']?.toString() ?? "Failed to upload documents.",
+            isError: true,
+          );
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
@@ -1026,6 +1139,475 @@ class RegistrationController extends GetxController {
     } finally {
       isLoading = false;
       update();
+    }
+  }
+
+  Future<void> _startRegistrationPayment(RegistrationData data) async {
+    await RazorpayService().startPayment(
+      amount: registrationFee,
+      bookingType: "nurse_registration",
+      bookingId: "",
+      description: "Nurse Registration Fee",
+      contact: data.mobile,
+      email: data.email,
+      key: "rzp_test_T8uZQ7cP2kcNGN",
+      id: nurseId,
+      onSuccess: (paymentSuccessResponse) async {
+        debugPrint(
+          "[Registration] Razorpay payment success: ${paymentSuccessResponse.paymentId}",
+        );
+        Get.dialog(
+          const Center(child: CircularProgressIndicator(color: Colors.blue)),
+          barrierDismissible: false,
+        );
+
+        // Immediately call checkRegistrationStatus API and poll if not completed/success
+        Map<String, dynamic>? statusData;
+        bool isCompletedOrSuccess = false;
+        while (!isCompletedOrSuccess) {
+          statusData = await checkRegistrationStatus();
+          final feeStatus = statusData?['fee_status']?.toString().toLowerCase();
+          if (feeStatus == 'completed' || feeStatus == 'success') {
+            isCompletedOrSuccess = true;
+          } else {
+            await Future.delayed(const Duration(seconds: 2));
+          }
+        }
+
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        Get.offAll(
+          () => PaymentSuccessScreen(
+            amount: registrationFee,
+            paymentId: paymentSuccessResponse.paymentId ?? "",
+            email: data.email,
+            contact: data.mobile,
+          ),
+        );
+      },
+      onFailure: (paymentFailureResponse) {
+        debugPrint(
+          "[Registration] Razorpay payment failed/cancelled: ${paymentFailureResponse.message}",
+        );
+        Get.offAll(
+          () => PaymentFailedScreen(
+            amount: registrationFee,
+            errorMessage:
+                paymentFailureResponse.message ??
+                "Payment cancelled or failed.",
+            onRetry: () {
+              _startRegistrationPayment(data);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> submitDocumentsAfterLogin({
+    required List<XFile> idProof,
+    required List<XFile> certificates,
+    required String salaryType,
+    required String salary,
+  }) async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.updateProfile;
+
+      Map<String, dynamic> formMap = {
+        "salary_type": salaryType == "Salaried Employee" ? "1" : "2",
+        "salary": salary,
+      };
+
+      FormData formData = FormData.fromMap(formMap);
+
+      // Add ID proof if it is not a remote URL
+      if (idProof.isNotEmpty && !idProof.first.path.startsWith('http')) {
+        String fileName = idProof.first.path.split('/').last;
+        formData.files.add(
+          MapEntry(
+            "id_proof",
+            await MultipartFile.fromFile(
+              idProof.first.path,
+              filename: fileName,
+            ),
+          ),
+        );
+      }
+
+      // Add Certificates if they are not remote URLs
+      if (certificates.isNotEmpty) {
+        for (var file in certificates) {
+          if (!file.path.startsWith('http')) {
+            String fileName = file.path.split('/').last;
+            formData.files.add(
+              MapEntry(
+                "certificates[]",
+                await MultipartFile.fromFile(file.path, filename: fileName),
+              ),
+            );
+          }
+        }
+      }
+
+      final Dio checkDio = Dio();
+      checkDio.options.headers["Authorization"] = "Bearer $token";
+
+      debugPrint("=== API REQUEST: submitDocumentsAfterLogin ===");
+      debugPrint("URL: $url");
+      debugPrint("Form Map: $formMap");
+      debugPrint("=============================================");
+
+      final response = await checkDio.post(url, data: formData);
+
+      debugPrint("=== API RESPONSE: submitDocumentsAfterLogin ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("==============================================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error in submitDocumentsAfterLogin: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> submitDocumentsAndPayAfterLogin({
+    required List<XFile> idProof,
+    required List<XFile> certificates,
+    required String salaryType,
+    required String salary,
+    required String contact,
+    required String email,
+  }) async {
+    if (idProof.isEmpty) {
+      showToast("Please upload ID proof", isError: true);
+      return;
+    }
+    if (certificates.isEmpty) {
+      showToast("Please upload certificates", isError: true);
+      return;
+    }
+    if (salary.isEmpty) {
+      showToast("Expected salary is required", isError: true);
+      return;
+    }
+
+    // Check registration fee
+    await getRegistrationFee();
+
+    if (registrationFee > 0) {
+      await _startRegistrationPaymentAfterLogin(
+        amount: registrationFee,
+        contact: contact,
+        email: email,
+        idProof: idProof,
+        certificates: certificates,
+        salaryType: salaryType,
+        salary: salary,
+      );
+    } else {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: Colors.blue)),
+        barrierDismissible: false,
+      );
+      bool success = await this.uploadRegistrationDocuments(
+        idProof: idProof,
+        certificates: certificates,
+        salaryType: salaryType,
+        salary: salary,
+      );
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      if (success) {
+        Get.offAll(() => Home());
+      } else {
+        showToast(
+          "Failed to upload documents. Please try again.",
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Future<void> _startRegistrationPaymentAfterLogin({
+    required double amount,
+    required String contact,
+    required String email,
+    required List<XFile> idProof,
+    required List<XFile> certificates,
+    required String salaryType,
+    required String salary,
+  }) async {
+    await RazorpayService().startPayment(
+      amount: amount,
+      bookingType: "nurse_registration",
+      bookingId: "",
+      description: "Nurse Registration Fee",
+      contact: contact,
+      email: email,
+      key: "rzp_test_T8uZQ7cP2kcNGN",
+      id: nurseId,
+      onSuccess: (paymentSuccessResponse) async {
+        debugPrint(
+          "[Registration] Razorpay payment success: ${paymentSuccessResponse.paymentId}",
+        );
+        Get.dialog(
+          const Center(child: CircularProgressIndicator(color: Colors.blue)),
+          barrierDismissible: false,
+        );
+
+        // Immediately call checkRegistrationStatus API and poll if not completed/success
+        Map<String, dynamic>? statusData;
+        bool isCompletedOrSuccess = false;
+        while (!isCompletedOrSuccess) {
+          statusData = await checkRegistrationStatus();
+          final feeStatus = statusData?['fee_status']?.toString().toLowerCase();
+          if (feeStatus == 'completed' || feeStatus == 'success') {
+            isCompletedOrSuccess = true;
+          } else {
+            await Future.delayed(const Duration(seconds: 2));
+          }
+        }
+
+        bool uploaded = await uploadRegistrationDocuments(
+          idProof: idProof,
+          certificates: certificates,
+          salaryType: salaryType,
+          salary: salary,
+        );
+
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        if (uploaded) {
+          Get.offAll(
+            () => PaymentSuccessScreen(
+              amount: amount,
+              paymentId: paymentSuccessResponse.paymentId ?? "",
+              email: email,
+              contact: contact,
+              isAfterLogin: true,
+            ),
+          );
+        } else {
+          showToast(
+            "Payment successful, but document upload failed.",
+            isError: true,
+          );
+        }
+      },
+      onFailure: (paymentFailureResponse) {
+        debugPrint(
+          "[Registration] Razorpay payment failed/cancelled: ${paymentFailureResponse.message}",
+        );
+        Get.offAll(
+          () => PaymentFailedScreen(
+            amount: amount,
+            errorMessage:
+                paymentFailureResponse.message ??
+                "Payment cancelled or failed.",
+            onRetry: () {
+              _startRegistrationPaymentAfterLogin(
+                amount: amount,
+                contact: contact,
+                email: email,
+                idProof: idProof,
+                certificates: certificates,
+                salaryType: salaryType,
+                salary: salary,
+              );
+            },
+            isAfterLogin: true,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> fetchProfileAndPrefillData() async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
+      final Dio checkDio = Dio();
+      checkDio.options.headers["Authorization"] = "Bearer $token";
+      final response = await checkDio.get(profileUrl);
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          final nurseData = resData['data']?['nurse'];
+          if (nurseData != null) {
+            nurseId = nurseData['id']?.toString();
+            if (nurseId != null) {
+              saveObject("nurse_id", nurseId!);
+            }
+            String? salaryVal = nurseData['salary']?.toString();
+            if (salaryVal != null &&
+                salaryVal != "null" &&
+                salaryVal.isNotEmpty) {
+              final double? parsed = double.tryParse(salaryVal);
+              if (parsed != null && parsed != 0.0) {
+                expectedSalaryController.text = salaryVal;
+              }
+            }
+
+            var sType = nurseData['salary_type']?.toString();
+            if (sType == "1" || sType == "Salaried Employee") {
+              selectedType = Strings.salariedEmployee;
+            } else if (sType == "2" ||
+                sType == "Per Day Charge" ||
+                sType == "Hourly Employee") {
+              selectedType = Strings.perDayCharge;
+            }
+          }
+        }
+      }
+
+      // Load documents from server
+      await getDocuments();
+    } catch (e) {
+      debugPrint("Error in fetchProfileAndPrefillData: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<bool> uploadRegistrationDocuments({
+    required List<XFile> idProof,
+    required List<XFile> certificates,
+    required String salaryType,
+    required String salary,
+  }) async {
+    isLoading = true;
+    update();
+    try {
+      var token = await getSavedObject("token");
+      String url =
+          ApiConfigs.baseUrl + APIEndpoints.uploadRegistrationDocuments;
+
+      Map<String, dynamic> formMap = {
+        "salary_type": salaryType == "Salaried Employee" ? "1" : "2",
+        "salary": salary,
+      };
+
+      FormData formData = FormData.fromMap(formMap);
+
+      // Add ID proof if it is not a remote URL
+      if (idProof.isNotEmpty && !idProof.first.path.startsWith('http')) {
+        String fileName = idProof.first.path.split('/').last;
+        formData.files.add(
+          MapEntry(
+            "id_proof",
+            await MultipartFile.fromFile(
+              idProof.first.path,
+              filename: fileName,
+            ),
+          ),
+        );
+      }
+
+      // Add Certificates if they are not remote URLs
+      if (certificates.isNotEmpty) {
+        for (var file in certificates) {
+          if (!file.path.startsWith('http')) {
+            String fileName = file.path.split('/').last;
+            formData.files.add(
+              MapEntry(
+                "certificates[]",
+                await MultipartFile.fromFile(file.path, filename: fileName),
+              ),
+            );
+          }
+        }
+      }
+
+      final Dio checkDio = Dio();
+      checkDio.options.headers["Authorization"] = "Bearer $token";
+
+      debugPrint("=== API REQUEST: uploadRegistrationDocuments ===");
+      debugPrint("URL: $url");
+      debugPrint("Form Map: $formMap");
+      debugPrint("=============================================");
+
+      final response = await checkDio.post(url, data: formData);
+
+      debugPrint("=== API RESPONSE: uploadRegistrationDocuments ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("==============================================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error in uploadRegistrationDocuments: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<Map<String, dynamic>?> checkRegistrationStatus() async {
+    try {
+      var token = await getSavedObject("token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.checkRegistrationStatus;
+      final headers = {
+        'Accept': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      };
+
+      debugPrint("=== API REQUEST: checkRegistrationStatus ===");
+      debugPrint("URL: $url");
+      debugPrint("Headers: $headers");
+
+      final Dio checkDio = Dio();
+      final response = await checkDio.get(
+        url,
+        options: Options(headers: headers),
+      );
+
+      debugPrint("=== API RESPONSE: checkRegistrationStatus ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        if (resData is Map) {
+          if (resData['status'] == "true" || resData['status'] == true) {
+            return resData['data'] is Map
+                ? Map<String, dynamic>.from(resData['data'])
+                : null;
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Error in checkRegistrationStatus: $e");
+      return null;
     }
   }
 }

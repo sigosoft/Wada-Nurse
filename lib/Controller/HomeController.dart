@@ -24,6 +24,7 @@ class HomeController extends GetxController {
   List<dynamic> pendingRequests = [];
   List<dynamic> recentRequests = [];
   String profileImage = "";
+  String profileName = "";
 
   Timer? _timer;
 
@@ -147,7 +148,7 @@ class HomeController extends GetxController {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
 
-      // Fetch profile image from Profile API
+      // Fetch profile image and name from Profile API
       try {
         String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
         dio.options.headers["Authorization"] = "Bearer $token";
@@ -164,10 +165,19 @@ class HomeController extends GetxController {
                 "HomeController profileImage updated from Profile API: $profileImage",
               );
             }
+            final nurseName = resBody['data']?['nurse']?['name'];
+            if (nurseName != null &&
+                nurseName.toString().isNotEmpty &&
+                nurseName.toString() != 'null') {
+              profileName = nurseName.toString();
+              debugPrint(
+                "HomeController profileName updated from Profile API: $profileName",
+              );
+            }
           }
         }
       } catch (e) {
-        debugPrint("Error fetching profile image from Profile API: $e");
+        debugPrint("Error fetching profile details from Profile API: $e");
       }
 
       String url = ApiConfigs.baseUrl + APIEndpoints.home;

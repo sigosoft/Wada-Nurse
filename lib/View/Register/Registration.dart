@@ -127,7 +127,7 @@ class _RegisterState extends State<Register> {
                                 selectedDateOfBirth:
                                     controller.selectedDateOfBirth,
                                 onDateSelected: (date) {
-                                 controller.onDateSelected(date);
+                                  controller.onDateSelected(date);
                                 },
                               ),
                             ),
@@ -262,7 +262,7 @@ class _RegisterState extends State<Register> {
                                 "slectedGender: ${controller.selectedGender}",
                               );
                               if (formKey.currentState?.validate() ?? false) {
-                                controller.navigatingToNextPage(
+                                controller.startRegistrationFlow(
                                   fullname: controller.fullNameController.text,
                                   countryCode:
                                       controller.selectedCountryCodeId
