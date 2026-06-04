@@ -19,16 +19,31 @@ class HomeItem extends StatefulWidget {
 class _HomeItemState extends State<HomeItem> {
   final HomeController controller = Get.put(HomeController());
   bool _isInitialized = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _isInitialized = true;
         controller.getHome();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      controller.getHome(loadMore: true);
+    }
   }
 
   @override
@@ -43,6 +58,7 @@ class _HomeItemState extends State<HomeItem> {
             await controller.getHome(silent: true);
           },
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             child: GetBuilder<HomeController>(
               init: controller,

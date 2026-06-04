@@ -4,10 +4,45 @@ import 'package:waaada_nurseapp/Widget/NurseShiftItem.dart';
 import '../../Controller/BookingsController.dart';
 import '../../Resource/Colors.dart';
 
-class TabBarItem extends StatelessWidget {
+class TabBarItem extends StatefulWidget {
   const TabBarItem({super.key, required this.index, required this.bookingType});
   final int index;
   final String bookingType;
+
+  @override
+  State<TabBarItem> createState() => _TabBarItemState();
+}
+
+class _TabBarItemState extends State<TabBarItem> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final BookingsController controller = Get.find<BookingsController>();
+      if (widget.bookingType == "requests") {
+        controller.getBookingRequests(loadMore: true);
+      } else if (widget.bookingType == "upcoming") {
+        controller.getPendingBookings(loadMore: true);
+      } else if (widget.bookingType == "ongoing") {
+        controller.getOngoingBookings(loadMore: true);
+      } else if (widget.bookingType == "completed") {
+        controller.getCompletedBookings(loadMore: true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +50,13 @@ class TabBarItem extends StatelessWidget {
       color: colorPrimary,
       onRefresh: () async {
         final BookingsController controller = Get.find<BookingsController>();
-        if (bookingType == "requests") {
+        if (widget.bookingType == "requests") {
           await controller.getBookingRequests(silent: true);
-        } else if (bookingType == "upcoming") {
+        } else if (widget.bookingType == "upcoming") {
           await controller.getPendingBookings(silent: true);
-        } else if (bookingType == "ongoing") {
+        } else if (widget.bookingType == "ongoing") {
           await controller.getOngoingBookings(silent: true);
-        } else if (bookingType == "completed") {
+        } else if (widget.bookingType == "completed") {
           await controller.getCompletedBookings(silent: true);
         }
       },
@@ -30,6 +65,9 @@ class TabBarItem extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
+    final String bookingType = widget.bookingType;
+    final int index = widget.index;
+
     if (bookingType == "requests") {
       return GetBuilder<BookingsController>(
         init: Get.find<BookingsController>(),
@@ -45,6 +83,7 @@ class TabBarItem extends StatelessWidget {
           return Container(
             margin: const EdgeInsets.all(15),
             child: ListView.builder(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: controller.bookingRequests.length,
               itemBuilder: (context, indexValue) {
@@ -75,6 +114,7 @@ class TabBarItem extends StatelessWidget {
           return Container(
             margin: const EdgeInsets.all(15),
             child: ListView.builder(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: controller.upcomingBookings.length,
               itemBuilder: (context, indexValue) {
@@ -105,6 +145,7 @@ class TabBarItem extends StatelessWidget {
           return Container(
             margin: const EdgeInsets.all(15),
             child: ListView.builder(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: controller.ongoingBookings.length,
               itemBuilder: (context, indexValue) {
@@ -135,6 +176,7 @@ class TabBarItem extends StatelessWidget {
           return Container(
             margin: const EdgeInsets.all(15),
             child: ListView.builder(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: controller.completedBookings.length,
               itemBuilder: (context, indexValue) {
@@ -153,6 +195,7 @@ class TabBarItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(15),
       child: ListView.builder(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: 3, // Number of items in the list
         itemBuilder: (context, indexValue) {

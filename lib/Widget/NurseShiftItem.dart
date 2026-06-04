@@ -16,12 +16,14 @@ class NurseShiftItem extends StatelessWidget {
   final bool showLocationText;
   final String bookingType;
   final dynamic request;
+  final bool hideButtons;
 
   const NurseShiftItem({
     super.key,
     this.showLocationText = false,
     this.bookingType = "",
     this.request,
+    this.hideButtons = false,
   });
 
   int calculateAge(String dobString) {
@@ -224,7 +226,10 @@ class NurseShiftItem extends StatelessWidget {
                   : const SizedBox(),
               showLocationText
                   ? Text(
-                    "Waiting for location share",
+                    (request?['booking_status']?.toString() == "1" ||
+                            request?['bookingStatus']?.toString() == "1")
+                        ? "Waiting for payment"
+                        : "Waiting for location share",
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -232,7 +237,8 @@ class NurseShiftItem extends StatelessWidget {
                     ),
                   )
                   : const SizedBox(),
-              bookingType == "upcoming" || bookingType == "ongoing"
+              (bookingType == "upcoming" || bookingType == "ongoing") &&
+                      !hideButtons
                   ? SubmitButtonWidget(
                     text:
                         bookingType == "upcoming"

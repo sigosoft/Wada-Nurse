@@ -28,6 +28,10 @@ class HomeController extends GetxController {
 
   Timer? _timer;
 
+  int homePage = 1;
+  bool hasMoreHome = true;
+  bool isHomeMoreLoading = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -130,16 +134,28 @@ class HomeController extends GetxController {
     return false;
   }
 
-  Future<void> getHome({bool silent = false}) async {
-    if (!silent) {
-      isLoading = true;
+  Future<void> getHome({bool silent = false, bool loadMore = false}) async {
+    if (loadMore) {
+      if (isHomeMoreLoading || !hasMoreHome) return;
+      isHomeMoreLoading = true;
       update();
-      checkNetworkAndRedirectOffAll();
+    } else {
+      homePage = 1;
+      hasMoreHome = true;
+      if (!silent) {
+        isLoading = true;
+        update();
+        checkNetworkAndRedirectOffAll();
+      }
     }
     final blockHomeScreen = await checkMaintenanceAndUpdates();
     if (blockHomeScreen) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         isLoading = false;
+        update();
+      }
+      if (loadMore) {
+        isHomeMoreLoading = false;
         update();
       }
       return;
@@ -148,39 +164,42 @@ class HomeController extends GetxController {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
 
-      // Fetch profile image and name from Profile API
-      try {
-        String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
-        dio.options.headers["Authorization"] = "Bearer $token";
-        final profileResponse = await dio.get(profileUrl);
-        if (profileResponse.statusCode == 200) {
-          final resBody = profileResponse.data;
-          if (resBody is Map) {
-            final nurseImage = resBody['data']?['nurse']?['image'];
-            if (nurseImage != null &&
-                nurseImage.toString().isNotEmpty &&
-                nurseImage.toString() != 'null') {
-              profileImage = nurseImage.toString();
-              debugPrint(
-                "HomeController profileImage updated from Profile API: $profileImage",
-              );
-            }
-            final nurseName = resBody['data']?['nurse']?['name'];
-            if (nurseName != null &&
-                nurseName.toString().isNotEmpty &&
-                nurseName.toString() != 'null') {
-              profileName = nurseName.toString();
-              debugPrint(
-                "HomeController profileName updated from Profile API: $profileName",
-              );
+      // Fetch profile image and name from Profile API (only on initial load/silent updates, not loadMore)
+      if (!loadMore) {
+        try {
+          String profileUrl = ApiConfigs.baseUrl + APIEndpoints.profile;
+          dio.options.headers["Authorization"] = "Bearer $token";
+          final profileResponse = await dio.get(profileUrl);
+          if (profileResponse.statusCode == 200) {
+            final resBody = profileResponse.data;
+            if (resBody is Map) {
+              final nurseImage = resBody['data']?['nurse']?['image'];
+              if (nurseImage != null &&
+                  nurseImage.toString().isNotEmpty &&
+                  nurseImage.toString() != 'null') {
+                profileImage = nurseImage.toString();
+                debugPrint(
+                  "HomeController profileImage updated from Profile API: $profileImage",
+                );
+              }
+              final nurseName = resBody['data']?['nurse']?['name'];
+              if (nurseName != null &&
+                  nurseName.toString().isNotEmpty &&
+                  nurseName.toString() != 'null') {
+                profileName = nurseName.toString();
+                debugPrint(
+                  "HomeController profileName updated from Profile API: $profileName",
+                );
+              }
             }
           }
+        } catch (e) {
+          debugPrint("Error fetching profile details from Profile API: $e");
         }
-      } catch (e) {
-        debugPrint("Error fetching profile details from Profile API: $e");
       }
 
-      String url = ApiConfigs.baseUrl + APIEndpoints.home;
+      String url =
+          "${ApiConfigs.baseUrl}${APIEndpoints.home}?limit=10&page=$homePage";
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
       if (response.statusCode == 200) {
@@ -189,24 +208,90 @@ class HomeController extends GetxController {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
             homeData = data;
-            ongoingRequests = [];
-            upcomingRequests = data['upcoming'] is List ? data['upcoming'] : [];
-            pendingRequests = data['requests'] is List ? data['requests'] : [];
-            recentRequests = data['recent'] is List ? data['recent'] : [];
+
+            final List<dynamic> newUpcoming =
+                data['upcoming'] is List ? data['upcoming'] : [];
+            final List<dynamic> newRequests =
+                data['requests'] is List ? data['requests'] : [];
+            final List<dynamic> newRecent =
+                data['recent'] is List ? data['recent'] : [];
+
+            if (loadMore) {
+              final existingUpcomingIds =
+                  upcomingRequests
+                      .map((e) => e['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final uniqueUpcoming =
+                  newUpcoming
+                      .where(
+                        (e) =>
+                            e['id'] == null ||
+                            !existingUpcomingIds.contains(e['id']),
+                      )
+                      .toList();
+              upcomingRequests.addAll(uniqueUpcoming);
+
+              final existingPendingIds =
+                  pendingRequests
+                      .map((e) => e['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final uniquePending =
+                  newRequests
+                      .where(
+                        (e) =>
+                            e['id'] == null ||
+                            !existingPendingIds.contains(e['id']),
+                      )
+                      .toList();
+              pendingRequests.addAll(uniquePending);
+
+              final existingRecentIds =
+                  recentRequests
+                      .map((e) => e['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final uniqueRecent =
+                  newRecent
+                      .where(
+                        (e) =>
+                            e['id'] == null ||
+                            !existingRecentIds.contains(e['id']),
+                      )
+                      .toList();
+              recentRequests.addAll(uniqueRecent);
+
+              if (uniqueUpcoming.isEmpty &&
+                  uniquePending.isEmpty &&
+                  uniqueRecent.isEmpty) {
+                hasMoreHome = false;
+              } else {
+                homePage++;
+              }
+            } else {
+              ongoingRequests = [];
+              upcomingRequests = newUpcoming;
+              pendingRequests = newRequests;
+              recentRequests = newRecent;
+              homePage = 2;
+            }
           }
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      if (!silent) {
+      if (loadMore) {
+        isHomeMoreLoading = false;
+      } else if (!silent) {
         isLoading = false;
       }
       update();

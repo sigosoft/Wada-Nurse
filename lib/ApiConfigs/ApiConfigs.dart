@@ -40,6 +40,7 @@ class APIEndpoints {
   static const String settings = "settings";
   static const String logout = "logout";
   static const String checkIn = "checkIn";
+  static const String checkOut = "checkOut";
 
   ////////////////////////////Leaves////////////////////////
   static const String requestLeave = "requestLeave";

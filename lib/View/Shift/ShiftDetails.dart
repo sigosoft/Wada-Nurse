@@ -353,15 +353,17 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                         ),
                                         widget.bookingType == "requests"
                                             ? Expanded(
-                                              child: Text(
-                                                "Waiting for location share",
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.grey.shade600,
+                                                child: Text(
+                                                  (booking?['booking_status']?.toString() == "1" || booking?['bookingStatus']?.toString() == "1")
+                                                      ? "Waiting for payment"
+                                                      : "Waiting for location share",
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.grey.shade600,
+                                                  ),
                                                 ),
-                                              ),
-                                            )
+                                              )
                                             : Container(),
                                       ],
                                     ),
@@ -561,69 +563,86 @@ class _ShiftDetailsState extends State<ShiftDetails> {
                                 right: 15,
                                 bottom: 20,
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: SizedBox(
+                              child: (booking?['booking_status']?.toString() == "1" || booking?['bookingStatus']?.toString() == "1")
+                                  ? Container(
                                       height: 45,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          controller.showInfoBottomSheet(
-                                            context,
-                                            widget.bookingId,
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color(0xFFFFC3C4),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        "Waiting for payment",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    )
+                                  : Row(
+                                      children: [
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: 45,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                controller.showInfoBottomSheet(
+                                                  context,
+                                                  widget.bookingId,
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xFFFFC3C4),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(
+                                                    10,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                Strings.reject,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.red.shade600,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                        child: Text(
-                                          Strings.reject,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.red.shade600,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: SizedBox(
-                                      height: 45,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          controller.showAcceptBottomSheet(
-                                            context,
-                                            widget.bookingId,
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color(0xFF039300),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: 45,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                controller.showAcceptBottomSheet(
+                                                  context,
+                                                  widget.bookingId,
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xFF039300),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(
+                                                    10,
+                                                  ),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                Strings.accept,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                        child: Text(
-                                          Strings.accept,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
                             )
                             : Container(),
                       ],

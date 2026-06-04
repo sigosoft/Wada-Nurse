@@ -120,6 +120,9 @@ class _ShiftAcceptedSuccessfullyState extends State<ShiftAcceptedSuccessfully> {
                           : NurseShiftItem(
                             request: _booking,
                             bookingType: "upcoming",
+                            hideButtons:
+                                widget.title == Strings.successfullyCheckedin ||
+                                widget.title == Strings.successfullyCheckedout,
                           ),
                     ],
                   ),

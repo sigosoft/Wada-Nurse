@@ -31,10 +31,14 @@ class ShiftDetailsController extends GetxController {
   List<dynamic> shifts = [];
   List<dynamic> upcomingLeaves = [];
   List<dynamic> leaveHistory = [];
+  bool isEarlyCheckout = false;
+  int selectedLeaveReasonId = 1;
 
   Future<void> getShiftDetails(int bookingId) async {
     booking = null;
     shifts = [];
+    isEarlyCheckout = false;
+    selectedLeaveReasonId = 1;
     isLoading = true;
     update();
     checkNetworkAndRedirectOffAll();
@@ -195,6 +199,204 @@ class ShiftDetailsController extends GetxController {
           return true;
         } else {
           showToast(resData['message'] ?? "Failed to check in.", isError: true);
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      return false;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<List<int>> getServiceIds() async {
+    List<int> ids = [];
+    if (booking != null) {
+      // 1. Check direct category/service ID fields in the booking object
+      final directKeys = [
+        'category_id',
+        'service_id',
+        'healthcare_category_id',
+        'healthcare_categories_id',
+      ];
+      for (var key in directKeys) {
+        var val = booking![key];
+        if (val != null) {
+          var parsed = int.tryParse(val.toString());
+          if (parsed != null && !ids.contains(parsed)) {
+            ids.add(parsed);
+          }
+        }
+      }
+
+      // Helper function to extract ID from a service/category item
+      void extractIdFromItem(dynamic item) {
+        if (item == null) return;
+        if (item is Map) {
+          final keys = [
+            'service_id',
+            'category_id',
+            'healthcare_category_id',
+            'healthcare_categories_id',
+            'id',
+          ];
+          for (var key in keys) {
+            var val = item[key];
+            if (val != null) {
+              var parsed = int.tryParse(val.toString());
+              if (parsed != null && !ids.contains(parsed)) {
+                ids.add(parsed);
+                break; // Found an ID for this item, move on
+              }
+            }
+          }
+        } else if (item is num) {
+          if (!ids.contains(item.toInt())) {
+            ids.add(item.toInt());
+          }
+        } else {
+          var parsed = int.tryParse(item.toString());
+          if (parsed != null && !ids.contains(parsed)) {
+            ids.add(parsed);
+          }
+        }
+      }
+
+      // 2. Check service/category lists or objects in the booking
+      final listKeys = [
+        'booking_services',
+        'bookingServices',
+        'services',
+        'service',
+        'categories',
+        'category',
+      ];
+      for (var key in listKeys) {
+        final val = booking![key];
+        if (val is List) {
+          for (var item in val) {
+            extractIdFromItem(item);
+          }
+        } else if (val != null) {
+          extractIdFromItem(val);
+        }
+      }
+    }
+
+    // 3. If ids is still empty, try to resolve via category_name and the healthcare_categories API
+    if (ids.isEmpty && booking != null) {
+      final categoryNameVal = booking!['category_name'];
+      if (categoryNameVal != null &&
+          categoryNameVal.toString().trim().isNotEmpty) {
+        final List<String> namesToMatch = categoryNameVal
+            .toString()
+            .split(',')
+            .map((e) => e.trim().toLowerCase())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        if (namesToMatch.isNotEmpty) {
+          try {
+            var token = await getSavedObject("token");
+            String url = ApiConfigs.baseUrl + "healthcare_categories";
+            dio.options.headers["Authorization"] = "Bearer $token";
+            final response = await dio.get(url);
+            if (response.statusCode == 200) {
+              final resData = response.data;
+              final List<dynamic> categoriesList = (resData['data'] is List)
+                  ? resData['data']
+                  : (resData['categories'] is List)
+                      ? resData['categories']
+                      : [];
+
+              for (var categoryItem in categoriesList) {
+                if (categoryItem is Map) {
+                  final catId = categoryItem['id'];
+                  final catName = (categoryItem['name'] ??
+                          categoryItem['category_name'] ??
+                          categoryItem['title'] ??
+                          "")
+                      .toString()
+                      .trim()
+                      .toLowerCase();
+
+                  if (catId != null && namesToMatch.contains(catName)) {
+                    var parsed = int.tryParse(catId.toString());
+                    if (parsed != null && !ids.contains(parsed)) {
+                      ids.add(parsed);
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            debugPrint("Error fetching healthcare categories: $e");
+          }
+        }
+      }
+    }
+
+    return ids;
+  }
+
+  Future<bool> checkOut({
+    required int bookingId,
+    required int earlyCheckout,
+    required int checkOutReason,
+    required List<int> completedServicesIds,
+  }) async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      var token = await getSavedObject("token");
+      String url = ApiConfigs.baseUrl + APIEndpoints.checkOut;
+      dio.options.headers["Authorization"] = "Bearer $token";
+
+      // Clear any global query parameters to avoid pollution
+      dio.options.queryParameters = {};
+
+      FormData requestBody = FormData.fromMap({
+        "booking_id": bookingId,
+        "early_checkout": earlyCheckout.toString(),
+        "check_out_reason": checkOutReason.toString(),
+      });
+
+      for (var id in completedServicesIds) {
+        requestBody.fields.add(
+          MapEntry("completed_services_ids[]", id.toString()),
+        );
+      }
+
+      debugPrint("=== API REQUEST: checkOut ===");
+      debugPrint("URL: $url");
+      debugPrint("Fields: ${requestBody.fields}");
+      debugPrint("=============================");
+
+      final response = await dio.post(url, data: requestBody);
+
+      debugPrint("=== API RESPONSE: checkOut ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("=============================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          showToast(resData['message'] ?? "Checked out successfully.");
+          return true;
+        } else {
+          showToast(
+            resData['message'] ?? "Failed to check out.",
+            isError: true,
+          );
           return false;
         }
       } else {
@@ -826,6 +1028,7 @@ class ShiftDetailsController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['status'] == "true" || data['status'] == true) {
+          isEarlyCheckout = true;
           showToast(data['message'] ?? "Leave requested successfully.");
           await getNurseLeaves();
           return true;

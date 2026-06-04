@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:waaada_nurseapp/Controller/ShiftDetailsController.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
 
 import '../Resource/Strings.dart';
@@ -38,6 +40,15 @@ class _ReasonDropdownFieldState extends State<ReasonDropdownField> {
           setState(() {
             _selectedReason = value;
           });
+          try {
+            final controller = Get.find<ShiftDetailsController>();
+            int index = ['Reason1', 'Reason2', 'Reason3'].indexOf(value ?? '') + 1;
+            if (index > 0) {
+              controller.selectedLeaveReasonId = index;
+            }
+          } catch (e) {
+            debugPrint("Error updating selected reason: $e");
+          }
         },
 
         decoration: InputDecoration(

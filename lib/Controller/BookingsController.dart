@@ -23,6 +23,22 @@ class BookingsController extends GetxController {
   int activeTabIndex = 0;
   Timer? _timer;
 
+  int bookingRequestsPage = 1;
+  bool hasMoreBookingRequests = true;
+  bool isBookingRequestsMoreLoading = false;
+
+  int upcomingBookingsPage = 1;
+  bool hasMoreUpcomingBookings = true;
+  bool isUpcomingBookingsMoreLoading = false;
+
+  int ongoingBookingsPage = 1;
+  bool hasMoreOngoingBookings = true;
+  bool isOngoingBookingsMoreLoading = false;
+
+  int completedBookingsPage = 1;
+  bool hasMoreCompletedBookings = true;
+  bool isCompletedBookingsMoreLoading = false;
+
   void _startAutoUpdate() {
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
       refreshActiveTab(silent: true);
@@ -41,17 +57,28 @@ class BookingsController extends GetxController {
     }
   }
 
-  Future<void> getBookingRequests({bool silent = false}) async {
-    if (!silent) {
-      isLoading = true;
+  Future<void> getBookingRequests({
+    bool silent = false,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (isBookingRequestsMoreLoading || !hasMoreBookingRequests) return;
+      isBookingRequestsMoreLoading = true;
       update();
-      checkNetworkAndRedirectOffAll();
+    } else {
+      bookingRequestsPage = 1;
+      hasMoreBookingRequests = true;
+      if (!silent) {
+        isLoading = true;
+        update();
+        checkNetworkAndRedirectOffAll();
+      }
     }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
       String url =
-          "${ApiConfigs.baseUrl}${APIEndpoints.bookingRequests}?limit=10";
+          "${ApiConfigs.baseUrl}${APIEndpoints.bookingRequests}?limit=10&page=$bookingRequestsPage";
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
       if (response.statusCode == 200) {
@@ -59,38 +86,80 @@ class BookingsController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
-            bookingRequests = data['data'] is List ? data['data'] : [];
+            final List<dynamic> fetchedList =
+                data['data'] is List ? data['data'] : [];
+
+            if (loadMore) {
+              final existingIds =
+                  bookingRequests
+                      .map((item) => item['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final newItems =
+                  fetchedList
+                      .where(
+                        (item) =>
+                            item['id'] == null ||
+                            !existingIds.contains(item['id']),
+                      )
+                      .toList();
+              bookingRequests.addAll(newItems);
+            } else {
+              bookingRequests = fetchedList;
+            }
+
+            final currentPage = data['current_page'] ?? bookingRequestsPage;
+            final lastPage = data['last_page'] ?? currentPage;
+            if (currentPage >= lastPage || fetchedList.length < 10) {
+              hasMoreBookingRequests = false;
+            } else {
+              hasMoreBookingRequests = true;
+              bookingRequestsPage = currentPage + 1;
+            }
           }
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      if (!silent) {
+      if (loadMore) {
+        isBookingRequestsMoreLoading = false;
+      } else if (!silent) {
         isLoading = false;
       }
       update();
     }
   }
 
-  Future<void> getPendingBookings({bool silent = false}) async {
-    if (!silent) {
-      isUpcomingLoading = true;
+  Future<void> getPendingBookings({
+    bool silent = false,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (isUpcomingBookingsMoreLoading || !hasMoreUpcomingBookings) return;
+      isUpcomingBookingsMoreLoading = true;
       update();
-      checkNetworkAndRedirectOffAll();
+    } else {
+      upcomingBookingsPage = 1;
+      hasMoreUpcomingBookings = true;
+      if (!silent) {
+        isUpcomingLoading = true;
+        update();
+        checkNetworkAndRedirectOffAll();
+      }
     }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
       String url =
-          "${ApiConfigs.baseUrl}${APIEndpoints.pendingBookings}?limit=10";
+          "${ApiConfigs.baseUrl}${APIEndpoints.pendingBookings}?limit=10&page=$upcomingBookingsPage";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
@@ -102,38 +171,80 @@ class BookingsController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
-            upcomingBookings = data['data'] is List ? data['data'] : [];
+            final List<dynamic> fetchedList =
+                data['data'] is List ? data['data'] : [];
+
+            if (loadMore) {
+              final existingIds =
+                  upcomingBookings
+                      .map((item) => item['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final newItems =
+                  fetchedList
+                      .where(
+                        (item) =>
+                            item['id'] == null ||
+                            !existingIds.contains(item['id']),
+                      )
+                      .toList();
+              upcomingBookings.addAll(newItems);
+            } else {
+              upcomingBookings = fetchedList;
+            }
+
+            final currentPage = data['current_page'] ?? upcomingBookingsPage;
+            final lastPage = data['last_page'] ?? currentPage;
+            if (currentPage >= lastPage || fetchedList.length < 10) {
+              hasMoreUpcomingBookings = false;
+            } else {
+              hasMoreUpcomingBookings = true;
+              upcomingBookingsPage = currentPage + 1;
+            }
           }
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      if (!silent) {
+      if (loadMore) {
+        isUpcomingBookingsMoreLoading = false;
+      } else if (!silent) {
         isUpcomingLoading = false;
       }
       update();
     }
   }
 
-  Future<void> getOngoingBookings({bool silent = false}) async {
-    if (!silent) {
-      isOngoingLoading = true;
+  Future<void> getOngoingBookings({
+    bool silent = false,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (isOngoingBookingsMoreLoading || !hasMoreOngoingBookings) return;
+      isOngoingBookingsMoreLoading = true;
       update();
-      checkNetworkAndRedirectOffAll();
+    } else {
+      ongoingBookingsPage = 1;
+      hasMoreOngoingBookings = true;
+      if (!silent) {
+        isOngoingLoading = true;
+        update();
+        checkNetworkAndRedirectOffAll();
+      }
     }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
       String url =
-          "${ApiConfigs.baseUrl}${APIEndpoints.ongoingBookings}?limit=10";
+          "${ApiConfigs.baseUrl}${APIEndpoints.ongoingBookings}?limit=10&page=$ongoingBookingsPage";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
@@ -145,38 +256,80 @@ class BookingsController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
-            ongoingBookings = data['data'] is List ? data['data'] : [];
+            final List<dynamic> fetchedList =
+                data['data'] is List ? data['data'] : [];
+
+            if (loadMore) {
+              final existingIds =
+                  ongoingBookings
+                      .map((item) => item['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final newItems =
+                  fetchedList
+                      .where(
+                        (item) =>
+                            item['id'] == null ||
+                            !existingIds.contains(item['id']),
+                      )
+                      .toList();
+              ongoingBookings.addAll(newItems);
+            } else {
+              ongoingBookings = fetchedList;
+            }
+
+            final currentPage = data['current_page'] ?? ongoingBookingsPage;
+            final lastPage = data['last_page'] ?? currentPage;
+            if (currentPage >= lastPage || fetchedList.length < 10) {
+              hasMoreOngoingBookings = false;
+            } else {
+              hasMoreOngoingBookings = true;
+              ongoingBookingsPage = currentPage + 1;
+            }
           }
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      if (!silent) {
+      if (loadMore) {
+        isOngoingBookingsMoreLoading = false;
+      } else if (!silent) {
         isOngoingLoading = false;
       }
       update();
     }
   }
 
-  Future<void> getCompletedBookings({bool silent = false}) async {
-    if (!silent) {
-      isCompletedLoading = true;
+  Future<void> getCompletedBookings({
+    bool silent = false,
+    bool loadMore = false,
+  }) async {
+    if (loadMore) {
+      if (isCompletedBookingsMoreLoading || !hasMoreCompletedBookings) return;
+      isCompletedBookingsMoreLoading = true;
       update();
-      checkNetworkAndRedirectOffAll();
+    } else {
+      completedBookingsPage = 1;
+      hasMoreCompletedBookings = true;
+      if (!silent) {
+        isCompletedLoading = true;
+        update();
+        checkNetworkAndRedirectOffAll();
+      }
     }
     try {
       var token = await getSavedObject("token");
       debugPrint("Token: $token");
       String url =
-          "${ApiConfigs.baseUrl}${APIEndpoints.completedBookings}?limit=10";
+          "${ApiConfigs.baseUrl}${APIEndpoints.completedBookings}?limit=10&page=$completedBookingsPage";
       debugPrint("Request GET: $url");
       dio.options.headers["Authorization"] = "Bearer $token";
       final response = await dio.get(url);
@@ -188,21 +341,52 @@ class BookingsController extends GetxController {
         if (resData['status'] == "true" || resData['status'] == true) {
           final data = resData['data'];
           if (data is Map<String, dynamic>) {
-            completedBookings = data['data'] is List ? data['data'] : [];
+            final List<dynamic> fetchedList =
+                data['data'] is List ? data['data'] : [];
+
+            if (loadMore) {
+              final existingIds =
+                  completedBookings
+                      .map((item) => item['id'])
+                      .where((id) => id != null)
+                      .toSet();
+              final newItems =
+                  fetchedList
+                      .where(
+                        (item) =>
+                            item['id'] == null ||
+                            !existingIds.contains(item['id']),
+                      )
+                      .toList();
+              completedBookings.addAll(newItems);
+            } else {
+              completedBookings = fetchedList;
+            }
+
+            final currentPage = data['current_page'] ?? completedBookingsPage;
+            final lastPage = data['last_page'] ?? currentPage;
+            if (currentPage >= lastPage || fetchedList.length < 10) {
+              hasMoreCompletedBookings = false;
+            } else {
+              hasMoreCompletedBookings = true;
+              completedBookingsPage = currentPage + 1;
+            }
           }
         }
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (!silent) {
+      if (!silent && !loadMore) {
         handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
     } finally {
-      if (!silent) {
+      if (loadMore) {
+        isCompletedBookingsMoreLoading = false;
+      } else if (!silent) {
         isCompletedLoading = false;
       }
       update();

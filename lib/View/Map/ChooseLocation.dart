@@ -14,7 +14,11 @@ import '../../Resource/Strings.dart';
 import '../../Widget/SubmitButtonWidget.dart';
 
 class ChooseLocation extends StatefulWidget {
-  const ChooseLocation({Key? key, required this.shiftType, required this.bookingId}) : super(key: key);
+  const ChooseLocation({
+    Key? key,
+    required this.shiftType,
+    required this.bookingId,
+  }) : super(key: key);
   final String shiftType; // To handle different shift types if needed
   final int bookingId;
   @override
@@ -24,7 +28,9 @@ class ChooseLocation extends StatefulWidget {
 class _ChooseLocationState extends State<ChooseLocation> {
   GoogleMapController? mapController;
   final LatLng _initialPosition = const LatLng(
-      37.7749, -122.4194); // Example coordinates
+    37.7749,
+    -122.4194,
+  ); // Example coordinates
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchResults = []; // Mock search results
 
@@ -81,10 +87,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
       if (mapController != null) {
         mapController!.animateCamera(
           CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(_latitude!, _longitude!),
-              zoom: 18.0,
-            ),
+            CameraPosition(target: LatLng(_latitude!, _longitude!), zoom: 18.0),
           ),
         );
       }
@@ -98,7 +101,8 @@ class _ChooseLocationState extends State<ChooseLocation> {
           Placemark place = placemarks.first;
           setState(() {
             _area = place.locality ?? place.subLocality ?? place.name ?? "";
-            _address = "${place.name ?? ""}, ${place.subLocality ?? ""}, ${place.locality ?? ""}, ${place.administrativeArea ?? ""}, ${place.postalCode ?? ""}";
+            _address =
+                "${place.name ?? ""}, ${place.subLocality ?? ""}, ${place.locality ?? ""}, ${place.administrativeArea ?? ""}, ${place.postalCode ?? ""}";
           });
         } else {
           setState(() {
@@ -156,7 +160,9 @@ class _ChooseLocationState extends State<ChooseLocation> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    widget.shiftType == "checkin" ? Strings.checkinmsg : Strings.checkoutMsg,
+                    widget.shiftType == "checkin"
+                        ? Strings.checkinmsg
+                        : Strings.checkoutMsg,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -170,11 +176,12 @@ class _ChooseLocationState extends State<ChooseLocation> {
                         child: SizedBox(
                           height: 45,
                           child: ElevatedButton(
-                            onPressed: _isSubmitting
-                                ? null
-                                : () {
-                                    Navigator.pop(bottomSheetContext);
-                                  },
+                            onPressed:
+                                _isSubmitting
+                                    ? null
+                                    : () {
+                                      Navigator.pop(bottomSheetContext);
+                                    },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE7F4FD),
                               shape: RoundedRectangleBorder(
@@ -197,65 +204,102 @@ class _ChooseLocationState extends State<ChooseLocation> {
                         child: SizedBox(
                           height: 45,
                           child: ElevatedButton(
-                            onPressed: _isSubmitting
-                                ? null
-                                : () async {
-                                    setModalState(() {
-                                      _isSubmitting = true;
-                                    });
-                                    if (widget.shiftType == "checkin") {
-                                      final detailsController = Get.find<ShiftDetailsController>();
-                                      bool success = await detailsController.checkIn(
-                                        widget.bookingId,
-                                        _latitude ?? 0.0,
-                                        _longitude ?? 0.0,
-                                      );
+                            onPressed:
+                                _isSubmitting
+                                    ? null
+                                    : () async {
                                       setModalState(() {
-                                        _isSubmitting = false;
+                                        _isSubmitting = true;
                                       });
-                                      if (success) {
-                                        Navigator.pop(bottomSheetContext);
-                                        Get.off(ShiftAcceptedSuccessfully(
-                                          title: Strings.successfullyCheckedin,
-                                          message: Strings.successfullyCheckedinmsg,
-                                          bookingId: widget.bookingId,
-                                        ));
+                                      if (widget.shiftType == "checkin") {
+                                        final detailsController =
+                                            Get.find<ShiftDetailsController>();
+                                        bool success = await detailsController
+                                            .checkIn(
+                                              widget.bookingId,
+                                              _latitude ?? 0.0,
+                                              _longitude ?? 0.0,
+                                            );
+                                        setModalState(() {
+                                          _isSubmitting = false;
+                                        });
+                                        if (success) {
+                                          Navigator.pop(bottomSheetContext);
+                                          Get.off(
+                                            ShiftAcceptedSuccessfully(
+                                              title:
+                                                  Strings.successfullyCheckedin,
+                                              message:
+                                                  Strings
+                                                      .successfullyCheckedinmsg,
+                                              bookingId: widget.bookingId,
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        final detailsController =
+                                            Get.find<ShiftDetailsController>();
+                                        bool success = await detailsController
+                                            .checkOut(
+                                              bookingId: widget.bookingId,
+                                              earlyCheckout:
+                                                  detailsController
+                                                          .isEarlyCheckout
+                                                      ? 1
+                                                      : 0,
+                                              checkOutReason:
+                                                  detailsController
+                                                          .isEarlyCheckout
+                                                      ? detailsController
+                                                          .selectedLeaveReasonId
+                                                      : 0,
+                                              completedServicesIds:
+                                                  await detailsController
+                                                      .getServiceIds(),
+                                            );
+                                        setModalState(() {
+                                          _isSubmitting = false;
+                                        });
+                                        if (success) {
+                                          Navigator.pop(bottomSheetContext);
+                                          Get.off(
+                                            ShiftAcceptedSuccessfully(
+                                              title:
+                                                  Strings
+                                                      .successfullyCheckedout,
+                                              message:
+                                                  Strings
+                                                      .successfullyCheckedoutmsg,
+                                              bookingId: widget.bookingId,
+                                            ),
+                                          );
+                                        }
                                       }
-                                    } else {
-                                      setModalState(() {
-                                        _isSubmitting = false;
-                                      });
-                                      Navigator.pop(bottomSheetContext);
-                                      Get.to(ShiftAcceptedSuccessfully(
-                                        title: Strings.successfullyCheckedout,
-                                        message: Strings.successfullyCheckedoutmsg,
-                                        bookingId: widget.bookingId,
-                                      ));
-                                    }
-                                  },
+                                    },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorPrimary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: _isSubmitting
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.0,
+                            child:
+                                _isSubmitting
+                                    ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.0,
+                                      ),
+                                    )
+                                    : Text(
+                                      Strings.yes,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  )
-                                : Text(
-                                    Strings.yes,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
                           ),
                         ),
                       ),
@@ -274,16 +318,16 @@ class _ChooseLocationState extends State<ChooseLocation> {
   void _onSearchChanged(String query) {
     // Mock search logic
     setState(() {
-      _searchResults = query.isEmpty
-          ? []
-          : List.generate(5, (index) => "$query Result $index");
+      _searchResults =
+          query.isEmpty
+              ? []
+              : List.generate(5, (index) => "$query Result $index");
     });
   }
 
   @override
   void initState() {
     super.initState();
-
   }
 
   void _setMapStyle() async {
@@ -339,10 +383,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
             ),
             // Search Bar
             Positioned(
-              top: MediaQuery
-                  .of(context)
-                  .padding
-                  .top + 10,
+              top: MediaQuery.of(context).padding.top + 10,
               left: 10,
               right: 10,
               child: Column(
@@ -356,7 +397,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: white, size: 23,),
+                        const Icon(Icons.search, color: white, size: 23),
                         const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
@@ -438,7 +479,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 5,),
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         SvgPicture.asset(
@@ -453,10 +494,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width - 80,
+                              width: MediaQuery.of(context).size.width - 80,
                               child: Text(
                                 _area.isNotEmpty ? _area : "Current Location",
                                 style: GoogleFonts.inter(
@@ -468,10 +506,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
                               ),
                             ),
                             SizedBox(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width - 80,
+                              width: MediaQuery.of(context).size.width - 80,
                               child: Text(
                                 _address,
                                 style: GoogleFonts.inter(
