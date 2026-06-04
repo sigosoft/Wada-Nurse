@@ -65,11 +65,7 @@ class NotificationsController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");

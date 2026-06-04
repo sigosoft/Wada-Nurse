@@ -204,11 +204,7 @@ class LoginController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
@@ -264,11 +260,7 @@ class LoginController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {
@@ -318,11 +310,7 @@ class LoginController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {
@@ -374,11 +362,7 @@ class LoginController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {

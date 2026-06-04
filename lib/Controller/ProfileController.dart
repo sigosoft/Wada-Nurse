@@ -73,11 +73,7 @@ class ProfileController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {
@@ -175,11 +171,7 @@ class ProfileController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
       return false;
     } catch (e) {
       debugPrint("Unexpected Error: $e");
@@ -267,11 +259,7 @@ class ProfileController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception during logout: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error during logout: $e");
     } finally {
@@ -315,11 +303,7 @@ class ProfileController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception during delete account: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error during delete account: $e");
     } finally {

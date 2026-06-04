@@ -4,6 +4,8 @@ import 'package:get/get.dart' hide Response, FormData;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:waaada_nurseapp/ApiConfigs/ApiConfigs.dart';
 import 'package:waaada_nurseapp/Utils/utils.dart' hide showToast;
+import 'package:waaada_nurseapp/Utils/HandleDioExceptions.dart';
+import 'package:waaada_nurseapp/Utils/LoggingInterceptor.dart';
 
 class RazorpayService {
   static final RazorpayService _instance = RazorpayService._internal();
@@ -11,6 +13,7 @@ class RazorpayService {
 
   late Razorpay _razorpay;
   bool _isInitialized = false;
+  final Dio _dio = Dio()..interceptors.add(LoggingInterceptor());
 
   Function(PaymentSuccessResponse)? _onSuccessCallback;
   Function(PaymentFailureResponse)? _onFailureCallback;
@@ -96,8 +99,7 @@ class RazorpayService {
       );
       final FormData formData = FormData.fromMap(data);
 
-      final Dio dio = Dio();
-      final response = await dio.post(
+      final response = await _dio.post(
         url,
         data: formData,
         options: Options(headers: headers),
@@ -138,6 +140,10 @@ class RazorpayService {
           }
         }
       }
+      return null;
+    } on DioException catch (e) {
+      print("--- [RazorpayService] createOrder API EXCEPTION: $e ---");
+      handleDioException(e);
       return null;
     } catch (e) {
       print("--- [RazorpayService] createOrder API EXCEPTION: $e ---");

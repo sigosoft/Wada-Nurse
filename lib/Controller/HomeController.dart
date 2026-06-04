@@ -200,11 +200,7 @@ class HomeController extends GetxController {
       }
     } on DioException catch (e) {
       if (!silent) {
-        if (e.response != null) {
-          handleDioException(e);
-        } else {
-          debugPrint("Dio Exception without response: ${e.message}");
-        }
+        handleDioException(e);
       }
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");

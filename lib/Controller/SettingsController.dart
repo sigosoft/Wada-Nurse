@@ -76,11 +76,7 @@ class SettingsController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching terms: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching terms: $e");
     } finally {
@@ -120,11 +116,7 @@ class SettingsController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching privacy policy: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching privacy policy: $e");
     } finally {
@@ -164,11 +156,7 @@ class SettingsController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching about: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching about: $e");
     } finally {
@@ -218,11 +206,7 @@ class SettingsController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching contact us: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching contact us: $e");
     } finally {
@@ -275,11 +259,7 @@ class SettingsController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching FAQs: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching FAQs: $e");
     } finally {

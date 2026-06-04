@@ -79,11 +79,7 @@ class ChangePasswordController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
       return false;
     } catch (e) {
       debugPrint("Unexpected Error: $e");

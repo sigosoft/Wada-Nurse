@@ -501,11 +501,7 @@ class RegistrationController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {
@@ -829,11 +825,7 @@ class RegistrationController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e, stackTrace) {
       debugPrint("Unexpected Error: $e");
       debugPrint("Stack Trace: $stackTrace");
@@ -867,11 +859,7 @@ class RegistrationController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
       registrationFee = 0.0;
       update();
     } catch (e) {
@@ -923,11 +911,7 @@ class RegistrationController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception without response: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error: $e");
     } finally {
@@ -1058,11 +1042,7 @@ class RegistrationController extends GetxController {
         }
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception fetching documents: ${e.message}");
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error fetching documents: $e");
     } finally {
@@ -1127,12 +1107,7 @@ class RegistrationController extends GetxController {
         throw Exception("Unexpected status code: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      if (e.response != null) {
-        handleDioException(e);
-      } else {
-        debugPrint("Dio Exception uploading documents: ${e.message}");
-        showToast("Error uploading documents: ${e.message}", isError: true);
-      }
+      handleDioException(e);
     } catch (e) {
       debugPrint("Unexpected Error uploading documents: $e");
       showToast("Error: $e", isError: true);
@@ -1254,15 +1229,14 @@ class RegistrationController extends GetxController {
         }
       }
 
-      final Dio checkDio = Dio();
-      checkDio.options.headers["Authorization"] = "Bearer $token";
+      dio.options.headers["Authorization"] = "Bearer $token";
 
       debugPrint("=== API REQUEST: submitDocumentsAfterLogin ===");
       debugPrint("URL: $url");
       debugPrint("Form Map: $formMap");
       debugPrint("=============================================");
 
-      final response = await checkDio.post(url, data: formData);
+      final response = await dio.post(url, data: formData);
 
       debugPrint("=== API RESPONSE: submitDocumentsAfterLogin ===");
       debugPrint("Status Code: ${response.statusCode}");
@@ -1275,6 +1249,10 @@ class RegistrationController extends GetxController {
           return true;
         }
       }
+      return false;
+    } on DioException catch (e) {
+      debugPrint("Error in submitDocumentsAfterLogin: $e");
+      handleDioException(e);
       return false;
     } catch (e) {
       debugPrint("Error in submitDocumentsAfterLogin: $e");
@@ -1584,8 +1562,7 @@ class RegistrationController extends GetxController {
       debugPrint("URL: $url");
       debugPrint("Headers: $headers");
 
-      final Dio checkDio = Dio();
-      final response = await checkDio.get(
+      final response = await dio.get(
         url,
         options: Options(headers: headers),
       );
@@ -1604,6 +1581,10 @@ class RegistrationController extends GetxController {
           }
         }
       }
+      return null;
+    } on DioException catch (e) {
+      debugPrint("Error in checkRegistrationStatus: $e");
+      handleDioException(e);
       return null;
     } catch (e) {
       debugPrint("Error in checkRegistrationStatus: $e");
