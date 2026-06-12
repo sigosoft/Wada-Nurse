@@ -15,6 +15,7 @@ class CountryCodeAndPhoneNUmber extends StatefulWidget {
     required this.validatorText,
     this.countryCodeValidatorText,
     this.onCountryCodeSelected,
+    this.initialCountryCodeId,
   });
   final String name;
   final List<CountryCode> countrycodes;
@@ -22,6 +23,7 @@ class CountryCodeAndPhoneNUmber extends StatefulWidget {
   final String validatorText;
   final String? countryCodeValidatorText;
   final Function(int?)? onCountryCodeSelected;
+  final int? initialCountryCodeId;
 
   @override
   State<CountryCodeAndPhoneNUmber> createState() =>
@@ -34,7 +36,30 @@ class _CountryCodeAndPhoneNUmberState extends State<CountryCodeAndPhoneNUmber> {
   @override
   void initState() {
     super.initState();
-    _selectedCountryCode = null;
+    _initSelectedCountryCode();
+  }
+
+  @override
+  void didUpdateWidget(covariant CountryCodeAndPhoneNUmber oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCountryCodeId != oldWidget.initialCountryCodeId ||
+        widget.countrycodes != oldWidget.countrycodes) {
+      _initSelectedCountryCode();
+    }
+  }
+
+  void _initSelectedCountryCode() {
+    if (widget.initialCountryCodeId != null && widget.countrycodes.isNotEmpty) {
+      try {
+        _selectedCountryCode = widget.countrycodes.firstWhere(
+          (code) => code.id == widget.initialCountryCodeId,
+        );
+      } catch (_) {
+        _selectedCountryCode = null;
+      }
+    } else {
+      _selectedCountryCode = null;
+    }
   }
 
   @override
@@ -42,7 +67,7 @@ class _CountryCodeAndPhoneNUmberState extends State<CountryCodeAndPhoneNUmber> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: FormField<Map<String, String>>(
-        key: ValueKey('countryCodeAndPhone'),
+        key: ValueKey('countryCodeAndPhone_${_selectedCountryCode?.id}'),
         initialValue: {
           'countryCode': _selectedCountryCode?.countryCode ?? '',
           'phoneNumber': widget.controller.text,

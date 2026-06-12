@@ -32,7 +32,7 @@ class _TabBarItemState extends State<TabBarItem> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       final BookingsController controller = Get.find<BookingsController>();
-      if (widget.bookingType == "requests") {
+      if (widget.bookingType == "requests" || widget.bookingType == "pending") {
         controller.getBookingRequests(loadMore: true);
       } else if (widget.bookingType == "upcoming") {
         controller.getPendingBookings(loadMore: true);
@@ -50,7 +50,7 @@ class _TabBarItemState extends State<TabBarItem> {
       color: colorPrimary,
       onRefresh: () async {
         final BookingsController controller = Get.find<BookingsController>();
-        if (widget.bookingType == "requests") {
+        if (widget.bookingType == "requests" || widget.bookingType == "pending") {
           await controller.getBookingRequests(silent: true);
         } else if (widget.bookingType == "upcoming") {
           await controller.getPendingBookings(silent: true);
@@ -77,7 +77,14 @@ class _TabBarItemState extends State<TabBarItem> {
               child: CircularProgressIndicator(color: colorPrimary),
             );
           }
-          if (controller.bookingRequests.isEmpty) {
+          final filteredList = controller.bookingRequests.where((item) {
+            final status = item['booking_status']?.toString() ??
+                item['bookingStatus']?.toString() ??
+                "";
+            return status != "1" && status != "7";
+          }).toList();
+
+          if (filteredList.isEmpty) {
             return _buildEmptyState(context);
           }
           return Container(
@@ -85,12 +92,50 @@ class _TabBarItemState extends State<TabBarItem> {
             child: ListView.builder(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: controller.bookingRequests.length,
+              itemCount: filteredList.length,
               itemBuilder: (context, indexValue) {
                 return NurseShiftItem(
                   showLocationText: true,
                   bookingType: bookingType,
-                  request: controller.bookingRequests[indexValue],
+                  request: filteredList[indexValue],
+                );
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    if (bookingType == "pending") {
+      return GetBuilder<BookingsController>(
+        init: Get.find<BookingsController>(),
+        builder: (controller) {
+          if (controller.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: colorPrimary),
+            );
+          }
+          final filteredList = controller.bookingRequests.where((item) {
+            final status = item['booking_status']?.toString() ??
+                item['bookingStatus']?.toString() ??
+                "";
+            return status == "1";
+          }).toList();
+
+          if (filteredList.isEmpty) {
+            return _buildEmptyState(context);
+          }
+          return Container(
+            margin: const EdgeInsets.all(15),
+            child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: filteredList.length,
+              itemBuilder: (context, indexValue) {
+                return NurseShiftItem(
+                  showLocationText: true,
+                  bookingType: "requests",
+                  request: filteredList[indexValue],
                 );
               },
             ),

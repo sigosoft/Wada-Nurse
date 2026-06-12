@@ -24,17 +24,19 @@ class _BookingsState extends State<Bookings>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
       controller.activeTabIndex = _tabController.index;
       setState(() {}); // Rebuild UI when tab changes
       if (_tabController.index == 0) {
         controller.getBookingRequests();
       } else if (_tabController.index == 1) {
-        controller.getPendingBookings();
+        controller.getBookingRequests();
       } else if (_tabController.index == 2) {
-        controller.getOngoingBookings();
+        controller.getPendingBookings();
       } else if (_tabController.index == 3) {
+        controller.getOngoingBookings();
+      } else if (_tabController.index == 4) {
         controller.getCompletedBookings();
       }
     });
@@ -80,10 +82,10 @@ class _BookingsState extends State<Bookings>
                       Axis.horizontal, // Enable horizontal scrolling
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(5, (index) {
+                    children: List.generate(6, (index) {
                       return Container(
                         margin: EdgeInsets.only(
-                          right: index < 4 ? 10 : 0,
+                          right: index < 5 ? 10 : 0,
                         ), // Add space between buttons
                         child: InkWell(
                           onTap: () {
@@ -102,12 +104,14 @@ class _BookingsState extends State<Bookings>
                             alignment: Alignment.center,
                             child: Text(
                               index == 0
-                                  ? Strings.requests
+                                  ? "All Requests"
                                   : index == 1
-                                  ? Strings.upcoming
+                                  ? "Pending"
                                   : index == 2
-                                  ? Strings.ongoing
+                                  ? Strings.upcoming
                                   : index == 3
+                                  ? Strings.ongoing
+                                  : index == 4
                                   ? Strings.completed
                                   : Strings.cancelled,
                               style: TextStyle(
@@ -140,10 +144,11 @@ class _BookingsState extends State<Bookings>
                         NeverScrollableScrollPhysics(), // Disable swipe scrolling
                     children: [
                       TabBarItem(index: 0, bookingType: "requests"),
-                      TabBarItem(index: 1, bookingType: "upcoming"),
-                      TabBarItem(index: 2, bookingType: "ongoing"),
-                      TabBarItem(index: 3, bookingType: "completed"),
-                      TabBarItem(index: 4, bookingType: "cancelled"),
+                      TabBarItem(index: 1, bookingType: "pending"),
+                      TabBarItem(index: 2, bookingType: "upcoming"),
+                      TabBarItem(index: 3, bookingType: "ongoing"),
+                      TabBarItem(index: 4, bookingType: "completed"),
+                      TabBarItem(index: 5, bookingType: "cancelled"),
                     ],
                   ),
                 ),

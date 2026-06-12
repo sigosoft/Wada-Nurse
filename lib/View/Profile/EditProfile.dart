@@ -36,7 +36,7 @@ class _EditProfileState extends State<EditProfile> {
         _isInitialized = true;
 
         // 1. Fetch country codes and map selected country code id
-        controller.getCountryCodes().then((_) {
+        void mapSelectedCountryCode() {
           if (Get.isRegistered<ProfileController>()) {
             final profileCtrl = Get.find<ProfileController>();
             final nurse = profileCtrl.profileModel?.data.nurse;
@@ -54,10 +54,15 @@ class _EditProfileState extends State<EditProfile> {
               }
             }
           }
+        }
+
+        controller.getCountryCodes().then((_) {
+          mapSelectedCountryCode();
         });
+        mapSelectedCountryCode();
 
         // 2. Fetch languages and map selected language names
-        controller.getLanguages().then((_) {
+        void mapSelectedLanguages() {
           if (Get.isRegistered<ProfileController>()) {
             final profileCtrl = Get.find<ProfileController>();
             final nurse = profileCtrl.profileModel?.data.nurse;
@@ -77,7 +82,12 @@ class _EditProfileState extends State<EditProfile> {
               controller.update();
             }
           }
+        }
+
+        controller.getLanguages().then((_) {
+          mapSelectedLanguages();
         });
+        mapSelectedLanguages();
 
         // 3. Map immediately available fields
         if (Get.isRegistered<ProfileController>()) {
@@ -172,6 +182,8 @@ class _EditProfileState extends State<EditProfile> {
                           controller: controller.phoneNumberController,
                           name: Strings.phoneNumber,
                           countrycodes: controller.countryCodes,
+                          initialCountryCodeId:
+                              controller.selectedCountryCodeId,
                           onCountryCodeSelected: (id) {
                             controller.selectedCountryCodeId = id;
                             controller.update();
@@ -256,24 +268,40 @@ class _EditProfileState extends State<EditProfile> {
                             onTap: () {
                               if (formKey.currentState?.validate() ?? false) {
                                 if (controller.selectedCountryCodeId == null) {
-                                  showToast("Please select country code", isError: true);
+                                  showToast(
+                                    "Please select country code",
+                                    isError: true,
+                                  );
                                   return;
                                 }
                                 if (controller.selectedGender == null) {
-                                  showToast("Please select gender", isError: true);
+                                  showToast(
+                                    "Please select gender",
+                                    isError: true,
+                                  );
                                   return;
                                 }
                                 if (controller.selectedDateOfBirth == null) {
-                                  showToast("Please select date of birth", isError: true);
+                                  showToast(
+                                    "Please select date of birth",
+                                    isError: true,
+                                  );
                                   return;
                                 }
 
                                 // Map selected languages to their database IDs
                                 List<String> languageIds = [];
-                                if (controller.languages?.data?.languages != null) {
-                                  for (var name in controller.selectedLanguages) {
-                                    for (var lang in controller.languages!.data!.languages!) {
-                                      if (lang.language?.toLowerCase().trim() == name.toLowerCase().trim()) {
+                                if (controller.languages?.data?.languages !=
+                                    null) {
+                                  for (var name
+                                      in controller.selectedLanguages) {
+                                    for (var lang
+                                        in controller
+                                            .languages!
+                                            .data!
+                                            .languages!) {
+                                      if (lang.language?.toLowerCase().trim() ==
+                                          name.toLowerCase().trim()) {
                                         if (lang.id != null) {
                                           languageIds.add(lang.id.toString());
                                         }
@@ -282,30 +310,45 @@ class _EditProfileState extends State<EditProfile> {
                                     }
                                   }
                                 }
-                                if (languageIds.isEmpty && controller.selectedLanguages.isNotEmpty) {
+                                if (languageIds.isEmpty &&
+                                    controller.selectedLanguages.isNotEmpty) {
                                   languageIds = controller.selectedLanguages;
                                 }
 
                                 // Format DOB to string YYYY-MM-DD
-                                final dobString = "${controller.selectedDateOfBirth!.toLocal()}".split(' ')[0];
+                                final dobString =
+                                    "${controller.selectedDateOfBirth!.toLocal()}"
+                                        .split(' ')[0];
 
                                 if (Get.isRegistered<ProfileController>()) {
-                                  final profileCtrl = Get.find<ProfileController>();
-                                  profileCtrl.updateProfile(
-                                    name: controller.fullNameController.text,
-                                    countryCode: controller.selectedCountryCodeId.toString(),
-                                    mobile: controller.phoneNumberController.text,
-                                    email: controller.emailController.text,
-                                    dob: dobString,
-                                    gender: controller.selectedGender!,
-                                    qualification: controller.qualificationController.text,
-                                    languages: languageIds,
-                                    pickedImagePath: controller.pickedImage,
-                                  ).then((success) {
-                                    if (success) {
-                                      Get.back(); // Go back to profile screen on success
-                                    }
-                                  });
+                                  final profileCtrl =
+                                      Get.find<ProfileController>();
+                                  profileCtrl
+                                      .updateProfile(
+                                        name:
+                                            controller.fullNameController.text,
+                                        countryCode:
+                                            controller.selectedCountryCodeId
+                                                .toString(),
+                                        mobile:
+                                            controller
+                                                .phoneNumberController
+                                                .text,
+                                        email: controller.emailController.text,
+                                        dob: dobString,
+                                        gender: controller.selectedGender!,
+                                        qualification:
+                                            controller
+                                                .qualificationController
+                                                .text,
+                                        languages: languageIds,
+                                        pickedImagePath: controller.pickedImage,
+                                      )
+                                      .then((success) {
+                                        if (success) {
+                                          Get.back(); // Go back to profile screen on success
+                                        }
+                                      });
                                 }
                               }
                             },

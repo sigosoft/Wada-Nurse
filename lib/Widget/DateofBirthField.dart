@@ -38,7 +38,8 @@ class _DateOfBirthFieldState extends State<DateOfBirthField> {
 
   void _updateControllerFromSelectedDate() {
     if (widget.selectedDateOfBirth != null) {
-      final dateString = "${widget.selectedDateOfBirth!.toLocal()}".split(' ')[0];
+      final dateString =
+          "${widget.selectedDateOfBirth!.toLocal()}".split(' ')[0];
       _dobController.text = dateString;
     } else {
       _dobController.clear();
@@ -49,11 +50,17 @@ class _DateOfBirthFieldState extends State<DateOfBirthField> {
     BuildContext context,
     FormFieldState<String> field,
   ) async {
+    final today = DateTime.now();
+    final maxDate = DateTime(today.year - 20, today.month, today.day);
     DateTime? selectedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate:
+          widget.selectedDateOfBirth != null &&
+                  widget.selectedDateOfBirth!.isBefore(maxDate)
+              ? widget.selectedDateOfBirth!
+              : maxDate,
       firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      lastDate: maxDate,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -79,16 +86,16 @@ class _DateOfBirthFieldState extends State<DateOfBirthField> {
     );
     if (selectedDate != null) {
       final dateString = "${selectedDate.toLocal()}".split(' ')[0];
-      
+
       // Temporarily update the text field
       setState(() {
         _dobController.text = dateString;
       });
       field.didChange(dateString);
-      
+
       // Call the callback - if validation fails, it won't update selectedDateOfBirth
       widget.onDateSelected?.call(selectedDate);
-      
+
       // After a short delay, sync with the actual selectedDateOfBirth value
       // This ensures if validation failed, the text field reverts to the previous value
       Future.delayed(const Duration(milliseconds: 100), () {

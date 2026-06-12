@@ -46,13 +46,13 @@ class BookingsController extends GetxController {
   }
 
   void refreshActiveTab({bool silent = false}) {
-    if (activeTabIndex == 0) {
+    if (activeTabIndex == 0 || activeTabIndex == 1) {
       getBookingRequests(silent: silent);
-    } else if (activeTabIndex == 1) {
-      getPendingBookings(silent: silent);
     } else if (activeTabIndex == 2) {
-      getOngoingBookings(silent: silent);
+      getPendingBookings(silent: silent);
     } else if (activeTabIndex == 3) {
+      getOngoingBookings(silent: silent);
+    } else if (activeTabIndex == 4) {
       getCompletedBookings(silent: silent);
     }
   }

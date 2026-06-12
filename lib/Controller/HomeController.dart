@@ -22,6 +22,26 @@ class HomeController extends GetxController {
   List<dynamic> ongoingRequests = [];
   List<dynamic> upcomingRequests = [];
   List<dynamic> pendingRequests = [];
+  List<dynamic> get filteredNewRequests {
+    return pendingRequests.where((item) {
+      final status =
+          item['booking_status']?.toString() ??
+          item['bookingStatus']?.toString() ??
+          "";
+      return status != "1" && status != "7";
+    }).toList();
+  }
+
+  List<dynamic> get filteredPendingRequests {
+    return pendingRequests.where((item) {
+      final status =
+          item['booking_status']?.toString() ??
+          item['bookingStatus']?.toString() ??
+          "";
+      return status == "1";
+    }).toList();
+  }
+
   List<dynamic> recentRequests = [];
   String profileImage = "";
   String profileName = "";

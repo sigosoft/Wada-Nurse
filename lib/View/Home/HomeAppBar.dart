@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:waaada_nurseapp/ApiConfigs/ApiConfigs.dart';
 import 'package:waaada_nurseapp/Controller/HomeController.dart';
 import '../../Resource/Colors.dart';
+import '../../Widget/CustomCliprect.dart';
 import '../../Widget/TextStyleInterWithoutPadding.dart';
 import '../Notifications/NotificationsListing.dart';
 
@@ -36,40 +36,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             margin: const EdgeInsets.only(left: 15),
             child: Row(
               children: [
-                SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ClipOval(
-                    child:
-                        nurseImage != null &&
-                                nurseImage.toString().isNotEmpty &&
-                                nurseImage.toString() != "null"
-                            ? CachedNetworkImage(
-                              imageUrl:
-                                  ApiConfigs.Image_URL + nurseImage.toString(),
-                              fit: BoxFit.cover,
-                              placeholder:
-                                  (context, url) => const Center(
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: colorPrimary,
-                                      ),
-                                    ),
-                                  ),
-                              errorWidget:
-                                  (context, url, error) => Image.asset(
-                                    "lib/Assets/Images/nurseimage.png",
-                                    fit: BoxFit.cover,
-                                  ),
-                            )
-                            : Image.asset(
-                              "lib/Assets/Images/nurseimage.png",
-                              fit: BoxFit.cover,
-                            ),
-                  ),
+                CustomClipRRect(
+                  borderRadius: 60,
+                  imagePath:
+                      nurseImage != null &&
+                              nurseImage.toString().isNotEmpty &&
+                              nurseImage.toString() != "null"
+                          ? ApiConfigs.Image_URL + nurseImage.toString()
+                          : "",
                 ),
                 const SizedBox(width: 5),
                 Column(
@@ -77,7 +51,12 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     TextStyleInterWithoutPadding(
                       textAlign: TextAlign.center,
-                      text: "Good Morning!",
+                      text: () {
+                        final hour = DateTime.now().hour;
+                        if (hour < 12) return "Good Morning!";
+                        if (hour < 15) return "Good Afternoon!";
+                        return "Good Evening!";
+                      }(),
                       color: greyishBlack,
                       fontWeight: FontWeight.w500,
                       size: 12.00,

@@ -10,6 +10,7 @@ import 'package:waaada_nurseapp/Widget/TextStyleInterWithoutPadding.dart';
 import 'package:waaada_nurseapp/Widget/TransactionTile.dart';
 import 'package:waaada_nurseapp/Widget/WithDrawalWidget.dart';
 import 'package:waaada_nurseapp/Resource/Colors.dart';
+import 'package:waaada_nurseapp/View/Home/Home.dart';
 
 class Wallet extends StatefulWidget {
   const Wallet({super.key});
@@ -78,7 +79,13 @@ class _WalletState extends State<Wallet> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(label: Strings.wallet, showBackButton: true),
+      appBar: CustomAppBar(
+        label: Strings.wallet,
+        showBackButton: true,
+        onTap: () {
+          Get.offAll(Home());
+        },
+      ),
       body: SafeArea(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -106,42 +113,47 @@ class _WalletState extends State<Wallet> {
                             ),
                             SizedBox(height: 10),
                             WithDrawalWidget(
-                              balance: "1,500",
-                              nextWithdrawalDate: "01 May 2025",
+                              balance: "0",
+                              nextWithdrawalDate: "",
                               minWithdrawalAmount: "1,500",
                               onWithdrawPressed: () {
                                 controller.showWithdrawBottomSheet(context);
                               },
                             ),
-                            SizedBox(height: 20),
-                            TextStyleInterWithoutPadding(
-                              text: Strings.transactions,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              size: 16.00,
-                            ),
-                            SizedBox(height: 10),
-                            ListView.separated(
-                              physics: NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return TransactionTile(
-                                  date: controller.transactions[index]['date'],
-                                  title:
-                                      controller.transactions[index]['title'],
-                                  status:
-                                      controller.transactions[index]['status'],
-                                  amount:
-                                      controller.transactions[index]['amount'],
-                                  isCredited:
-                                      controller
-                                          .transactions[index]['isCredited'],
-                                );
-                              },
-                              separatorBuilder:
-                                  (context, index) => SizedBox(height: 10),
-                              itemCount: controller.transactions.length,
-                            ),
+                            if (controller.transactions.isNotEmpty) ...[
+                              SizedBox(height: 20),
+                              TextStyleInterWithoutPadding(
+                                text: Strings.transactions,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w700,
+                                size: 16.00,
+                              ),
+                              SizedBox(height: 10),
+                              ListView.separated(
+                                physics: NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  return TransactionTile(
+                                    date:
+                                        controller.transactions[index]['date'],
+                                    title:
+                                        controller.transactions[index]['title'],
+                                    status:
+                                        controller
+                                            .transactions[index]['status'],
+                                    amount:
+                                        controller
+                                            .transactions[index]['amount'],
+                                    isCredited:
+                                        controller
+                                            .transactions[index]['isCredited'],
+                                  );
+                                },
+                                separatorBuilder:
+                                    (context, index) => SizedBox(height: 10),
+                                itemCount: controller.transactions.length,
+                              ),
+                            ],
                           ],
                         ),
                   ),

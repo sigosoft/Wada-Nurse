@@ -70,7 +70,8 @@ class _HomeItemState extends State<HomeItem> {
                       children: [
                         if (controller.ongoingRequests.isEmpty &&
                             controller.upcomingRequests.isEmpty &&
-                            controller.pendingRequests.isEmpty &&
+                            controller.filteredNewRequests.isEmpty &&
+                            controller.filteredPendingRequests.isEmpty &&
                             controller.recentRequests.isEmpty) ...[
                           Center(
                             child: Padding(
@@ -150,7 +151,7 @@ class _HomeItemState extends State<HomeItem> {
                             ),
                             const SizedBox(height: 5),
                           ],
-                          if (controller.pendingRequests.isNotEmpty) ...[
+                          if (controller.filteredNewRequests.isNotEmpty) ...[
                             TextStyleInterWithoutPadding(
                               textAlign: TextAlign.center,
                               text: Strings.requests,
@@ -162,12 +163,39 @@ class _HomeItemState extends State<HomeItem> {
                             ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: controller.pendingRequests.length,
+                              itemCount: controller.filteredNewRequests.length,
                               itemBuilder: (context, index) {
                                 return NurseShiftItem(
                                   bookingType: "requests",
                                   showLocationText: false,
-                                  request: controller.pendingRequests[index],
+                                  request:
+                                      controller.filteredNewRequests[index],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 5),
+                          ] else if (controller
+                              .filteredPendingRequests
+                              .isNotEmpty) ...[
+                            TextStyleInterWithoutPadding(
+                              textAlign: TextAlign.center,
+                              text: "Pending",
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              size: 15.00,
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount:
+                                  controller.filteredPendingRequests.length,
+                              itemBuilder: (context, index) {
+                                return NurseShiftItem(
+                                  bookingType: "requests",
+                                  showLocationText: false,
+                                  request:
+                                      controller.filteredPendingRequests[index],
                                 );
                               },
                             ),

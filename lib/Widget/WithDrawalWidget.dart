@@ -52,13 +52,17 @@ class WithDrawalWidget extends StatelessWidget {
             color: Colors.white,
             fontWeight: FontWeight.w400,
             size: 14.00,
-          ),  const SizedBox(height: 8),
-          TextStyleInterWithoutPadding(
-            text: '${Strings.nextWithdrawalOn} $nextWithdrawalDate',
-            color: Colors.white,
-            fontWeight: FontWeight.w400,
-            size: 14.00,
-          ),const SizedBox(height: 8),
+          ),
+          const SizedBox(height: 8),
+          if (nextWithdrawalDate.isNotEmpty) ...[
+            TextStyleInterWithoutPadding(
+              text: '${Strings.nextWithdrawalOn} $nextWithdrawalDate',
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+              size: 14.00,
+            ),
+            const SizedBox(height: 8),
+          ],
           TextStyleInterWithoutPadding(
             text: '${Strings.minimumWithdrawalAmount} ₹$minWithdrawalAmount',
             color: Colors.white,

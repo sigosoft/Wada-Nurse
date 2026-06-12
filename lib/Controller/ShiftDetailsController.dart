@@ -143,7 +143,8 @@ class ShiftDetailsController extends GetxController {
     if (photo != null) {
       _image = photo;
       final int bId = int.tryParse(booking?['id']?.toString() ?? "") ?? 0;
-      Get.to(ChooseLocation(shiftType: shiftType, bookingId: bId));
+      await Get.to(ChooseLocation(shiftType: shiftType, bookingId: bId));
+      getShiftDetails(bId);
     }
   }
 
@@ -295,12 +296,13 @@ class ShiftDetailsController extends GetxController {
       final categoryNameVal = booking!['category_name'];
       if (categoryNameVal != null &&
           categoryNameVal.toString().trim().isNotEmpty) {
-        final List<String> namesToMatch = categoryNameVal
-            .toString()
-            .split(',')
-            .map((e) => e.trim().toLowerCase())
-            .where((e) => e.isNotEmpty)
-            .toList();
+        final List<String> namesToMatch =
+            categoryNameVal
+                .toString()
+                .split(',')
+                .map((e) => e.trim().toLowerCase())
+                .where((e) => e.isNotEmpty)
+                .toList();
 
         if (namesToMatch.isNotEmpty) {
           try {
@@ -310,22 +312,24 @@ class ShiftDetailsController extends GetxController {
             final response = await dio.get(url);
             if (response.statusCode == 200) {
               final resData = response.data;
-              final List<dynamic> categoriesList = (resData['data'] is List)
-                  ? resData['data']
-                  : (resData['categories'] is List)
+              final List<dynamic> categoriesList =
+                  (resData['data'] is List)
+                      ? resData['data']
+                      : (resData['categories'] is List)
                       ? resData['categories']
                       : [];
 
               for (var categoryItem in categoriesList) {
                 if (categoryItem is Map) {
                   final catId = categoryItem['id'];
-                  final catName = (categoryItem['name'] ??
-                          categoryItem['category_name'] ??
-                          categoryItem['title'] ??
-                          "")
-                      .toString()
-                      .trim()
-                      .toLowerCase();
+                  final catName =
+                      (categoryItem['name'] ??
+                              categoryItem['category_name'] ??
+                              categoryItem['title'] ??
+                              "")
+                          .toString()
+                          .trim()
+                          .toLowerCase();
 
                   if (catId != null && namesToMatch.contains(catName)) {
                     var parsed = int.tryParse(catId.toString());
@@ -570,13 +574,14 @@ class ShiftDetailsController extends GetxController {
                               1,
                             );
                             if (success) {
-                              Get.to(
+                              await Get.to(
                                 ShiftAcceptedSuccessfully(
                                   title: Strings.accepted,
                                   message: Strings.acceptedmsg,
                                   bookingId: bookingId,
                                 ),
                               );
+                              getShiftDetails(bookingId);
                             }
                           },
                           style: ElevatedButton.styleFrom(

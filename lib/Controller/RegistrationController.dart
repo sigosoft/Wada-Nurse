@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:waaada_nurseapp/Utils/LoggingInterceptor.dart';
 import 'package:flutter/material.dart';
@@ -137,7 +138,7 @@ class RegistrationController extends GetxController {
       }
 
       final maxAllowedDate = DateTime(
-        normalizedToday.year - 18,
+        normalizedToday.year - 20,
         normalizedToday.month,
         normalizedToday.day,
       );
@@ -149,9 +150,9 @@ class RegistrationController extends GetxController {
 
       if (normalizedDate.isAfter(maxAllowedDate)) {
         debugPrint(
-          "onDateSelected - Date is less than 18 years old, rejecting",
+          "onDateSelected - Date is less than 20 years old, rejecting",
         );
-        showToast("Minimum age should be 18 years", isError: true);
+        showToast("Minimum age should be 20 years", isError: true);
         return;
       }
 
@@ -450,8 +451,23 @@ class RegistrationController extends GetxController {
   }
 
   Future<void> getCountryCodes() async {
-    isLoading = true;
-    update();
+    final storage = GetStorage();
+    final cached = storage.read<List>("cached_country_codes");
+    if (cached != null && cached.isNotEmpty) {
+      try {
+        countryCodes = cached
+            .map((e) => CountryCode.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+        update();
+      } catch (e) {
+        debugPrint("Error reading cached country codes: $e");
+      }
+    }
+
+    if (countryCodes.isEmpty) {
+      isLoading = true;
+      update();
+    }
     checkNetworkAndRedirectOffAll();
     try {
       String url = ApiConfigs.baseUrl + APIEndpoints.getCountryCodes;
@@ -459,13 +475,14 @@ class RegistrationController extends GetxController {
       debugPrint("URL: $url");
       debugPrint("Method: GET");
       debugPrint("====================\n");
-      countryCodes = await compute(fetchCountryCodesInIsolate, url);
+      final fetchedCodes = await compute(fetchCountryCodesInIsolate, url);
       debugPrint("=== HTTP RESPONSE (Isolate) ===");
       debugPrint("URL: $url");
-      debugPrint(
-        "Response Body: ${countryCodes.map((e) => e.toJson()).toList()}",
-      );
       debugPrint("=====================\n");
+      if (fetchedCodes.isNotEmpty) {
+        countryCodes = fetchedCodes;
+        storage.write("cached_country_codes", countryCodes.map((e) => e.toJson()).toList());
+      }
       if (countryCodes.isEmpty) {
         debugPrint("No country codes retrieved from API");
       } else {
@@ -473,18 +490,33 @@ class RegistrationController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error fetching country codes: $e");
-      countryCodes = [];
-      showToast(
-        "Failed to load country codes. Please try again.",
-        isError: true,
-      );
+      if (countryCodes.isEmpty) {
+        countryCodes = [];
+        showToast(
+          "Failed to load country codes. Please try again.",
+          isError: true,
+        );
+      }
     } finally {
-      isLoading = false;
-      update();
+      if (isLoading) {
+        isLoading = false;
+        update();
+      }
     }
   }
 
   Future<void> getLanguages() async {
+    final storage = GetStorage();
+    final cached = storage.read<Map<String, dynamic>>("cached_languages");
+    if (cached != null) {
+      try {
+        languages = LanguageModel.fromJson(cached);
+        update();
+      } catch (e) {
+        debugPrint("Error reading cached languages: $e");
+      }
+    }
+
     isLoading = true;
     checkNetworkAndRedirectOffAll();
     try {
@@ -496,6 +528,7 @@ class RegistrationController extends GetxController {
       debugPrint("Response: ${response.data}");
       if (response.statusCode == 200) {
         languages = LanguageModel.fromJson(response.data);
+        storage.write("cached_languages", response.data);
         update();
       } else {
         throw Exception("Unexpected status code: ${response.statusCode}");
@@ -1562,10 +1595,7 @@ class RegistrationController extends GetxController {
       debugPrint("URL: $url");
       debugPrint("Headers: $headers");
 
-      final response = await dio.get(
-        url,
-        options: Options(headers: headers),
-      );
+      final response = await dio.get(url, options: Options(headers: headers));
 
       debugPrint("=== API RESPONSE: checkRegistrationStatus ===");
       debugPrint("Status Code: ${response.statusCode}");
