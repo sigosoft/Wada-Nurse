@@ -11,6 +11,7 @@ class APIEndpoints {
   static const String register = "nurseRegistration";
   static const String getRegistrationFee = "reg_fee";
   static const String sendRegisterOtp = "send_reg_otp";
+  static const String validateNurseRegistration = "validateNurseRegistration";
   static const String home = "home";
   static const String login = "login";
   static const String shiftDetails = "shiftDetails";

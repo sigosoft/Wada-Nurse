@@ -455,9 +455,10 @@ class RegistrationController extends GetxController {
     final cached = storage.read<List>("cached_country_codes");
     if (cached != null && cached.isNotEmpty) {
       try {
-        countryCodes = cached
-            .map((e) => CountryCode.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
+        countryCodes =
+            cached
+                .map((e) => CountryCode.fromJson(Map<String, dynamic>.from(e)))
+                .toList();
         update();
       } catch (e) {
         debugPrint("Error reading cached country codes: $e");
@@ -481,7 +482,10 @@ class RegistrationController extends GetxController {
       debugPrint("=====================\n");
       if (fetchedCodes.isNotEmpty) {
         countryCodes = fetchedCodes;
-        storage.write("cached_country_codes", countryCodes.map((e) => e.toJson()).toList());
+        storage.write(
+          "cached_country_codes",
+          countryCodes.map((e) => e.toJson()).toList(),
+        );
       }
       if (countryCodes.isEmpty) {
         debugPrint("No country codes retrieved from API");
@@ -635,7 +639,7 @@ class RegistrationController extends GetxController {
     return true;
   }
 
-  bool startRegistrationFlow({
+  Future<bool> startRegistrationFlow({
     required String fullname,
     required String countryCode,
     required String mobile,
@@ -647,7 +651,7 @@ class RegistrationController extends GetxController {
     required String passwordConfirmation,
     required String image,
     required List<String> languages,
-  }) {
+  }) async {
     if (email.isNotEmpty) {
       final emailRegex = RegExp(
         r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -683,6 +687,27 @@ class RegistrationController extends GetxController {
       showToast("Please upload a profile photo", isError: true);
       return false;
     }
+
+    if (isLoading) return false;
+
+    // Call the validation API first
+    bool isValid = await validateNurseRegistration(
+      fullname: fullname,
+      countryCode: countryCode,
+      mobile: mobile,
+      email: email,
+      dob: dob,
+      gender: gender,
+      qualification: qualification,
+      password: password,
+      passwordConfirmation: passwordConfirmation,
+      image: image,
+    );
+
+    if (!isValid) {
+      return false;
+    }
+
     List<String> languageIds = [];
     if (this.languages?.data?.languages != null) {
       for (var name in languages) {
@@ -720,7 +745,7 @@ class RegistrationController extends GetxController {
       otp: "",
     );
 
-    sendRegisterOtp(
+    await sendRegisterOtp(
       mobile: mobile,
       countryCode: countryCode,
       registrationData: registrationData,
@@ -899,6 +924,102 @@ class RegistrationController extends GetxController {
       debugPrint("Unexpected Error: $e");
       registrationFee = 0.0;
       update();
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<bool> validateNurseRegistration({
+    required String fullname,
+    required String countryCode,
+    required String mobile,
+    required String email,
+    required String dob,
+    required String gender,
+    required String qualification,
+    required String password,
+    required String passwordConfirmation,
+    required String image,
+  }) async {
+    isLoading = true;
+    update();
+    checkNetworkAndRedirectOffAll();
+    try {
+      String url = ApiConfigs.baseUrl + APIEndpoints.validateNurseRegistration;
+
+      String fileNameFromPath(String path) {
+        if (path.isEmpty) return "";
+        var normalized = path.replaceAll('\\\\', '/');
+        var parts = normalized.split('/');
+        return parts.isNotEmpty ? parts.last : "";
+      }
+
+      Map<String, dynamic> formMap = {
+        "name": fullname,
+        "country_code": countryCode,
+        "mobile": mobile,
+        "email": email,
+        "dob": dob,
+        "gender": gender,
+        "qualification": qualification,
+        "password": password,
+        "password_confirmation": passwordConfirmation,
+      };
+
+      List<MapEntry<String, MultipartFile>> files = [];
+      if (image.isNotEmpty) {
+        files.add(
+          MapEntry(
+            "image",
+            await MultipartFile.fromFile(
+              image,
+              filename: fileNameFromPath(image),
+            ),
+          ),
+        );
+      }
+
+      debugPrint("=== API REQUEST: validateNurseRegistration ===");
+      debugPrint("URL: $url");
+      debugPrint("Method: POST");
+      debugPrint("Form Map: $formMap");
+      debugPrint("Files: ${files.map((e) => e.key).toList()}");
+      debugPrint("==============================================");
+
+      FormData formData = FormData.fromMap(formMap);
+      for (var fileEntry in files) {
+        formData.files.add(fileEntry);
+      }
+
+      final response = await dio.post(url, data: formData);
+
+      debugPrint("=== API RESPONSE: validateNurseRegistration ===");
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.data}");
+      debugPrint("===============================================");
+
+      if (response.statusCode == 200) {
+        final resData = response.data;
+        if (resData['status'] == "true" || resData['status'] == true) {
+          return true;
+        } else {
+          showToast(getErrorMessage(resData), isError: true);
+          return false;
+        }
+      } else {
+        throw Exception("Unexpected status code: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint("Unexpected Error: $e");
+      showToast(
+        "An unexpected error occurred during validation",
+        isError: true,
+      );
+      return false;
     } finally {
       isLoading = false;
       update();
